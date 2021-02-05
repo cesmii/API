@@ -10,13 +10,28 @@ The following query payload returns a list of Equipment Types (also known as SM 
 
 ```
 query EquipmentListQuery {
-  things(condition: {typeName: "type"}) {
+   things(condition: {typeName: "type"}, filter: {displayName: {isNull: false}}) {
     id
     displayName
-    typeName
-    partOf {
-      displayName
+    relativeName
+    description
+  }
+}
+```
+
+We can expand this query to ask it to also return a list of the Equipment (instance object) of each Equipment Type (SM Profile):
+
+```
+query EquipmentListQuery {
+   things(condition: {typeName: "type"}, filter: {displayName: {isNull: false}}) {
+    id
+    displayName
+    relativeName
+    description
+    equipmentByTypeId {
       id
+      displayName
+      systemType
     }
   }
 }
@@ -24,7 +39,7 @@ query EquipmentListQuery {
 
 **<a name="query-equipment">Querying Equipment**
 
-The following query payload returns a list of Equipment instances in a given SMIP instance:
+The following query payload returns a list of Equipment instances in a given SMIP instance, independent of Type:
 
 ```
 query EquipmentListQuery { 
