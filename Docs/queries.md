@@ -9,13 +9,16 @@ In GraphQL, the endpoint is always the same, but the query payload changes to in
 The following query payload returns a list of Equipment Types (also known as SM Profiles) in a given SMIP instance:
 
 ```
-query equipmentTypeQuery {  
-    equipmentTypes {  
-        displayName, 
-        subTypeOf {  
-            displayName 
-        }   
-    } 
+query EquipmentListQuery {
+  things(condition: {typeName: "type"}) {
+    id
+    displayName
+    typeName
+    partOf {
+      displayName
+      id
+    }
+  }
 }
 ```
 

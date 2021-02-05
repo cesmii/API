@@ -92,7 +92,8 @@ function main() {
         Or find additional samples at https://github.com/cesmii/API/wiki/GraphQL-Queries */
     $smp_query = "{\"query\":\"{
     query: equipments {
-         id displayName 
+         id 
+         displayName 
         }}
     \"}";        
     $smp_response = perform_graphql_request($smp_query, INSTANCE_GRAPHQL_ENDPOINT, $GLOBALS['current_bearer_token']);
