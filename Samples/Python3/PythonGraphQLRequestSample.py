@@ -13,7 +13,6 @@ instance_graphql_endpoint = "https://YOURINSTANCE.cesmii.net/graphql"
       But be aware this is short-lived (you set the expiry, see Authenticator comments below) and you will need to handle
       expiry and renewal -- as shown below. As an alternative, you could start your life-cycle with authentication, or
       you could authenticate with each request (assuming bandwidth and latency aren't factors in your use-case). '''
-current_bearer_token = "Value from Instance Portal -- You must include the prefix Bearer followed by a space"
 # eg: Bearer eyJyb2xlIjoieW91cl9yb2xlIiwiZXhwIjoxNDk5OTk5OTk5LCJ1c2VyX25hbWUiOiJ5b3VydXNlcm5hbWUiLCJhdXRoZW50aWNhdG9yIjoieW91cmF1dGgiLCJhdXRoZW50aWNhdGlvbl9pZCI6Ijk5IiwiaWF0Ijo5OTk5OTk5OTk5LCJhdWQiOiJhdWQiLCJpc3MiOiJpc3MifQ==
 
 parser = argparse.ArgumentParser()
@@ -28,8 +27,6 @@ parser.add_argument("-r", "--role", type=str, default="YourAuthenticatorRole", h
 parser.add_argument("-u", "--url", type=str, default=instance_graphql_endpoint, help="GraphQL URL")
 args = parser.parse_args()
 
-#Call main program function
-main()
 
 ''' Forms and sends a GraphQL request (query or mutation) and returns the response
     Accepts: The JSON payload you want to send to GraphQL and post arguments established above
@@ -57,7 +54,7 @@ def get_bearer_token (auth=args.authenticator, password=args.password, name=args
   """) 
   jwt_request = response['data']['authenticationRequest']['jwtRequest']
   if jwt_request['challenge'] is None:
-      raise Exception(jwt_request['message'])
+      raise requests.exceptions.HTTPError(jwt_request['message'])
   else:
       print("Challenge received: " + jwt_request['challenge'])
       response=perform_graphql_request(f"""
@@ -92,8 +89,9 @@ def main():
 
   try:
     #Try to request data with the current bearer token
+    current_bearer_token = "Value from Instance Portal -- You must include the prefix Bearer followed by a space"
     smp_response = perform_graphql_request(smp_query, headers={"Authorization": current_bearer_token})
-  except Exception as e:
+  except requests.exceptions.HTTPError as e:
     if "forbidden" in str(e).lower() or "unauthorized" in str(e).lower():
       print("Bearer Token expired!")
       print("Attempting to retreive a new GraphQL Bearer Token...")
@@ -118,3 +116,5 @@ def main():
   print()
   exit(0)
 
+if __name__=="__main__": #Dont run main if imported...
+    main()
