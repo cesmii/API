@@ -11,3 +11,6 @@ See the video here: [https://www.youtube.com/watch?v=j8fymUL55xk](https://www.yo
 Edit CommonGraphQLFunctions to set the _endPointURI to your platform instance
 
 Edit Functions to use tags that make sense for your instance
+
+# Compatibility Issues
+This demo pre-dates JWT-based authentication and would need to be modified for use on a current version of the SMIP.
