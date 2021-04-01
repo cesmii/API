@@ -11,9 +11,12 @@
   * random: determines the lowest and highest number in the config and publishes a random number in that range in a loop with a delay
 * **topic-name**: the MQTT topic to publish under, if left blank, uses the value of config
 
-Examples:
+## Examples:
 * `python3 simulate.py tank`
 * `python3 simulate.py tank random MyTank1`
+
+## Notes:
+You can run multiple instances, but make sure they each have a unique topic
 
 # Test
 * Use an app like [MQTT Explorer](http://mqtt-explorer.com/), connect to the Broker, and watch the data come in
