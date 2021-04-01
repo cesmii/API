@@ -4,7 +4,7 @@
 * Modify line 8 to point to your MQTT Broker
 
 # Run
-`python3 simulate.py [config] [*optional* simulation-type] [*optional* topic-name]`
+`python3 simulate.py [config] [`*optional*` simulation-type] [`*optional*` topic-name]`
 * **config**: name of config file to use, no extension. eg: tank
 * **simulation-type**: the kind of simulation to perform, defaults to stepwise
   * stepwise: publishes each line of the config in a loop with a delay
