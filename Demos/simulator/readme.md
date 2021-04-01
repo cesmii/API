@@ -15,5 +15,8 @@ Examples:
 * `python3 simulate.py tank`
 * `python3 simulate.py tank random MyTank1`
 
+# Test
+* Use an app like [http://mqtt-explorer.com/](MQTT Explorer), connect to the Broker, and watch the data come in
+
 # Stop
 `control + c`
