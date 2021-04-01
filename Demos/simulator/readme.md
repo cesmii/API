@@ -20,6 +20,7 @@ You can run multiple instances, but make sure they each have a unique topic on t
 
 # Test
 * Use an app like [MQTT Explorer](http://mqtt-explorer.com/), connect to the Broker, and watch the data come in
+![MQTT Client](MQTTClient.png "MQTT Client")
 
 # Stop
 `control + c`
