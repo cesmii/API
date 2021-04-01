@@ -16,7 +16,7 @@
 * `python3 simulate.py tank random MyTank1`
 
 ## Notes:
-You can run multiple instances, but make sure they each have a unique topic
+You can run multiple instances, but make sure they each have a unique topic on the Broker!
 
 # Test
 * Use an app like [MQTT Explorer](http://mqtt-explorer.com/), connect to the Broker, and watch the data come in
