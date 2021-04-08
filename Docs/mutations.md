@@ -68,7 +68,7 @@ mutation CreateTag_Mutation {
 
 Replace ## with the ID of the connector you want to attach the tag to.
 
-**<a name="create-equipment>Creating New Equipment**
+**<a name="create-equipment">Creating New Equipment**
   
   ```
   mutation MyNewEquipmentMutation {
