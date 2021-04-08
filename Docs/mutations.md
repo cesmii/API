@@ -68,6 +68,30 @@ mutation CreateTag_Mutation {
 
 Replace ## with the ID of the connector you want to attach the tag to.
 
+**<a name="create-equipment>Creating New Equipment**
+  
+  ```
+  mutation MyNewEquipmentMutation {
+  createEquipment(
+    input: {
+      equipment: {
+        description: "My machine based on a batch tank type definition"
+        displayName: "Batch Machine 001"
+        notes: "Created programmatically, derived from the batch tank type, which is id 358, and part of physical location with id 1362"
+        partOfId: "1362"
+        relativeName: "batch_machine_001"
+        typeId: "358"
+      }
+    }
+  ) {
+    equipment {
+      id
+      displayName
+    }
+  }
+}
+```
+
 ## Other Operations
 
 Read only operations, called Queries, are performed against the same endpoint. Some  [Query examples can be found here](queries.md).
