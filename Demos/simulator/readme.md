@@ -4,8 +4,11 @@
 * Modify line 8 to point to your MQTT Broker
 
 # Simulator 
-
 The simulator is intended to act like an independent process unit, emitting data over MQTT about its current state.
+
+## Config
+* Copy `config-example.py` to `config.py`
+* Specify the MQTT section to match your Broker
 
 ## Run
 `python3 simulate.py [simulation-file] [`*optional*` simulation-type] [`*optional*` topic-name]`
@@ -30,5 +33,12 @@ You can run multiple instances, but make sure they each have a unique topic on t
 `control + c`
 
 # Gateway
-
 The Gateway functions as a "connector" from MQTT to the SM Innovation Platform, pumping data from a simulator to the Platform.
+
+## Config
+* Uses same config.py as Simulator, but update the SMIP section to match your GraphQL Authenticator.
+* Update line 16 to match the Attribute id to update in the SMIP
+  * Hard-coding is sad. We need to query for and/or create the equipment instance, then find the attribute to update programmatically.
+
+## Run
+`python3 gateway.py`
