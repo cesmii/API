@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 
 mqtt_broker = config.mqtt["broker"]
 uuid = str(uuid.uuid4())[:8]
-mqtt_id = config.mqtt["clientprefix"] + uuid
+mqtt_clientid = config.mqtt["clientprefix"] + uuid
 
 def main(args):
     if len(args) <= 1:
@@ -34,13 +34,13 @@ def main(args):
     #Figure out what config file to use
     file1 = open(config + '.txt', 'r')
     print ("Using Config:    " + config + '.txt')
-    print ("MQTT Client ID:  " + mqtt_id)
+    print ("MQTT Client ID:  " + mqtt_clientid)
     print ("Publish Topic:   " + topic)
     print ("Simulation Type: " + simulation)
     print()
 
     #Connect to Broker
-    mqtt_client = mqtt.Client(mqtt_id)
+    mqtt_client = mqtt.Client(mqtt_clientid)
     mqtt_client.connect(mqtt_broker)
 
     #Call selected simulation function with needed values from config

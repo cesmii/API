@@ -3,24 +3,32 @@
 * Requires Paho-MQTT: `sudo pip3 install paho-mqtt`
 * Modify line 8 to point to your MQTT Broker
 
-# Run
-`python3 simulate.py [config] [`*optional*` simulation-type] [`*optional*` topic-name]`
-* **config**: name of config file to use, no extension. eg: tank
+# Simulator 
+
+The simulator is intended to act like an independent process unit, emitting data over MQTT about its current state.
+
+## Run
+`python3 simulate.py [simulation-file] [`*optional*` simulation-type] [`*optional*` topic-name]`
+* **simulation-file**: name of simulation config file to use, no extension. eg: tank
 * **simulation-type**: the kind of simulation to perform, defaults to stepwise
   * stepwise: publishes each line of the config in a loop with a delay
   * random: determines the lowest and highest number in the config and publishes a random number in that range in a loop with a delay
 * **topic-name**: the MQTT topic to publish under, if left blank, uses the value of config
 
-## Examples:
+### Examples:
 * `python3 simulate.py tank`
 * `python3 simulate.py tank random MyTank1`
 
-## Notes:
+### Notes:
 You can run multiple instances, but make sure they each have a unique topic on the Broker!
 
-# Test
+## Test
 * Use an app like [MQTT Explorer](http://mqtt-explorer.com/), connect to the Broker, and watch the data come in
 ![MQTT Client](MQTTClient.png "MQTT Client")
 
-# Stop
+## Stop
 `control + c`
+
+# Gateway
+
+The Gateway functions as a "connector" from MQTT to the SM Innovation Platform, pumping data from a simulator to the Platform.
