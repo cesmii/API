@@ -1,17 +1,18 @@
 #!/usr/bin/python3
+import config   #copy config-example.py to config.py and set values
 import sys
 import time
 import random
 import uuid
 import paho.mqtt.client as mqtt
 
-mqtt_broker = "192.168.1.8"
+mqtt_broker = config.mqtt["broker"]
 uuid = str(uuid.uuid4())[:8]
-mqtt_id = "CESMII-Sim-" + uuid
+mqtt_id = config.mqtt["clientprefix"] + uuid
 
 def main(args):
     if len(args) <= 1:
-        print ("Specify config file to use")
+        print ("Specify unit simulation file to use")
         exit()
 
     count = 0

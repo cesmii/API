@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 Samples/Javascript/JavascriptGraphQLRequestSample.html
 Samples/Javascript/package-lock.json
+Demos/simulator/config.py
