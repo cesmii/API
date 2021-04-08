@@ -37,6 +37,25 @@ query EquipmentListQuery {
 }
 ```
 
+If you only want Equipment Types defined locally, you can filter the query:
+
+```
+query MyLocalEquipmentQuery {
+  libraries (condition:{displayName:"Local Library"}) {
+    id
+    displayName
+    asThing {
+      thingsByPartOfId(condition: { systemType: "type" }) {
+        id
+        displayName
+        systemType
+      }
+    }
+  }
+}
+```
+
+
 **<a name="query-equipment">Querying Equipment**
 
 The following query payload returns a list of Equipment instances in a given SMIP instance, independent of Type:
