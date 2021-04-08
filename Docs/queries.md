@@ -37,7 +37,7 @@ query EquipmentListQuery {
 }
 ```
 
-If you only want Equipment Types defined locally, you can filter the query:
+If you only want Equipment Types defined locally, you can query your library for type definitions:
 
 ```
 query MyLocalEquipmentQuery {
