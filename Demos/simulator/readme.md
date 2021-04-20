@@ -1,6 +1,11 @@
 # Install
 * Requires Python3
-* Requires Paho-MQTT: `sudo pip3 install paho-mqtt`
+* Requires Paho-MQTT:
+
+```
+sudo pip3 install paho-mqtt
+```
+
 * Modify line 8 to point to your MQTT Broker
 
 # Simulator 
@@ -26,11 +31,17 @@ The simulator is intended to act like an independent process unit, emitting data
 You can run multiple instances, but make sure they each have a unique topic on the Broker!
 
 ## Test
-* Use an app like [MQTT Explorer](http://mqtt-explorer.com/), connect to the Broker, and watch the data come in
+* Use an app like [MQTT Explorer](http://mqtt-explorer.com/)
+* Subscribe to the `#` topic in the Advanced settings
+![MQTT Client Advanced](MQTTClient--Advanced.png "MQTT Client Advanced")
+* Connect to the Broker, and watch the data come in
 ![MQTT Client](MQTTClient.png "MQTT Client")
 
 ## Stop
-`control + c`
+
+```
+control + c
+```
 
 # Gateway
 The Gateway functions as a "connector" from MQTT to the SM Innovation Platform, pumping data from a simulator to the Platform.
@@ -41,4 +52,90 @@ The Gateway functions as a "connector" from MQTT to the SM Innovation Platform, 
   * Hard-coding is sad. We need to query for and/or create the equipment instance, then find the attribute to update programmatically.
 
 ## Run
-`python3 gateway.py`
+
+```
+python3 gateway.py
+```
+
+# Mosquitto
+Eclipse Mosquitto is an open source (EPL/EDL licensed) message broker that implements the MQTT protocol versions 5.0, 3.1.1 and 3.1. Mosquitto is lightweight and is suitable for use on all devices from low power single board computers to full servers.
+
+## [Mosquitto Debian repository for Raspberry Pi](https://mosquitto.org/blog/2013/01/mosquitto-debian-repository/) (currently Pi 3 B+)
+After following these steps, Mosquitto will automatically be started on boot and available at `:1883`.
+
+* To use the new repository you should first import the repository package signing key:
+
+```
+wget http://repo.mosquitto.org/debian/mosquitto-repo.gpg.key  
+sudo apt-key add mosquitto-repo.gpg.key  
+```
+
+* Then make the repository available to apt:
+
+```
+cd /etc/apt/sources.list.d/
+```
+
+* Then one of the following, depending on which version of debian you are using:
+
+```
+sudo wget http://repo.mosquitto.org/debian/mosquitto-jessie.list  
+sudo wget http://repo.mosquitto.org/debian/mosquitto-stretch.list  
+sudo wget http://repo.mosquitto.org/debian/mosquitto-buster.list  
+```
+
+* Then update apt information:
+
+```
+apt-get update
+```
+
+* Install Mosquitto and Mosquitto-Clients
+
+```
+apt-get install mosquitto mosquitto-clients
+```
+
+* Install Uncomplicated Firewall to allow port 1883 outside of the Rasberry Pi
+
+```
+apt-get install ufw
+```
+
+* Enable the firewall
+
+```
+ufw enable
+```
+
+* Allow port 1883
+
+```
+ufw allow 1884
+```
+
+## Testing the Mosquitto Server
+
+* Start the command line subscriber:
+
+```
+mosquitto_sub -v -t 'test/topic'
+```
+
+* Publish test message with the command line publisher:
+
+```
+mosquitto_pub -t 'test/topic' -m 'helloWorld'
+```
+
+Both the subscriber and publisher connection messages should be seen in the broker terminal and the 
+following should be seen in the subscriber terminal:
+
+```
+test/topic helloWorld
+```
+
+## Data Flow
+```
+client (running python example code) > broker (mosquitto) > client (MQTT Explorer)
+```
