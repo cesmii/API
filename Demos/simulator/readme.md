@@ -96,6 +96,22 @@ apt-get update
 apt-get install mosquitto mosquitto-clients
 ```
 
+* For v2+: Create Mosquitto configuration file. All listeners now require authentication to be configured. This is with the exception of the case where no listener configuration is provided and hence the listener is bound to the loopback interface and will start in local only mode allowing only connections from clients running on the local machine. This means that `allow_anonymous` now defaults to `false`. If you currently have a broker running that has a listener configured in the configuration file, but has no other authentication configured and no explicit `allow_anonymous` setting, then your clients will be unable to connect after upgrading to Mosquitto 2.0.
+For ease of setup, the following configuration is allowing anonymous connections. For other authentication options see [https://mosquitto.org/documentation/authentication-methods/](https://mosquitto.org/documentation/authentication-methods/).
+
+```
+cd /etc/mosquitto/
+sudo cp conf.d/default.conf conf.d/anon.conf
+sudo vi conf.d/anon.conf
+```
+
+Update the `anon.conf` to the following:
+
+```
+listener 1883
+allow_anonymous true
+```
+
 * Install Uncomplicated Firewall to allow port 1883 outside of the Rasberry Pi
 
 ```
@@ -112,6 +128,17 @@ ufw enable
 
 ```
 ufw allow 1883
+```
+
+## Start the Mosquitto Broker using a configuration file from 
+
+```
+sudo mosquitto -c /etc/mosquitto/mosquitto.conf
+```
+
+## Start the Mosquitto Broker using a configuration file in background mode
+```
+sudo mosquitto -c /etc/mosquitto/mosquitto.conf -d
 ```
 
 ## Testing the Mosquitto Server
