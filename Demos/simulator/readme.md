@@ -111,7 +111,7 @@ ufw enable
 * Allow port 1883
 
 ```
-ufw allow 1884
+ufw allow 1883
 ```
 
 ## Testing the Mosquitto Server
