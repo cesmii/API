@@ -16,12 +16,22 @@ The simulator is intended to act like an independent process unit, emitting data
 * Specify the MQTT section to match your Broker
 
 ## Run
-`python3 simulate.py [simulation-file] [`*optional*` simulation-type] [`*optional*` topic-name]`
+`python3 simulate.py [simulation-file] [`*optional*` simulation-type] [`*optional*` topic-name]` [`*optional*` num_simutank]`
 * **simulation-file**: name of simulation config file to use, no extension. eg: tank
 * **simulation-type**: the kind of simulation to perform, defaults to stepwise
   * stepwise: publishes each line of the config in a loop with a delay
   * random: determines the lowest and highest number in the config and publishes a random number in that range in a loop with a delay
+  * randomfill: fills in the randomly selected tanks untill they are full(set as 10.0), increment the tank value by 1.0 at each round 
+  * randomleak: has leaks in the randomly selected tanks untill they are empty, decrement the tank value by 1.0 at each round
+  * randomfillandleak: fills in the randomly selected tanks untill they are full(set as 10.0), and has leaks in another set of randomly selected tanks untill they are empty
+  * fillwithhole: fills in the randomly selected tanks that also leak
+  * produce: simulates the assemblyline production by passing the product at each tank to the next tank for processing. The first tank contains the raw products, the last tank contains the final products, and the other tanks contain materials needed for processing at each step. the size of the first tank and the last tank is infinity while the others are of size 10.0
+  * producewithleak: like the normal produce process but has leaks in the randomly selected tanks
+  * producewithfill: like the normal produce process but fills in the randomly selected tanks until full
+  * producewithfillandleak: like the normal produce process but fills in the randomly selected tanks until full and has leaks in other set of random tanks
+
 * **topic-name**: the MQTT topic to publish under, if left blank, uses the value of config
+* **num_simutank**: the number of the tanks that would be randomly selected to go through simulations like leaks and fills, defaults to 1 when not provided
 
 ### Examples:
 * `python3 simulate.py tank`
