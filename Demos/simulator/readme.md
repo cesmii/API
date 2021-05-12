@@ -24,7 +24,6 @@ The simulator is intended to act like an independent process unit, emitting data
   * randomfill: fills in the randomly selected tanks untill they are full(set as 10.0), increment the tank value by 1.0 at each round 
   * randomleak: has leaks in the randomly selected tanks untill they are empty, decrement the tank value by 1.0 at each round
   * randomfillandleak: fills in the randomly selected tanks untill they are full(set as 10.0), and has leaks in another set of randomly selected tanks untill they are empty
-  * fillwithhole: fills in the randomly selected tanks that also leak
   * produce: simulates the assemblyline production by passing the product at each tank to the next tank for processing. The first tank contains the raw products, the last tank contains the final products, and the other tanks contain materials needed for processing at each step. the size of the first tank and the last tank is infinity while the others are of size 10.0
   * producewithleak: like the normal produce process but has leaks in the randomly selected tanks
   * producewithfill: like the normal produce process but fills in the randomly selected tanks until full
