@@ -101,13 +101,13 @@ def simulate_produce(lines, topic, mqtt_client):
                 if lines[count] == 0:
                     while count < (len(lines)-1):
                         mqtt_publish(str(lines[count]), topic, mqtt_client)
-                        time.sleep(1)
+                        time.sleep(0.1)
                         count += 1
                 else:              
                     lines[count] -= 1
                     lines[count+1] += 1
                     mqtt_publish(str(lines[count]), topic, mqtt_client)
-                    time.sleep(1)
+                    time.sleep(0.1)
                     count += 1
             mqtt_publish(str(lines[count]), topic, mqtt_client)
     except KeyboardInterrupt:
@@ -129,13 +129,13 @@ def simulate_producewithleak(randomtanks, count_leak, lines, topic, mqtt_client)
                 if lines[count] == 0.0:
                     while count < (len(lines)-1):
                         mqtt_publish(str(lines[count]), topic, mqtt_client)
-                        time.sleep(1)
+                        time.sleep(0.1)
                         count += 1
                 else:              
                     lines[count] -= 1.0
                     lines[count+1] += 1.0
                     mqtt_publish(str(lines[count]), topic, mqtt_client)
-                    time.sleep(1)
+                    time.sleep(0.1)
                     count += 1
             mqtt_publish(str(lines[count]), topic, mqtt_client)
     except KeyboardInterrupt:
@@ -157,13 +157,13 @@ def simulate_producewithfill(randomtanks, count_fill, lines, topic, mqtt_client)
                 if lines[count] == 0.0:
                     while count < (len(lines)-1):
                         mqtt_publish(str(lines[count]), topic, mqtt_client)
-                        time.sleep(1)
+                        time.sleep(0.1)
                         count += 1
                 else:              
                     lines[count] -= 1.0
                     lines[count+1] += 1.0
                     mqtt_publish(str(lines[count]), topic, mqtt_client)
-                    time.sleep(1)
+                    time.sleep(0.1)
                     count += 1
             mqtt_publish(str(lines[count]), topic, mqtt_client)
     except KeyboardInterrupt:
@@ -190,13 +190,64 @@ def simulate_producewithfillandleak(randomleaktanks, count_leak, randomfilltanks
                 if lines[count] == 0.0:
                     while count < (len(lines)-1):
                         mqtt_publish(str(lines[count]), topic, mqtt_client)
-                        time.sleep(1)
+                        time.sleep(0.1)
                         count += 1
                 else:              
                     lines[count] -= 1.0
                     lines[count+1] += 1.0
                     mqtt_publish(str(lines[count]), topic, mqtt_client)
-                    time.sleep(1)
+                    time.sleep(0.1)
+                    count += 1
+            mqtt_publish(str(lines[count]), topic, mqtt_client)
+    except KeyboardInterrupt:
+        print()
+        print("Simulation stopped")
+        exit()
+
+def simulate_complexproduce(tanksnext, lines, topic, mqtt_client):
+    try:
+        while True:
+            count = 0
+            lines[0] += 2
+            while count < (len(lines)-1):
+                if lines[count] == 0:
+                    while count < (len(lines)-1):
+                        mqtt_publish(str(lines[count]), topic, mqtt_client)
+                        time.sleep(0.1)
+                        count += 1
+                if lines[count] > 0:              
+                    lines[count] -= 1
+                    lines[tanks[count]] += 1
+                    mqtt_publish(str(lines[count]), topic, mqtt_client)
+                    time.sleep(0.1)
+                    count += 1
+            mqtt_publish(str(lines[count]), topic, mqtt_client)
+    except KeyboardInterrupt:
+        print()
+        print("Simulation stopped")
+        exit()
+
+def simulate_complexproducewithleak(randomtanks, count_leak, tanksnext, lines, topic, mqtt_client):
+    try:
+        while True:
+            count = 0
+            index_tank = 0
+            lines[0] += 2
+            while count < (len(lines)-1):
+                if index_tank < count_leak and count == randomtanks[index_tank]:
+                    lines[count] -= 1.0
+                    lines[count] = max(lines[count], 0)
+                    index_tank += 1
+                if lines[count] == 0.0:
+                    while count < (len(lines)-1):
+                        mqtt_publish(str(lines[count]), topic, mqtt_client)
+                        time.sleep(0.1)
+                        count += 1
+                else:              
+                    lines[count] -= 1.0
+                    lines[count+1] += 1.0
+                    mqtt_publish(str(lines[count]), topic, mqtt_client)
+                    time.sleep(0.1)
                     count += 1
             mqtt_publish(str(lines[count]), topic, mqtt_client)
     except KeyboardInterrupt:
@@ -211,7 +262,7 @@ def simulate_stepwise(lines, topic, mqtt_client):
             for line in lines:
                 count += 1
                 mqtt_publish(line.strip(), topic, mqtt_client)
-                time.sleep(1)
+                time.sleep(0.1)
     except KeyboardInterrupt:
         print()
         print("Simulation stopped")
@@ -223,7 +274,7 @@ def simulate_random(low, high, topic, mqtt_client):
             for x in range(10):
                 new_num = round(random.uniform(low, high), 1)
                 mqtt_publish(new_num, topic, mqtt_client)
-                time.sleep(1)
+                time.sleep(0.1)
     except KeyboardInterrupt:
         print()
         print("Simulation stopped")
@@ -240,7 +291,7 @@ def simulate_randomleak(randomtanks, count_leak, lines, topic, mqtt_client):
                     lines[count] = max(lines[count], 0)
                     index_tank += 1
                 mqtt_publish(str(lines[count]), topic, mqtt_client)
-                time.sleep(1)
+                time.sleep(0.1)
                 count += 1
     except KeyboardInterrupt:
         print()
@@ -258,7 +309,7 @@ def simulate_randomfill(randomtanks, count_fill, lines, topic, mqtt_client):
                     lines[count] = min(lines[count], 10)
                     index_tank += 1
                 mqtt_publish(str(lines[count]), topic, mqtt_client)
-                time.sleep(1)
+                time.sleep(0.1)
                 count += 1
     except KeyboardInterrupt:
         print()
@@ -282,7 +333,7 @@ def simulate_randomfillandleak(randomleaktanks, count_leak, randomfilltanks, cou
                     lines[count] = min(lines[count], 10)
                     index_filltank += 1          
                 mqtt_publish(str(lines[count]), topic, mqtt_client)
-                time.sleep(1)
+                time.sleep(0.1)
                 count += 1
     except KeyboardInterrupt:
         print()
