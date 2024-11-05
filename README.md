@@ -10,6 +10,6 @@ The authors of this document seek your feedback on how to move toward common int
 
 The prefered feedback mechanism is to use [GitHub issues](https://github.com/cesmii/API/issues), where input can be tracked, discussed, and categorized as an improvement or a feature request. If you desire to provide feedback, but cannot use GitHub issues, please email us: devops@cesmii.org
 
-## GraphQL API (Current)
+# GraphQL API (Current)
 
 The current API, based on GraphQL as implemented by ThinkIQ, is still available here: [https://github.com/cesmii/graphql-api](https://github.com/cesmii/graphql-api)
