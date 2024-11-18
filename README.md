@@ -1,11 +1,4 @@
 # API (RFC for the Future)
-## Usage
-The block diagram below shows where the Industrial Information API is most applicable, namely within the realm of software applications running on top of operating systems on PCs or servers. Information being accessed through the API are assumed to have already been processed by contexualization functions to make it ready for consumption by other applications.
-![API Block Diagram](images/api-block-diagram.PNG)
-
-## Selections within the Data Access Model
-The image below shows the tech stack for a general Web Browesr compared to the Industrial API, from the perspective of The Data Access Model.  Refer to the article ["How all protocols fail at data access interoperabilty"](https://iebmedia.com/technology/iiot/how-all-protocols-fail-at-data-access-interoperability/) for more information regarding The Data Access Model.
-![API Data Access Model](images/data-access-model.PNG)
 
 ## Description
 The manufacturing information ecosystem benefits from the contributions of many players, over multiple decades of technology evolution. While this diversity creates a lot of platform choice for manufacturers, it has the opposite effect on the creation of app value. Application developers must choose which platforms to build against, with no hope of portability between them. Apps create information value by consuming the data available in a platform, and rendering it in ways that are helpful to end users -- analytics, visualization, notification, machine learning... all of these need contextualized data, and all end up abstracted by an underlying platform (be it an Historian, MES, MOM, EMI, or broker or server).
@@ -17,6 +10,14 @@ The analogies in other industries should be obvious: Apple and Android users ben
 The authors of this document seek your feedback on how to move toward common interfaces for common industrial information functionality. This proposal has been created by industry participants with experience developing or using manufacturing information platforms such as those provided by Rockwell Automation, OSI Pi, ThinkIQ, ThingWorx and HighByte, are deep users and often contributors to the ecosystems around OPC UA, Asset Administration Shell, MQTT and Sparkplug/B, and have more than 50 years of combined experience in designing, developing, implementing and using manufacturing information software. The document has also benefited from a private review stage, where it was shared with more than 60 members of [CESMII](https://www.cesmii.org) to gather their feedback. In this public stage, this document is offered RFC-style, not as a prescription, but as an invitation: please [review the RFC](https://github.com/cesmii/API/blob/main/RFC%20for%20Contextualized%20Manufacturing%20Information%20API.md), consider how you might use or implement it in the tools that you are familiar with, and provide us feedback on how we can improve it -- within the scope it defines.
 
 The preferred feedback mechanism is to use [GitHub issues](https://github.com/cesmii/API/issues), where input can be tracked, discussed, and categorized as an improvement or a feature request. If you desire to provide feedback, but cannot use GitHub issues, please email us: rfc@cesmii.org
+
+## Usage
+The block diagram below shows where the CM Information API is most applicable, namely within the realm of software applications running on top of operating systems on PCs or servers. Information being accessed through the API are assumed to have already been processed by contexualization functions to make it ready for consumption by other applications.
+![API Block Diagram](images/api-block-diagram.PNG)
+
+## Selections within the Data Access Model
+The image below shows the tech stack for a general Web Browser compared to the CM Information API, from the perspective of The Data Access Model.  Refer to the article ["How all protocols fail at data access interoperabilty"](https://iebmedia.com/technology/iiot/how-all-protocols-fail-at-data-access-interoperability/) for more information regarding The Data Access Model.
+![API Data Access Model](images/data-access-model.PNG)
 
 # GraphQL API (Current)
 
