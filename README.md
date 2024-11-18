@@ -1,5 +1,13 @@
 # API (RFC for the Future)
+## Usage
+The block diagram below shows where the Industrial Information API is most applicable, namely within the realm of software applications running on top of operating systems on PCs or servers. Information being accessed through the API are assumed to have already been processed by contexualization functions to make it ready for consumption by other applications.
+![API Block Diagram](images/api-block-diagram.PNG)
 
+## Selections within the Data Access Model
+The image below shows the tech stack for a general Web Browesr compared to the Industrial API, from the perspective of The Data Access Model.  Refer to the article ["How all protocols fail at data access interoperabilty"](https://iebmedia.com/technology/iiot/how-all-protocols-fail-at-data-access-interoperability/) for more information regarding The Data Access Model.
+![API Data Access Model](images/data-access-model.PNG)
+
+## Description
 The manufacturing information ecosystem benefits from the contributions of many players, over multiple decades of technology evolution. While this diversity creates a lot of platform choice for manufacturers, it has the opposite effect on the creation of app value. Application developers must choose which platforms to build against, with no hope of portability between them. Apps create information value by consuming the data available in a platform, and rendering it in ways that are helpful to end users -- analytics, visualization, notification, machine learning... all of these need contextualized data, and all end up abstracted by an underlying platform (be it an Historian, MES, MOM, EMI, or broker or server).
 
 This initial proposal is to recommend the [creation of a common API](https://github.com/cesmii/API/blob/main/RFC%20for%20Contextualized%20Manufacturing%20Information%20API.md), consisting of a base set of server primitives that a wide array of platforms can implement to commoditize this access to data. Such a common API does not prevent platform vendors from differentiating on their capabilities, but it would encourage a proliferation of portable apps that could help spur adoption of such platforms, and create a vibrant marketplace of apps bringing value to end-users.
