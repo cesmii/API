@@ -1,7 +1,7 @@
 Smart Manufacturing API Working Group\
 Request for Comments: 001\
 Category: Informational\
-September 26, 2024
+Community Feedback Draft
 
 # Common API for Contextualized Manufacturing Information (CMIAPI)
 
@@ -60,8 +60,6 @@ The CMIAPI SHALL be implemented over HTTPS, and support the interfaces listed in
 Implementations MUST support a default JSON serialization for all responses.
 
 Implementations MAY support a Binary serialization for all responses, where the format of such response will be determined in a future RFC.
-
-Implementations MAY support a HTML serialization for all responses, that proposes an embed-able UI for the response data (for example, HTMX). Such pre-rendered responses MAY include Hyperlinks to follow-up queries in the same format, facilitating progressive UI expansion.
 
 #### 3.1.2 Request Headers
 
