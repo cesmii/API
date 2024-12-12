@@ -49,171 +49,171 @@ Element		    Any object or object attribute persisted by a CMIP
 ElementId	    A platform-specific, persistent and unique key for an Element
 Control System  An electronic control system and associated instrumentation used for industrial process control
 
-## 3. CMIAPI Basic Interfaces
-
-The CMIAPI SHALL be implemented over HTTPS, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 4, and MAY support the optional capabilities listed in section 4. 
-
-### 3.1 Request and Response Structure
-
-#### 3.1.1 Response Serialization
+## 3 Protocol Mappings
+The CMIAPI SHALL be implemented over HTTPS, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 5, and MAY support the optional capabilities listed in section 5. 
 
 Implementations MUST support a default JSON serialization for all responses.
 
 Implementations MAY support a Binary serialization for all responses, where the format of such response will be determined in a future RFC.
 
-#### 3.1.2 Request Headers
-
 Applications consuming the API SHOULD use the normal "accept" and "content-type" headers for indicating inbound and outbound serialization format. If omitted, the default JSON serialization should be used.
 
-### 3.2 Informative Interfaces
 
-#### 3.2.1 LiveValue
+## 4. CMIAPI Functional Interfaces
 
-When invoked as a Query, the LiveValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
+### 4.1 READ Interface
 
-When invoked as a Query, the LiveValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
+The READ interface MUST return the latest value available in the CMIP for the requested object, by ElementId.
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
+The READ interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
+
+If indicated by the request, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique identifier for that element following a documented notation or standard
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY include the following metadata about the returned value;
+If indicated by the request, the response payload MAY include the following metadata about the returned value;
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in UNECE Recommendation Number 20 MUST be used.
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned. If the Namespace is an implementation of standards-based definition that includes a URI, that URI MUST be used.
 - ParentId: the ElementId of the parent object
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
-When invoked as an Update, the LiveValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
+### 4.2 WRITE Interface
+The WRITE interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.
 
-When invoked as an Update the LiveValue interface MAY accept an array of current values for an array of of ElementIds.
+The WRITE interface MAY accept an array of current values for an array of of ElementIds.
 
-#### 3.2.2 HistoricalValue
+### 4.3 H_READ Interface
+The H_READ interface MUST return an array of historical values in a time range available in the contextualized information platform for the requested object, by ElementId.
 
-When invoked as a Query, the HistoricalValue interface MUST return an array of historical values in a time range available in the contextualized information platform for the requested object, by ElementId.
+The H_READ interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
 
-When invoked as a Query, the HistoricalValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
-
-When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
+If indicated by the request, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique identifier for that element following a documented notation or standard
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY include the following metadata about the returned value;
+If indicated by the request, the response payload MAY include the following metadata about the returned value;
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20]((https://unece.org/trade/documents/2021/06/uncefact-rec20-0)) MUST be used.
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 - ParentId: the ElementId of the parent object
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
-When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
+### 4.4 H_WRITE Interface
+The H_WRITE interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
 
-When invoked as an Update, the HistoricalValue interface MAY accept an array of updated historical values for an array of specified objects and timestamps, by ElementId.
+The H_WRITE interface MAY accept an array of updated historical values for an array of specified objects and timestamps, by ElementId.
 
-When invoked as a Put, the HistoricalValue interface MAY accept an array of new historical values for an array of specified objects and timestamps, by ElementId.
+The H_WRITE interface MAY accept an array of new historical values for an array of specified objects and timestamps, by ElementId.
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
-### 3.3 Exploratory Interfaces
+### 4.5 SUBSCRIBE Interface
 
-#### 3.3.1 Namespaces
+Placeholder for future pull request
 
-When invoked as a Query, MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
+### 4.6 BROWSE Interface
+#### 4.6.1 Namespaces
 
-#### 3.3.2 Types
+The BROWSE interface MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
 
-When invoked as a Query, MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
+#### 4.6.2 Types
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY by filtered by NamespaceURI.
+The BROWSE interface MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
 
-#### 3.3.3 Type
+If indicated by the request, the response payload MAY by filtered by NamespaceURI.
 
-When invoked as a Query, MUST return a JSON structure defining a Type registered in the contextualized manufacturing information platform for the requested Type's ElementId.
+#### 4.6.3 Type
 
-When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+The BROWSE interface MUST return a JSON structure defining a Type registered in the contextualized manufacturing information platform for the requested Type's ElementId.
 
-#### 3.4.3 ObjectsByType
+The BROWSE interface MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
-When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId.
+#### 4.6.3 ObjectsByType
 
-#### 3.4.4 ObjectByElementId
+The BROWSE interface MUST return an array of instance objects that are of the requested Type's ElementId.
 
-When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute.
+#### 4.6.4 ObjectByElementId
 
-When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+If the ElementId exists as an instance object, the BROWSE interface MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute.
 
-Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
+The BROWSE interface MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
-#### 3.4.5 RelationshipTypes
+Recognizing that some systems allow some Type tolerance or looseness, the BROWSE interface MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
-##### 3.4.5.1 HierarchicalRelationshipTypes
+#### 4.6.5 RelationshipTypes
 
-When invoked as a Query, MUST return the relationship types HasChild, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+##### 4.6.5.1 HierarchicalRelationshipTypes
 
-##### 3.4.5.2 NonHierarchicalRelationshipTypes
+The BROWSE interface MUST return the relationship types HasChild, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
-When invoked as a Query, MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
+##### 4.6.5.2 NonHierarchicalRelationshipTypes
 
-##### 3.4.6 RelationshipsOfType
+The BROWSE interface MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
-When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query.
+##### 4.6.6 RelationshipsOfType
 
-When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth.
+The BROWSE interface MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the request.
 
-## 4. CMIP Requirements
+If inidcated by the request, an implementation MAY support following relationships to the specified depth.
+
+
+
+## 5. CMIP Requirements
 
 To support the CMIAPI, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
 
-### 4.1 Object Orientation
+### 5.1 Object Orientation
 
-The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in 3.1.1 and 3.1.2)
+The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in Section 3)
 
-### 4.2 Type Safety
+### 5.2 Type Safety
 
-#### 4.2.1 Data Type Definitions
+#### 5.2.1 Data Type Definitions
 
 Underlying platforms MAY persist data values using any primitive types they wish, but MUST support return attribute values (both Live and Historical) cast or coerced to one of the primitive JavaScript primitive types to support JSON serialization (eg: a value persisted as FLOAT must be returned as NUMBER).
 
-#### 4.2.2 Complex Type Definitions
+#### 5.2.2 Complex Type Definitions
 
 Underlying platforms MUST derive Objects from separately declared definitions (also known as Class, Template or Schema definitions in other environments). In the CMIAPI, these definitions are generalized as Type definitions, given first-class treatment, and MUST be serializable to easy-to-consume JSON. Implementing platforms MUST support importing Type definitions from the [OPC UA Part 5 Information Modeling standard](https://reference.opcfoundation.org/Core/Part5/v104/docs/) (IEC62541-5). Implementing platforms MAY support importing Type definitions from the [Asset Administration Shell SubModelTemplate standard](https://www.zvei.org/fileadmin/user_upload/Presse_und_Medien/Publikationen/2020/Dezember/Submodel_Templates_of_the_Asset_Administration_Shell/201117_I40_ZVEI_SG2_Submodel_Spec_ZVEI_Technical_Data_Version_1_1.pdf). Implementing platforms MAY also support an internal Type definition and storage format.
 
-### 4.3 Relationships
+### 5.3 Relationships
 
-#### 4.3.1 Derivation
+#### 5.3.1 Derivation
 
-As described in 4.2.2, Objects are derived from Types. This derivation is a relationship that MUST be persisted by underlying platforms in order to support queries in the API.
+As described in 5.2.2, Objects are derived from Types. This derivation is a relationship that MUST be persisted by underlying platforms in order to support queries in the API.
 
-#### 4.3.2 Hierarchical Relationships
+#### 5.3.2 Hierarchical Relationships
 
 To properly support Object Orientation, underlying platforms MUST support hierarchical relationships between Objects. These common relationships, such as parent-child, are table stakes for any contextualized manufacturing information platform.
 
-#### 4.3.3 Non-Hierarchical Relationships
+#### 5.3.3 Non-Hierarchical Relationships
 
 Modern contextualized manufacturing information platforms should be able to track relationships between objects that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
 
-### 4.4 Security Considerations
+### 5.4 Security Considerations
 
-#### 4.4.1 Authorization
+#### 5.4.1 Authorization
 
 As a programmer's interface, this RFC primarily considers application authorization: implementations MUST support authorization using API keys as a minimum. Implementations MAY choose to replace API keys with JWT or OAuth. 
 
-#### 4.4.2 Authentication
+#### 5.4.2 Authentication
 
 Implementations MAY require user authentication in order to refine application authorization for some or all of the data the API supports.
 
-#### 4.4.3 Encryption
+#### 5.4.3 Encryption
 
 Implementations MUST require HTTPS for all communication. Implementations MUST NOT support un-encrypted HTTP in production.
 
-### 4.5 Address Space
+### 5.5 Address Space
 
 The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying, this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
-### 4.6 Performance Considerations
+### 5.6 Performance Considerations
 
 While this API suggests that large volumes of Structural and Historical data will be accessible, the reality of many underlying data sources is that it may take multiple calls (for example, to browse an Address Space in the case of OPC/UA, or to fetch history from a separate store where a MQTT Broker is paired with a Historian) to respond to a given query. While it is the intent of this proposal to provide such abstraction -- shielding an application developer from the complexity of such architectures -- obvious performance implications exist. This proposal cannot prescribe how to solve all of these issues, but implementers MAY consider the following:
 
