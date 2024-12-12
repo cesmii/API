@@ -41,13 +41,15 @@ Finally, comparisons may be drawn to commercial offerings that provide similar f
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in Internet RFC 2119 [RFC2119].
 
-Address Space   The complete collection of Contextualize Information that a platform makes available to clients
-API		        Application Programming Interface
-CMIAPI          Contextualized Manufacturing Information API
-CMIP		        Contextualized Manufacturing Information Platform that supports the CMIAPI
-Element		    Any object or object attribute persisted by a CMIP
-ElementId	    A platform-specific, persistent and unique key for an Element
-Control System  An electronic control system and associated instrumentation used for industrial process control
+- **Address Space** - The complete collection of Contextualize Information that a platform makes available to clients
+- **API** - Application Programming Interface
+- **CMIAPI** - Contextualized Manufacturing Information API
+- **CMIP** - Contextualized Manufacturing Information Platform that supports the CMIAPI
+- **Element** - Any object or object attribute persisted by a CMIP
+- **ElementId** - A platform-specific, persistent and unique key for an Element
+- **Control System** - An electronic control system and associated instrumentation used for industrial process control
+- **Request** - A generic means of a consumer to inform the producer what information is needed
+- **Response** - A generic means of a producer to fulfill the needs of the consumer
 
 ## 3. CMIAPI Basic Interfaces
 
