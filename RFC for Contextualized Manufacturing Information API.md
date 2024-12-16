@@ -207,7 +207,7 @@ Implementations MAY require user authentication in order to refine application a
 
 #### 4.4.3 Encryption
 
-Implementations MUST require HTTPS for all communication. Implementations MUST NOT support un-encrypted HTTP in production.
+Implementations MUST require HTTPS for all communication in production.
 
 ### 4.5 Address Space
 
