@@ -46,7 +46,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **CMIAPI** - Contextualized Manufacturing Information API
 - **CMIP** - Contextualized Manufacturing Information Platform that supports the CMIAPI
 - **Element** - Any object or object attribute persisted by a CMIP
-- **ElementId** - A platform-specific, persistent and unique key for an Element
+- **ElementId** - A platform-specific, persistent and unique key for an Element that MUST be a string
 - **Control System** - An electronic control system and associated instrumentation used for industrial process control
 - **Request** - A generic means of a consumer to inform the producer what information is needed
 - **Response** - A generic means of a producer to fulfill the needs of the consumer
@@ -76,7 +76,7 @@ When invoked as a Query, the LiveValue interface MUST return the current value a
 When invoked as a Query, the LiveValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
-- ElementId: a unique identifier for that element following a documented notation or standard
+- ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
@@ -99,7 +99,7 @@ When invoked as a Query, the HistoricalValue interface MUST return an array of h
 When invoked as a Query, the HistoricalValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
-- ElementId: a unique identifier for that element following a documented notation or standard
+- ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
