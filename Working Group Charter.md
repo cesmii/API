@@ -1,8 +1,5 @@
 # Draft Contextualized Manufacturing API Working Group Charter
 
-## Charter Status
-In-progress
-
 ### Duration
 - Start Date: November 2024
 - End Date: November 2025 (1 year)
