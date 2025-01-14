@@ -3,7 +3,7 @@ Request for Comments: 001\
 Category: Informational\
 Community Feedback Draft
 
-# Common API for Contextualized Manufacturing Information (CMIAPI)
+# Common API for Industrial Information Interface eXchange (I3X)
 
 #### Status of this Memo
 
@@ -43,17 +43,17 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 - **Address Space** - The complete collection of Contextualize Information that a platform makes available to clients
 - **API** - Application Programming Interface
-- **CMIAPI** - Contextualized Manufacturing Information API
-- **CMIP** - Contextualized Manufacturing Information Platform that supports the CMIAPI
+- **I3X** - Industrial Information Interface eXchange
+- **CMIP** - Contextualized Manufacturing Information Platform that supports I3X
 - **Element** - Any object or object attribute persisted by a CMIP
 - **ElementId** - A platform-specific, persistent and unique key for an Element that MUST be a string
 - **Control System** - An electronic control system and associated instrumentation used for industrial process control
 - **Request** - A generic means of a consumer to inform the producer what information is needed
 - **Response** - A generic means of a producer to fulfill the needs of the consumer
 
-## 3. CMIAPI Basic Interfaces
+## 3. I3X Basic Interfaces
 
-The CMIAPI SHALL be implemented over HTTPS, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 4, and MAY support the optional capabilities listed in section 4. 
+The I3X API SHALL be implemented over an encrypted transport, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 4, and MAY support the optional capabilities listed in section 4. 
 
 ### 3.1 Request and Response Structure
 
@@ -69,11 +69,11 @@ Applications consuming the API SHOULD use the normal "accept" and "content-type"
 
 ### 3.2 Informative Interfaces
 
-#### 3.2.1 LiveValue
+#### 3.2.1 LastKnownValue
 
-When invoked as a Query, the LiveValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
+When invoked as a Query, the LastKnownValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
 
-When invoked as a Query, the LiveValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
+When invoked as a Query, the LastKnownValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
@@ -88,9 +88,9 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - ParentId: the ElementId of the parent object
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
-When invoked as an Update, the LiveValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
+When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
-When invoked as an Update the LiveValue interface MAY accept an array of current values for an array of of ElementIds.
+When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
 
 #### 3.2.2 HistoricalValue
 
@@ -153,7 +153,7 @@ Recognizing that some systems allow some Type tolerance or looseness, when invok
 
 ##### 3.4.5.1 HierarchicalRelationshipTypes
 
-When invoked as a Query, MUST return the relationship types HasChild, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+When invoked as a Query, MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
 ##### 3.4.5.2 NonHierarchicalRelationshipTypes
 
@@ -167,7 +167,7 @@ When invoked as a Query, if specified by an optional query parameter, an impleme
 
 ## 4. CMIP Requirements
 
-To support the CMIAPI, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
+To support I3X, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
 
 ### 4.1 Object Orientation
 
@@ -181,7 +181,7 @@ Underlying platforms MAY persist data values using any primitive types they wish
 
 #### 4.2.2 Complex Type Definitions
 
-Underlying platforms MUST derive Objects from separately declared definitions (also known as Class, Template or Schema definitions in other environments). In the CMIAPI, these definitions are generalized as Type definitions, given first-class treatment, and MUST be serializable to easy-to-consume JSON. Implementing platforms MUST support importing Type definitions from the [OPC UA Part 5 Information Modeling standard](https://reference.opcfoundation.org/Core/Part5/v104/docs/) (IEC62541-5). Implementing platforms MAY support importing Type definitions from the [Asset Administration Shell SubModelTemplate standard](https://www.zvei.org/fileadmin/user_upload/Presse_und_Medien/Publikationen/2020/Dezember/Submodel_Templates_of_the_Asset_Administration_Shell/201117_I40_ZVEI_SG2_Submodel_Spec_ZVEI_Technical_Data_Version_1_1.pdf). Implementing platforms MAY also support an internal Type definition and storage format.
+Underlying platforms MUST derive Objects from separately declared definitions (also known as Class, Template or Schema definitions in other environments). In I3X, these definitions are generalized as Type definitions, given first-class treatment, and MUST be serializable to easy-to-consume JSON. Implementing platforms MUST support importing Type definitions from the [OPC UA Part 5 Information Modeling standard](https://reference.opcfoundation.org/Core/Part5/v104/docs/) (IEC62541-5). Implementing platforms MAY support importing Type definitions from the [Asset Administration Shell SubModelTemplate standard](https://www.zvei.org/fileadmin/user_upload/Presse_und_Medien/Publikationen/2020/Dezember/Submodel_Templates_of_the_Asset_Administration_Shell/201117_I40_ZVEI_SG2_Submodel_Spec_ZVEI_Technical_Data_Version_1_1.pdf). Implementing platforms MAY also support an internal Type definition and storage format.
 
 ### 4.3 Relationships
 
@@ -209,7 +209,7 @@ Implementations MAY require user authentication in order to refine application a
 
 #### 4.4.3 Encryption
 
-Implementations MUST require HTTPS for all communication in production.
+Implementations MUST require an encrypted transport for all communication in production.
 
 ### 4.5 Address Space
 
