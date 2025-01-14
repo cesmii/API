@@ -1,4 +1,4 @@
-# Draft Contextualized Manufacturing API Working Group Charter
+# Contextualized Manufacturing API Working Group Charter
 
 ### Duration
 - Start Date: November 2024
