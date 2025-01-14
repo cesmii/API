@@ -69,11 +69,11 @@ Applications consuming the API SHOULD use the normal "accept" and "content-type"
 
 ### 3.2 Informative Interfaces
 
-#### 3.2.1 LiveValue
+#### 3.2.1 LastKnownValue
 
-When invoked as a Query, the LiveValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
+When invoked as a Query, the LastKnownValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
 
-When invoked as a Query, the LiveValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
+When invoked as a Query, the LastKnownValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
@@ -88,9 +88,9 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - ParentId: the ElementId of the parent object
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
-When invoked as an Update, the LiveValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
+When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
-When invoked as an Update the LiveValue interface MAY accept an array of current values for an array of of ElementIds.
+When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
 
 #### 3.2.2 HistoricalValue
 
