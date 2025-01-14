@@ -53,7 +53,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## 3. I3X Basic Interfaces
 
-The I3X API SHALL be implemented over HTTPS, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 4, and MAY support the optional capabilities listed in section 4. 
+The I3X API SHALL be implemented over an encrypted transport, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in section 4, and MAY support the optional capabilities listed in section 4. 
 
 ### 3.1 Request and Response Structure
 
@@ -209,7 +209,7 @@ Implementations MAY require user authentication in order to refine application a
 
 #### 4.4.3 Encryption
 
-Implementations MUST require HTTPS for all communication in production.
+Implementations MUST require an encrypted transport for all communication in production.
 
 ### 4.5 Address Space
 
