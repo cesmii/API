@@ -153,7 +153,7 @@ Recognizing that some systems allow some Type tolerance or looseness, when invok
 
 ##### 3.4.5.1 HierarchicalRelationshipTypes
 
-When invoked as a Query, MUST return the relationship types HasChild, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+When invoked as a Query, MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
 ##### 3.4.5.2 NonHierarchicalRelationshipTypes
 
