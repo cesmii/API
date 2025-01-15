@@ -28,6 +28,19 @@ This working group is guiding the creation of a common API, consisting of a base
 - Sample code in at least two programming languages demonstrating how to consume the API.
 - Sample test cases to support implementation validation.
 
+## Timeline
+- Nov 2024: Kickoff and 1.0 Publication
+- Dec 2025: Group Charter Publication
+- Feb 2025: Articulation of use-cases that this API is designed to support
+- Feb 2025: Identification of potential information platform server & client vendors
+- Mar 2025: Visual documentation of API (Living document using Swagger or similar UI)
+- Apr 2025: Sample implementation of the API as a server with data
+- Jun 2025: Reference implementation of a client interacting with the API
+- Aug 2025: Draft of Specification Document
+- Oct 2025: Sample code in at least two programming languages demonstrating how to consume the API
+- Oct 2025: Sample test cases to support implementation validation.
+- Nov 2025: Final Specification Document
+
 ## Success Criteria
 - Demonstration of sample client interacting with a sample server implementation.
 - Demonstration of interoperability against the API implemented on three or more information server platforms.
