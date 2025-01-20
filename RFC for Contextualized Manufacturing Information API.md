@@ -50,6 +50,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **Control System** - An electronic control system and associated instrumentation used for industrial process control
 - **Request** - A generic means of a consumer to inform the producer what information is needed
 - **Response** - A generic means of a producer to fulfill the needs of the consumer
+- **Query** - A read operation
+- **Update** - A write operation, inclusive of creation
 
 ## 3. I3X Basic Interfaces
 
@@ -67,7 +69,9 @@ Implementations MAY support a Binary serialization for all responses, where the 
 
 Applications consuming the API SHOULD use the normal "accept" and "content-type" headers for indicating inbound and outbound serialization format. If omitted, the default JSON serialization should be used.
 
-### 3.2 Informative Interfaces
+### 3.2 Value Interfaces
+
+Value Interfaces MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document indepenent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
 
 #### 3.2.1 LastKnownValue
 
@@ -81,12 +85,7 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY include the following metadata about the returned value;
-- Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
-- EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in UNECE Recommendation Number 20 MUST be used.
-- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned. If the Namespace is an implementation of standards-based definition that includes a URI, that URI MUST be used.
-- ParentId: the ElementId of the parent object
-- Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
+When invoked as a Query, the response payload MUST include the metadata indicated in section (4.1.1)[#4.1.1] and, if indicated by an optional query parameter, MAY include the metadata indicated in section (4.1.2)[#4.1.2]
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
@@ -104,12 +103,7 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY include the following metadata about the returned value;
-- Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
-- EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20]((https://unece.org/trade/documents/2021/06/uncefact-rec20-0)) MUST be used.
-- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
-- ParentId: the ElementId of the parent object
-- Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
+When invoked as a Query, the response payload MUST include the metadata indicated in section (4.1.1)[#4.1.1] and, if indicated by an optional query parameter, MAY include the metadata indicated in section (4.1.2)[#4.1.2]
 
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
 
@@ -120,6 +114,8 @@ When invoked as a Put, the HistoricalValue interface MAY accept an array of new 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
 ### 3.3 Exploratory Interfaces
+
+Exploratory Interfaces are Read-only operations, with reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using Value interfaces described in section (3.2)[#3.2].
 
 #### 3.3.1 Namespaces
 
@@ -139,11 +135,11 @@ When invoked as a Query, MAY accept an array of JSON structures defining Types f
 
 #### 3.4.3 ObjectsByType
 
-When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId.
+When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in section (4.1.1)[#4.1.1] and, if indicated by an optional query parameter, MAY include the metadata indicated in section (4.1.2)[#4.1.2]
 
 #### 3.4.4 ObjectByElementId
 
-When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute.
+When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in section (4.1.1)[#4.1.1] and, if indicated by an optional query parameter, MAY include the metadata indicated in section (4.1.2)[#4.1.2]
 
 When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
@@ -159,11 +155,11 @@ When invoked as a Query, MUST return the relationship types HasChildren, HasPare
 
 When invoked as a Query, MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
-##### 3.4.6 RelationshipsOfType
+##### 3.4.6 ObjectsWithRelationshipsOfType
 
-When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query.
+When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. The returned value payload MUST include the metadata indicated in section (4.1.1)[#4.1.1] and, if indicated by an optional query parameter, MAY include the metadata indicated in section (4.1.2)[#4.1.2]
 
-When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth.
+When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy.
 
 ## 4. CMIP Requirements
 
@@ -172,6 +168,18 @@ To support I3X, a CMIP must have certain capabilities. While this, and subsequen
 ### 4.1 Object Orientation
 
 The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in 3.1.1 and 3.1.2)
+
+### 4.1.1 Required Object Metadata
+
+- ParentId: the ElementId of the parent object
+- HasChildren: if the element value is complex, a boolean value indiciating if the element is composed of one or more child objects
+
+# 4.1.2 Optional Object Metadata
+
+- Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
+- EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20]((https://unece.org/trade/documents/2021/06/uncefact-rec20-0)) MUST be used.
+- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
+- Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
 ### 4.2 Type Safety
 
