@@ -79,13 +79,13 @@ When invoked as a Query, the LastKnownValue interface MUST return the current va
 
 When invoked as a Query, the LastKnownValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
+When invoked as a Query, the response payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
+
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
-
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
@@ -97,13 +97,13 @@ When invoked as a Query, the HistoricalValue interface MUST return an array of h
 
 When invoked as a Query, the HistoricalValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
 
+When invoked as a Query, the response payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
+
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
-
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
 
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
 
@@ -173,12 +173,12 @@ The reader will observe that the API requires the underlying platform to support
 
 - ParentId: the ElementId of the parent object
 - HasChildren: if the element value is complex, a boolean value indiciating if the element is composed of one or more child objects
+- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 
 ### 4.1.2 Optional Object Metadata
 
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20](https://unece.org/trade/documents/2021/06/uncefact-rec20-0) MUST be used.
-- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
 ### 4.2 Type Safety
