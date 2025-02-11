@@ -87,6 +87,8 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
+Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
+
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
 When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
@@ -105,11 +107,13 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
+Implementations MAY include the ability to write to HistoricalValue(s). If this feature is implemented, the following considerations apply:
+
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
 
 When invoked as an Update, the HistoricalValue interface MAY accept an array of updated historical values for an array of specified objects and timestamps, by ElementId.
 
-When invoked as a Put, the HistoricalValue interface MAY accept an array of new historical values for an array of specified objects and timestamps, by ElementId.
+When invoked in order to Create a new historical record, the HistoricalValue interface MAY accept an array of new historical values for an array of specified objects and timestamps, by ElementId.
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
