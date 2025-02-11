@@ -86,8 +86,6 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-- What about extra meta data?
-
 Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
@@ -119,7 +117,7 @@ When updating Historical data, the CMIP SHOULD implement auditing or tracking of
 
 ### 3.3 Exploratory Interfaces
 
-Exploratory Interfaces are Read-only operations, with reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in section [section 3.2](#value-interfaces).
+Exploratory Interfaces are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in section [section 3.2](#value-interfaces).
 
 #### 3.3.1 Namespaces
 
