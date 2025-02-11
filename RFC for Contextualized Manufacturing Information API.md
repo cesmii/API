@@ -84,8 +84,9 @@ When invoked as a Query, the response payload MUST include the metadata indicate
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
-- Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
+
+- What about extra meta data?
 
 Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
 
@@ -104,7 +105,6 @@ When invoked as a Query, the response payload MUST include the metadata indicate
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
-- Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, the CMIP may return a GOOD status.
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
 Implementations MAY include the ability to write to HistoricalValue(s). If this feature is implemented, the following considerations apply:
