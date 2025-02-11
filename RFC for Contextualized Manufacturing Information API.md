@@ -165,7 +165,7 @@ When invoked as a Query, MUST return an array of objects related to the requeste
 
 Each element in the returned object array MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
 
-When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy.
+When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
 
 ## 4. CMIP Requirements
 
