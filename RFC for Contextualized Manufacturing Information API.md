@@ -135,11 +135,11 @@ When invoked as a Query, MUST return a JSON structure defining a Type registered
 
 When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
-#### 3.4.3 ObjectsByType
+#### 3.3.4 ObjectsByType
 
 When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
 
-#### 3.4.4 ObjectByElementId
+#### 3.3.5 ObjectByElementId
 
 When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 4.1.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 4.1.2](#412-optional-object-metadata).
 
@@ -147,17 +147,17 @@ When invoked as a Query, MAY accept an array of JSON structures defining Types f
 
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
-#### 3.4.5 RelationshipTypes
+#### 3.3.6 RelationshipTypes
 
-##### 3.4.5.1 HierarchicalRelationshipTypes
+##### 3.3.6.1 HierarchicalRelationshipTypes
 
 When invoked as a Query, MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
-##### 3.4.5.2 NonHierarchicalRelationshipTypes
+##### 3.3.6.2 NonHierarchicalRelationshipTypes
 
 When invoked as a Query, MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
-##### 3.4.6 ObjectsWithRelationshipsOfType
+#### 3.3.7 ObjectsWithRelationshipsOfType
 
 When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
 
