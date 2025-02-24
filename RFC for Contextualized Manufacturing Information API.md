@@ -157,7 +157,7 @@ When invoked as a Query, MUST return the relationship types HasChildren, HasPare
 
 When invoked as a Query, MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
-##### 3.3.7 ObjectsWithRelationshipsOfType
+#### 3.3.7 ObjectsWithRelationshipsOfType
 
 When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
 
