@@ -56,26 +56,28 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 3. Address Space Overview
 The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying, this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
-### 3.1 Object Types
+### 3.1 Namespaces
+
+### 3.2 Object Types
 TBD
 
-### 3.2 Object Orientation
+### 3.3 Object Orientation
 
 The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in [section 5.1.1](#511-response-serialization) and [section 5.1.2](#512-request-headers))
 
-### 3.2.1 Required Object Metadata
+### 3.3.1 Required Object Metadata
 
 - ParentId: the ElementId of the parent object
 - HasChildren: if the element value is complex, a boolean value indiciating if the element is composed of one or more child objects
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 
-### 3.2.2 Optional Object Metadata
+### 3.3.2 Optional Object Metadata
 
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20](https://unece.org/trade/documents/2021/06/uncefact-rec20-0) MUST be used.
 - Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
 
-### 3.3 Object Relationships
+### 3.4 Object Relationships
 
 #### 3.3.1 Type Relationships
 
@@ -119,19 +121,19 @@ When invoked as a Query, MAY return any graph-style relationship types the conte
 
 #### 4.1.6 Instances of an Object Type
 
-When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 3.2.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.2.2](#412-optional-object-metadata).
+When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 3.3.1](#331-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.3.2](#332-optional-object-metadata).
 
 #### 4.1.7 Objects linked by Relationship Type
 
 When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
 
-Each element in the returned object array MUST include the metadata indicated in [section 3.2.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.2.2](#412-optional-object-metadata).
+Each element in the returned object array MUST include the metadata indicated in [section 3.3.1](#331-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.3.2](#332-optional-object-metadata).
 
 When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
 
 #### 4.1.8 Object Definition
 
-When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.2.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.2.2](#412-optional-object-metadata).
+When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.3.1](#331-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.3.2](#332-optional-object-metadata).
 
 When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
@@ -146,7 +148,7 @@ When invoked as a Query, the LastKnownValue interface MUST return the current va
 
 When invoked as a Query, the LastKnownValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.2.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.2.2](#412-optional-object-metadata).
+When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.3.1](#331-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.3.2](#332-optional-object-metadata).
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
@@ -159,7 +161,7 @@ When invoked as a Query, the HistoricalValue interface MUST return an array of h
 
 When invoked as a Query, the HistoricalValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
 
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.2.1](#411-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.2.2](#412-optional-object-metadata).
+When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.3.1](#331-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.3.2](#332-optional-object-metadata).
 
 When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
 - ElementId: a unique string identifier for the element, as defined by the implementation
