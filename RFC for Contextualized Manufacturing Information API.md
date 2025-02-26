@@ -115,14 +115,6 @@ When invoked in order to Create a new historical record, the HistoricalValue int
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
-#### 3.2.3 Subscribe
-
-Subscriptions follow the pattern of Query-Then-Subscribe, where a client first sends a query (or queries) to identify relevant ElementIds, then subscribes to the individual ElementIds in the result payload. The pre-requisite query (or queries) may include any combination of Exploratory Interface invocations, but the Subscribe interface shall accept only an array of ElementIds for instance object members.
-
-Subscription implementations MAY service subscription requests for related elements, but only by their individual ElementIds -- the Subscribe interfce MUST NOT support object subscriptions. Similarily the Subscribe interface MUST NOT support relationship traversal. 
-
-The Subscribe interface MAY NOT allow subscription to Type definitions, however the Subscribe interface MAY indicate that a subscribed Element has been impacted by a structural or relationship change that invalidates (or cancels) the subscription. As of this writing, the mechanism for such notification has not been defined.
-
 ### 3.3 Exploratory Interfaces
 
 Exploratory Interfaces are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in section [section 3.2](#value-interfaces).
