@@ -62,7 +62,7 @@ TBD
 ### 3.2 Object Types
 TBD
 
-### 3.3 Object Orientation
+### 3.3 Object Elements
 
 The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in [section 5.1.1](#511-response-serialization) and [section 5.1.2](#512-request-headers))
 
