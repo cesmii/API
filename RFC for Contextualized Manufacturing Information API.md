@@ -57,10 +57,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying, this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
 ### 3.1 Namespaces
-TBD
+TODO: add non-normative description of Namespaces to help the understanding of section 4.1.1 Namespaces
 
 ### 3.2 Object Types
-TBD
+TODO: add non-normative description of Object Types to help the understanding of sections 4.1.2 Object Types, 4.1.3 Object Type Definition, and 4.1.6 Instances of an Object Type
 
 ### 3.3 Object Elements
 
@@ -94,7 +94,7 @@ Modern contextualized manufacturing information platforms should be able to trac
 
 ## 4. I3X Address Space Methods
 
-### 4.1 Browse Methods
+### 4.1 Exploratory Methods
 Exploratory Interfaces are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
 #### 4.1.1 Namespaces
 
