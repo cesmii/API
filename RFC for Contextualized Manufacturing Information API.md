@@ -63,7 +63,7 @@ The reader will observe that the API requires the underlying platform to support
 ### 3.1.1 Required Object Metadata
 
 - ParentId: the ElementId of the parent object
-- HasChildren: if the element value is complex, a boolean value indiciating if the element is composed of one or more child objects
+- HasChildren: if the element value is complex, a boolean value indicating if the element is composed of one or more child objects
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 
 ### 3.1.2 Optional Object Metadata
@@ -135,7 +135,7 @@ When invoked as a Query, MAY accept an array of JSON structures defining Types f
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
 ### 4.2 Value Methods
-Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document indepenent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
+Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document independent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
 
 #### 4.2.1 Object Element LastKnownValue
 
