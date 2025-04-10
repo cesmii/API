@@ -21,7 +21,7 @@ Copyright (C) CESMII, the Smart Manufacturing Institute, 2024. All Rights Reserv
 
 ## Abstract
 
-This document provides a common API that any information platform vendor can implement on a server to abstract the vendor-specific implementations of data organization and contextualization into a set of programmer's interfaces that helps ensure applications written against one implementation can work against another. While informed by OPC UA's REST API, and designed to be implementable against that API, this API should be supportable on a wide variety of existing, and future, information platforms. This RFC pertains specifically to the requirements for server-side implementations, and does not specifically address client requirements (save for those that may be inferred from server functionality)
+This document provides a common API that any information platform vendor can implement on a server to abstract the vendor-specific implementations of data organization and contextualization into a set of programmer's interfaces that helps ensure applications written against one implementation can work against another. While informed by OPC UA's REST API, and designed to be implementable against that API, this API should be supportable on a wide variety of existing, and future, information platforms. This RFC pertains specifically to the requirements for server-side implementations, and does not specifically address client requirements (save for those that may be inferred from server functionality).
 
 ## 1. Introduction
 
@@ -47,7 +47,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **CMIP** - Contextualized Manufacturing Information Platform that supports I3X
 - **Element** - Any object or object attribute persisted by a CMIP
 - **ElementId** - A platform-specific, persistent and unique key for an Element that MUST be a string
-- **Control System** - An electronic control system and associated instrumentation used for industrial process control
+- **Control System** - An system and associated instrumentation used for industrial process control
 - **Request** - A generic means of a consumer to inform the producer what information is needed
 - **Response** - A generic means of a producer to fulfill the needs of the consumer
 - **Query** - A read operation
@@ -58,7 +58,7 @@ The complete collection of Relationship Types and Relationships, Object Types an
 
 ### 3.1 Object Elements
 
-The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different flavors internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in [section 5.1.1](#511-response-serialization) and [section 5.1.2](#512-request-headers))
+The reader will observe that the API requires the underlying platform to support the idea of organizing data into objects with attributes. Those objects MUST be composable using other objects. Implementations MAY choose to have attributes of different styles internally (for example: OPC UA differentiates between properties and variables), but MUST simplify those variations to object parameters to support easy-to-consume JSON serialization. If the calling application requests additional metadata for an object, an implementation MAY return details about its specific attribute behavior (as described in [section 5.1.1](#511-response-serialization) and [section 5.1.2](#512-request-headers))
 
 ### 3.1.1 Required Object Metadata
 
@@ -89,53 +89,53 @@ Modern contextualized manufacturing information platforms should be able to trac
 ## 4. I3X Address Space Methods
 
 ### 4.1 Exploratory Methods
-Exploratory Interfaces are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
+Exploratory methods are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
 #### 4.1.1 Namespaces
 
-When invoked as a Query, MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
+This Query MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
 
 #### 4.1.2 Object Types
 
-When invoked as a Query, MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
+This Query MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MAY by filtered by NamespaceURI.
+The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
 
 #### 4.1.3 Object Type Definition
 
-When invoked as a Query, MUST return a JSON structure defining a Type registered in the contextualized manufacturing information platform for the requested Type's ElementId.
+This Query MUST return a JSON structure defining a Type registered in the contextualized manufacturing information platform for the requested Type's ElementId.
 
-When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+The Query MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
 #### 4.1.4 Relationship Types -- Hierarchical
 
-When invoked as a Query, MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+This Query MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
 #### 4.1.5 Relationship Types -- Non-Hierarchical
 
-When invoked as a Query, MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
+This Query MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
 #### 4.1.6 Instances of an Object Type
 
-When invoked as a Query, MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
+This Query MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
 #### 4.1.7 Objects linked by Relationship Type
 
-When invoked as a Query, MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
+This Query MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
 
 Each element in the returned object array MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-When invoked as a Query, if specified by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
+If the Query specifies by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
 
 #### 4.1.8 Object Definition
 
-When invoked as a Query, if the ElementId exists as an instance object, MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
+If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
 When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
-### 4.2 Query Methods
-Value Interfaces MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document indepenent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
+### 4.2 Value Methods
+Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document indepenent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
 
 #### 4.2.1 Object Element LastKnownValue
 
