@@ -41,7 +41,7 @@ Finally, comparisons may be drawn to commercial offerings that provide similar f
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in Internet RFC 2119 [RFC2119].
 
-- **Address Space** - The complete collection of Contextualize Information that a platform makes available to clients
+- **Address Space** - The complete collection of contextualized information that a platform makes available to clients
 - **API** - Application Programming Interface
 - **I3X** - Industrial Information Interface eXchange
 - **CMIP** - Contextualized Manufacturing Information Platform that supports I3X
@@ -52,9 +52,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **Response** - A generic means of a producer to fulfill the needs of the consumer
 - **Query** - A read operation
 - **Update** - A write operation, inclusive of creation
-
+- **URI** - Uniform Resource Indicator, a unique identifier for a resource
+  
 ## 3. Address Space Overview
-The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying, this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
+The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying; the authors are aware that this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
 ### 3.1 Object Elements
 
@@ -80,37 +81,37 @@ As described in 5.2.2, Objects are derived from Types. This derivation is a rela
 
 #### 3.2.2 Hierarchical Relationships
 
-To properly support Object Orientation, underlying platforms MUST support hierarchical relationships between Objects. These common relationships, such as parent-child, are table stakes for any contextualized manufacturing information platform.
+To properly support Object Orientation, underlying platforms MUST support hierarchical relationships between Objects. These common relationships, such as parent-child, are a minimum requirement for any contextualized manufacturing information platform.
 
 #### 3.2.3 Non-Hierarchical Relationships
 
-Modern contextualized manufacturing information platforms should be able to track relationships between objects that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
+Modern manufacturing information involves relationships in data that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
 
 ## 4. I3X Address Space Methods
 
 ### 4.1 Exploratory Methods
-Exploratory methods are Read-only operations, reflecting the current state of an information graph at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
+Exploratory methods are Read-only operations, reflecting the current state of an information store at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
 #### 4.1.1 Namespaces
 
 This Query MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
 
-#### 4.1.2 Object Types
-
-This Query MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
-
-The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
-
-#### 4.1.3 Object Type Definition
+#### 4.1.2 Object Type Definition
 
 This Query MUST return a JSON structure defining a Type registered in the contextualized manufacturing information platform for the requested Type's ElementId.
 
 The Query MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple Type definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
-#### 4.1.4 Relationship Types -- Hierarchical
+#### 4.1.3 Object Types
+
+This Query MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
+
+The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
+
+#### 4.1.4 Relationship Types - Hierarchical
 
 This Query MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
-#### 4.1.5 Relationship Types -- Non-Hierarchical
+#### 4.1.5 Relationship Types - Non-Hierarchical
 
 This Query MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
 
@@ -124,20 +125,22 @@ This Query MUST return an array of objects related to the requested ElementId by
 
 Each element in the returned object array MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-If the Query specifies by an optional query parameter, an implementation MAY support following relationships to the specified depth -- with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
+If the Query specifies an optional query parameter, an implementation MAY support following relationships to the specified depth - with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
 
 #### 4.1.8 Object Definition
 
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-When invoked as a Query, MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+When invoked as a Query, thie method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
 ### 4.2 Value Methods
 Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document independent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
 
-#### 4.2.1 Object Element LastKnownValue
+#### 4.2.1 Queries
+
+##### 4.2.1.1 Object Element LastKnownValue
 
 When invoked as a Query, the LastKnownValue interface MUST return the current value available in the CMIP for the requested object, by ElementId.
 
@@ -150,7 +153,7 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-#### 4.2.2 Object Element HistoricalValue
+##### 4.2.1.2 Object Element HistoricalValue
 
 When invoked as a Query, the HistoricalValue interface MUST return an array of historical values in a time range available in the contextualized information platform for the requested object, by ElementId.
 
@@ -163,16 +166,16 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-### 4.3 Update Methods
+### 4.2.2 Update Methods
 
-#### 4.3.1 Object Element LastKnownValue
+#### 4.2.2.1 Object Element LastKnownValue
 Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
 When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
 
-#### 4.3.2 Object Element HistoricalValue
+#### 4.2.2.2 Object Element HistoricalValue
 Implementations MAY include the ability to write to HistoricalValue(s). If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
@@ -182,9 +185,6 @@ When invoked as an Update, the HistoricalValue interface MAY accept an array of 
 When invoked in order to Create a new historical record, the HistoricalValue interface MAY accept an array of new historical values for an array of specified objects and timestamps, by ElementId.
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
-
-### 4.4 Subscribe Methods
-TBD
 
 ## 5. Implementation Requirements
 To support I3X, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
