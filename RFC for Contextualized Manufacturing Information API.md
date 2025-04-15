@@ -55,6 +55,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **URI** - Uniform Resource Indicator, a unique identifier for a resource
   
 ## 3. Address Space Overview
+
 The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying; the authors are aware that this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
 ### 3.1 Object Elements
@@ -166,16 +167,18 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-### 4.2.2 Update Methods
+#### 4.2.2 Update Methods
 
-#### 4.2.2.1 Object Element LastKnownValue
+##### 4.2.2.1 Object Element LastKnownValue
+
 Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
 When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
 
-#### 4.2.2.2 Object Element HistoricalValue
+##### 4.2.2.2 Object Element HistoricalValue
+
 Implementations MAY include the ability to write to HistoricalValue(s). If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
@@ -186,10 +189,12 @@ When invoked in order to Create a new historical record, the HistoricalValue int
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
-### 4.2.2 Subscription Methods
+#### 4.2.2 Subscription Methods
+
 The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. In order to service such subscriptions, an implementation must either a) surface a pub/sub style interface directly, or on behalf of the data source the API is abstracting, or b) poll an underlying data source on behalf of clients, surfacing changes with a new publication to subscribers. This will require persisting subscription state for each client.
 
-### 4.2.2.1 Subscribe to Object Element LastKnownValue
+##### 4.2.2.1 Subscribe to Object Element LastKnownValue
+
 When invoked as a Subscription, the LastKnownValue interface MUST begin a subscription to the current value available in the CMIP for the requested object, by ElementId, and publish any changes to subscribed clients. The method call MUST return a subscription ID that can be used for later interaction with the subscription.
 
 Published messages MUST match the form of the Object Element LastKnownValue Query (see 4.2.1.1), and add an additional member indicating if the Subscription is still operational.
@@ -198,10 +203,12 @@ Subscriptions to complex elements, including compound objects, or to parent Elem
 
 When invoked as a Subscription, the LastKnownValue interface MAY support an array of requested object ElementIds being subscribed to, in order to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of subscription IDs.
 
-### 4.2.2.2 Unsubscribe
+##### 4.2.2.2 Unsubscribe
+
 When invoked, the Unsubscribe interface accepts a single subscription ID, or an array of subscription IDs and cancels publication of future messages to the invoking client.
 
 ## 5. Implementation Requirements
+
 To support I3X, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
 
 The I3X API SHALL be implemented over an encrypted transport, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in [section 3](#3-address-space-overview), and MAY support the optional capabilities listed in [section 3](#3-address-space-overview). 
@@ -256,4 +263,5 @@ Implementations of this API MUST have Current Values for all persisted Object In
 Implementations of this API MUST be able to return Historical Value responses within a common HTTP client timeout (currently Firefox and Chrome use 300 seconds as a default.) If the complete payload cannot be returned within this time frame, a partial payload and poll-able callback URL MUST be returned.
 
 ## 6. Acknowledgements
+
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
