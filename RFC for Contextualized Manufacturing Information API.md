@@ -189,11 +189,11 @@ When invoked in order to Create a new historical record, the HistoricalValue int
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
-#### 4.2.2 Subscription Methods
+#### 4.2.3 Subscription Methods
 
 The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. In order to service such subscriptions, an implementation must either a) surface a pub/sub style interface directly, or on behalf of the data source the API is abstracting, or b) poll an underlying data source on behalf of clients, surfacing changes with a new publication to subscribers. This will require persisting subscription state for each client.
 
-##### 4.2.2.1 Subscribe to Object Element LastKnownValue
+##### 4.2.3.1 Subscribe to Object Element LastKnownValue
 
 When invoked as a Subscription, the LastKnownValue interface MUST begin a subscription to the current value available in the CMIP for the requested object, by ElementId, and publish any changes to subscribed clients. The method call MUST return a subscription ID that can be used for later interaction with the subscription.
 
@@ -203,7 +203,7 @@ Subscriptions to complex elements, including compound objects, or to parent Elem
 
 When invoked as a Subscription, the LastKnownValue interface MAY support an array of requested object ElementIds being subscribed to, in order to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of subscription IDs.
 
-##### 4.2.2.2 Unsubscribe
+##### 4.2.3.2 Unsubscribe
 
 When invoked, the Unsubscribe interface accepts a single subscription ID, or an array of subscription IDs and cancels publication of future messages to the invoking client.
 
