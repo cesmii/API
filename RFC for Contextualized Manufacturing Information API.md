@@ -191,13 +191,15 @@ When updating Historical data, the CMIP SHOULD implement auditing or tracking of
 
 #### 4.2.3 Subscription Methods
 
-The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. In order to service such subscriptions, an implementation must either a) surface a pub/sub style interface directly, or on behalf of the data source the API is abstracting, or b) poll an underlying data source on behalf of clients, surfacing changes with a new publication to subscribers. This will require persisting subscription state for each client.
+The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. In order to service such subscriptions, an implementation must either a) surface a pub/sub style interface directly, or on behalf of the data source the API is abstracting, or b) poll an underlying data source on behalf of clients, surfacing changes with a new publication to subscribers. This will require maintaining subscription state for each client.
 
 ##### 4.2.3.1 Subscribe to Object Element LastKnownValue
 
 When invoked as a Subscription, the LastKnownValue interface MUST begin a subscription to the current value available in the CMIP for the requested object, by ElementId, and publish any changes to subscribed clients. The method call MUST return a subscription ID that can be used for later interaction with the subscription.
 
-Published messages MUST match the form of the Object Element LastKnownValue Query (see 4.2.1.1), and add an additional member indicating if the Subscription is still operational.
+Published messages MUST match the form of the Object Element LastKnownValue Query (see 4.2.1.1).
+
+The CMIP should be able to identify a) that the underlying data source can no longer facilitate the subscription b) that the subscription itself is no longer valid (dead).
 
 Subscriptions to complex elements, including compound objects, or to parent Element IDs of hierarchical relationships, MUST be allowed. Implementing platforms MAY constrain subscription depth, as necessary to protect performance and server resources, but MUST populate the HasChildren metadata field to allow a client to detect depth limiting, and create additional subscriptions as needed.
 
@@ -205,7 +207,7 @@ When invoked as a Subscription, the LastKnownValue interface MAY support an arra
 
 ##### 4.2.3.2 Unsubscribe
 
-When invoked, the Unsubscribe interface accepts a single subscription ID, or an array of subscription IDs and cancels publication of future messages to the invoking client.
+When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client.
 
 ## 5. Implementation Requirements
 
