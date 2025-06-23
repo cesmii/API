@@ -92,6 +92,7 @@ Modern manufacturing information involves relationships in data that are not str
 
 ### 4.1 Exploratory Methods
 Exploratory methods are Read-only operations, reflecting the current state of an information store at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
+
 #### 4.1.1 Namespaces
 
 This Query MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
@@ -132,7 +133,7 @@ If the Query specifies an optional query parameter, an implementation MAY suppor
 
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-When invoked as a Query, thie method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+When invoked as a Query, the method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
@@ -191,23 +192,41 @@ When updating Historical data, the CMIP SHOULD implement auditing or tracking of
 
 #### 4.2.3 Subscription Methods
 
-The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. In order to service such subscriptions, an implementation must either a) surface a pub/sub style interface directly, or on behalf of the data source the API is abstracting, or b) poll an underlying data source on behalf of clients, surfacing changes with a new publication to subscribers. This will require maintaining subscription state for each client.
+The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. The proposed implementaiton attempts to harmonize strengths from both MQTT and OPC/UA's REST interface, while supporting a wide variety of network scenarios.
 
-##### 4.2.3.1 Subscribe to Object Element LastKnownValue
+##### 4.2.3.1 Create Subscription
 
-When invoked as a Subscription, the LastKnownValue interface MUST begin a subscription to the current value available in the CMIP for the requested object, by ElementId, and publish any changes to subscribed clients. The method call MUST return a subscription ID that can be used for later interaction with the subscription.
+Registers a client for a new Subscription. This initial handshake allows the CMIP to allocate resources for a client, and specifies the quality of service (QoS) the client requires. The response from the SMIP SHALL include a Subscription Id that may be used for follow-up calls. Implementations SHALL support two QoS Levels. Note that QoS levels are aligned to the MQTT standard, which has a QoS 1 (At Least Once) which has no analog in this RFC, so it has been ommitted intentionally.
 
-Published messages MUST match the form of the Object Element LastKnownValue Query (see 4.2.1.1).
+###### QoS 0: At Most Once
 
-The CMIP should be able to identify a) that the underlying data source can no longer facilitate the subscription b) that the subscription itself is no longer valid (dead).
+The CMIP will publish messages to subscribed clients as the data becomes available, but provide no guarantee of message delivery.
 
-Subscriptions to complex elements, including compound objects, or to parent Element IDs of hierarchical relationships, MUST be allowed. Implementing platforms MAY constrain subscription depth, as necessary to protect performance and server resources, but MUST populate the HasChildren metadata field to allow a client to detect depth limiting, and create additional subscriptions as needed.
+###### QoS 2: Exactly Once
 
-When invoked as a Subscription, the LastKnownValue interface MAY support an array of requested object ElementIds being subscribed to, in order to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of subscription IDs.
+The server will publish messages to subscribed clients when the client indicates readiness and will persist the message for re-delivery until the client acknowledges successful receipt. Only the most recent value is guaranteed to be delivered; in its initial version a CMIP provides no buffer for messages between acknowledged messages.
+
+##### 4.2.3.2 Register Monitored Items
+
+Registers the ElementIds the client wishes to subscribe to, for a given Subscription Id. Upon registration, the CMIP MUST begin publishing changed values according to the client's requested QoS level.
+
+For QoS 0 subscriptions, this method call establishes an ongoing connection between the client and CMIP. The server MUST stream changes to Subscribed items over this connection immediately until the connection is broken or the Unsubscribe method is called. Each element being streamed MUST include the metadata indicated in section 3.1.1 and, if indicated by an optional Registration parameter, MAY include the metadata indicated in section 3.1.2.
+
+Note I3X explicitly permits subscribing to complex structures (an ElementId may represent a single property of an object, an entire object, or a tree of related objects) but some implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation.
+
+##### 4.2.3.3 Sync
+
+This method is used only for QoS 2 subscriptions, and is called with a specific Subscription Id, to allow the client to:
+- Acknowledge receipt of previous messages
+- Check for changes to subscribed elements
+
+When servicing the Sync call, the CMIP MUST respond with the latest value for each registered Subscription element.
+
+If the client does not acknowledge a previous message, the CMIP MUST re-send that message as part of the response to the Sync call. The CMIP must maintain state for all pending (un-acknowledged) messages, with that caveat that only the latest value is ever available to QoS 2 clients.
 
 ##### 4.2.3.2 Unsubscribe
 
-When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client.
+When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client, allowing the CMIP to release resources and state held for the client.
 
 ## 5. Implementation Requirements
 
