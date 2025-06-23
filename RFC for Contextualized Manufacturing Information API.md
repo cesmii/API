@@ -224,7 +224,7 @@ When servicing the Sync call, the CMIP MUST respond with the latest value for ea
 
 If the client does not acknowledge a previous message, the CMIP MUST re-send that message as part of the response to the Sync call. The CMIP must maintain state for all pending (un-acknowledged) messages, with that caveat that only the latest value is ever available to QoS 2 clients.
 
-##### 4.2.3.2 Unsubscribe
+##### 4.2.3.4 Unsubscribe
 
 When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client, allowing the CMIP to release resources and state held for the client.
 
