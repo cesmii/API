@@ -133,10 +133,6 @@ If the Query specifies an optional query parameter, an implementation MAY suppor
 
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-When invoked as a Query, the method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
-
-Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
-
 ### 4.2 Value Methods
 Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document independent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
 
@@ -196,7 +192,7 @@ The contributors to this RFC, and the broader community, have communicated clear
 
 ##### 4.2.3.1 Create Subscription
 
-Registers a client for a new Subscription. This initial handshake allows the CMIP to allocate resources for a client, and specifies the quality of service (QoS) the client requires. The response from the SMIP SHALL include a Subscription Id that may be used for follow-up calls. Implementations SHALL support two QoS Levels. Note that QoS levels are aligned to the MQTT standard, which has a QoS 1 (At Least Once) which has no analog in this RFC, so it has been ommitted intentionally.
+Registers a client for a new Subscription. This initial handshake allows the CMIP to allocate resources for a client, and specifies the quality of service (QoS) the client requires. The response from the SMIP MUST include a Subscription Id that may be used for follow-up calls. Implementations SHALL support two QoS Levels. Note that QoS levels are aligned to the MQTT standard, which has a QoS 1 (At Least Once) which has no analog in this RFC, so it has been ommitted intentionally.
 
 ###### QoS 0: At Most Once
 
