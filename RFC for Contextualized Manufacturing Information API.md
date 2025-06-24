@@ -55,6 +55,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - **URI** - Uniform Resource Indicator, a unique identifier for a resource
   
 ## 3. Address Space Overview
+
 The complete collection of Relationship Types and Relationships, Object Types and Object Instances persisted in a contextualized manufacturing information platform SHALL be referred to as the Address Space. Implementations of this API MUST have the entire Address Space readily available for querying; the authors are aware that this is an anti-pattern for implementations like a OPC UA server, where the Address Space "unfolds" through multiple Browse queries. 
 
 ### 3.1 Object Elements
@@ -91,6 +92,7 @@ Modern manufacturing information involves relationships in data that are not str
 
 ### 4.1 Exploratory Methods
 Exploratory methods are Read-only operations, reflecting the current state of an information store at the time of the query, or in some cases, at the time specified as a query parameter. Operations to change relationships between elements are performed as an Update of an instance object, using the Value interfaces described in [section 4.2](#query-methods).
+
 #### 4.1.1 Namespaces
 
 This Query MUST return an array of Namespaces registered in the contextualized manufacturing information platform. All Namespaces MUST have a Namespace URI to support follow-up queries.
@@ -131,7 +133,7 @@ If the Query specifies an optional query parameter, an implementation MAY suppor
 
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-When invoked as a Query, thie method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
+When invoked as a Query, the method MAY accept an array of JSON structures defining Types for the requested ElementIds to reduce round-trips where multiple instance object definitions are required by an application, in which case, the return payload MUST be an array of arrays.
 
 Recognizing that some systems allow some Type tolerance or looseness, when invoked as a Query, MAY accept a target Type, which would allow the CMIP to attempt Type casting or coercion on behalf of the invoking application.
 
@@ -166,16 +168,18 @@ When invoked as a Query, if indicated by an optional query parameter, the respon
 - DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
 - TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
-### 4.2.2 Update Methods
+#### 4.2.2 Update Methods
 
-#### 4.2.2.1 Object Element LastKnownValue
+##### 4.2.2.1 Object Element LastKnownValue
+
 Implementations MAY include the ability to write to the LastKnownValue. If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the LastKnownValue interface MUST accept a new current value for the requested object to be recorded in the CMIP, by ElementId. If the CMIP supports write-back to a Control System (for example, via an interface to a PLC) additional security requirements outside the scope of this proposal MUST be considered.) 
 
 When invoked as an Update the LastKnownValue interface MAY accept an array of current values for an array of of ElementIds.
 
-#### 4.2.2.2 Object Element HistoricalValue
+##### 4.2.2.2 Object Element HistoricalValue
+
 Implementations MAY include the ability to write to HistoricalValue(s). If this feature is implemented, the following considerations apply:
 
 When invoked as an Update, the HistoricalValue interface MUST accept an updated historical value for the requested object and timestamp, by ElementId.
@@ -186,7 +190,46 @@ When invoked in order to Create a new historical record, the HistoricalValue int
 
 When updating Historical data, the CMIP SHOULD implement auditing or tracking of such changes.
 
+#### 4.2.3 Subscription Methods
+
+The contributors to this RFC, and the broader community, have communicated clearly that the minimum requirements for a modern industrial information API must include the ability to publish data on-change to subscribing clients. The proposed implementaiton attempts to harmonize strengths from both MQTT and OPC/UA's REST interface, while supporting a wide variety of network scenarios.
+
+##### 4.2.3.1 Create Subscription
+
+Registers a client for a new Subscription. This initial handshake allows the CMIP to allocate resources for a client, and specifies the quality of service (QoS) the client requires. The response from the SMIP SHALL include a Subscription Id that may be used for follow-up calls. Implementations SHALL support two QoS Levels. Note that QoS levels are aligned to the MQTT standard, which has a QoS 1 (At Least Once) which has no analog in this RFC, so it has been ommitted intentionally.
+
+###### QoS 0: At Most Once
+
+The CMIP will publish messages to subscribed clients as the data becomes available, but provide no guarantee of message delivery.
+
+###### QoS 2: Exactly Once
+
+The server will publish messages to subscribed clients when the client indicates readiness and will persist the message for re-delivery until the client acknowledges successful receipt. Only the most recent value is guaranteed to be delivered; in its initial version a CMIP provides no buffer for messages between acknowledged messages.
+
+##### 4.2.3.2 Register Monitored Items
+
+Registers the ElementIds the client wishes to subscribe to, for a given Subscription Id. Upon registration, the CMIP MUST begin publishing changed values according to the client's requested QoS level.
+
+For QoS 0 subscriptions, this method call establishes an ongoing connection between the client and CMIP. The server MUST stream changes to Subscribed items over this connection immediately until the connection is broken or the Unsubscribe method is called. Each element being streamed MUST include the metadata indicated in section 3.1.1 and, if indicated by an optional Registration parameter, MAY include the metadata indicated in section 3.1.2.
+
+Note I3X explicitly permits subscribing to complex structures (an ElementId may represent a single property of an object, an entire object, or a tree of related objects) but some implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation.
+
+##### 4.2.3.3 Sync
+
+This method is used only for QoS 2 subscriptions, and is called with a specific Subscription Id, to allow the client to:
+- Acknowledge receipt of previous messages
+- Check for changes to subscribed elements
+
+When servicing the Sync call, the CMIP MUST respond with the latest value for each registered Subscription element.
+
+If the client does not acknowledge a previous message, the CMIP MUST re-send that message as part of the response to the Sync call. The CMIP must maintain state for all pending (un-acknowledged) messages, with that caveat that only the latest value is ever available to QoS 2 clients.
+
+##### 4.2.3.4 Unsubscribe
+
+When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client, allowing the CMIP to release resources and state held for the client.
+
 ## 5. Implementation Requirements
+
 To support I3X, a CMIP must have certain capabilities. While this, and subsequent, RFCs will not define requirements for implementation specifics, some base functionality must exist. Vendors MAY differentiate on optimization, performance and scalability, to meet the requirements of the API.
 
 The I3X API SHALL be implemented over an encrypted transport, and support the interfaces listed in this section. In order to properly support some of these interfaces, implementations MUST support the required capabilities listed in [section 3](#3-address-space-overview), and MAY support the optional capabilities listed in [section 3](#3-address-space-overview). 
@@ -241,4 +284,5 @@ Implementations of this API MUST have Current Values for all persisted Object In
 Implementations of this API MUST be able to return Historical Value responses within a common HTTP client timeout (currently Firefox and Chrome use 300 seconds as a default.) If the complete payload cannot be returned within this time frame, a partial payload and poll-able callback URL MUST be returned.
 
 ## 6. Acknowledgements
+
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
