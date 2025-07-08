@@ -1,12 +1,12 @@
 # I3X API Server
 
-This is a Flask-based HTTP server that implements a REST API following the I3X (Industrial Information Interface eXchange) specification. The server provides endpoints for browsing equipment, sensors, and process data in a manufacturing environment. The server port is configurable via a config file.
+This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (Industrial Information Interface eXchange) API for Contextualized Manufacturing Information. The server provides endpoints for browsing equipment, sensors, and process data in a manufacturing environment. The server port is configurable via a config file.
 
 ## Project Structure
 
 ```
 i3x/
-├── app.py             # Main Flask application with I3X API implementation
+├── app.py             # Main FastAPI application with I3X API implementation
 ├── config.json        # Configuration file for server settings
 ├── mock_data.py       # I3X-compliant mock data structures
 ├── requirements.txt   # Python dependencies
@@ -73,6 +73,12 @@ Edit `config.json` to change the port, host, or debug settings:
 python app.py
 ```
 
+Alternatively, you can run with uvicorn directly:
+
+```
+uvicorn app:app --host 0.0.0.0 --port 8080 --reload
+```
+
 The server will start on the configured port (default: 8080).
 
 ### Quick Setup with PowerShell Script
@@ -100,95 +106,98 @@ This script will:
 
 ## API Endpoints
 
-The I3X server implements a subset of the Industrial Information Interface eXchange (I3X) specification. The available endpoints are described below.
+The I3X server implements RFC 001 - Common API for Industrial Information Interface eXchange (I3X). The available endpoints follow the specification exactly:
 
-### GET /browse
+### Exploratory Methods (RFC 4.1)
 
-Returns I3X API data based on the requested resource type.
+#### GET /namespaces
+**RFC 4.1.1** - Returns array of Namespaces registered in the CMIP.
 
-**Query Parameters**:
-- `resource`: Type of resource to retrieve (`namespaces`, `objectTypes`, `instances`, `relationships`, or `all`)
-- `namespaceUri`: (When `resource=objectTypes`) Filter object types by namespace URI
-- `typeId`: (When `resource=instances`) Filter instances by type ID
-- `type`: (When `resource=relationships`) Filter relationships by type (`hierarchical`, `nonHierarchical`, or `all`)
-
-**Response Structure**:
-- `status`: Operation result status ("success" or "error")
-- `data`: The requested I3X data based on resource type
-- `count`: Number of items returned (1 for non-array responses)
-- `timestamp`: UTC timestamp of the response in ISO 8601 format
-
-**Examples:**
-
-```powershell
-# Get all I3X data
-curl http://localhost:8080/browse
-
-# Get only namespaces
-curl http://localhost:8080/browse?resource=namespaces
-
-# Get instances of a specific type
-curl http://localhost:8080/browse?resource=instances&typeId=machine-type-001
-
-# Get object types from a specific namespace
-curl http://localhost:8080/browse?resource=objectTypes&namespaceUri=http://i3x.org/mfg/equipment
+```bash
+curl http://localhost:8080/namespaces
 ```
 
-Example response:
-```json
-{
-    "status": "success",
-    "data": {
-        "namespaces": [...],
-        "objectTypes": [...],
-        "instances": [...],
-        "relationships": {...}
-    },
-    "count": 1,
-    "timestamp": "2025-07-07T10:15:30Z"
-}
+#### GET /objectTypes
+**RFC 4.1.3** - Returns array of Type definitions, optionally filtered by NamespaceURI.
+
+```bash
+# Get all object types
+curl http://localhost:8080/objectTypes
+
+# Filter by namespace
+curl http://localhost:8080/objectTypes?namespaceUri=http://i3x.org/mfg/equipment
 ```
 
-### GET /browse/instance/{elementId}
+#### GET /objectType/{elementId}
+**RFC 4.1.2** - Returns JSON structure defining a Type for the requested ElementId.
 
-Returns data for a specific instance by its element ID.
-
-**Example:**
-
-```powershell
-# Get a specific machine instance
-curl http://localhost:8080/browse/instance/machine-001
+```bash
+curl http://localhost:8080/objectType/machine-type-001
 ```
 
-Example response:
-```json
-{
-    "status": "success",
-    "data": {
-        "elementId": "machine-001",
-        "name": "CNC-101",
-        "typeId": "machine-type-001",
-        "parentId": "plant-001",
-        "hasChildren": true,
-        "namespaceUri": "http://i3x.org/mfg/equipment",
-        "attributes": {
-            "serialNumber": "SN-45678",
-            "model": "ModelX",
-            "status": "running",
-            "temperature": {
-                "value": 65.4,
-                "engUnit": "CEL"
-            },
-            "powerConsumption": {
-                "value": 4.7,
-                "engUnit": "KWH"
-            }
-        },
-        "timestamp": "2025-07-07T10:15:30Z"
-    },
-    "timestamp": "2025-07-07T10:15:30Z"
-}
+#### GET /relationshipTypes/hierarchical
+**RFC 4.1.4** - Returns hierarchical relationship types (HasParent, HasChildren).
+
+#### GET /relationshipTypes/nonHierarchical
+**RFC 4.1.5** - Returns non-hierarchical relationship types.
+
+#### GET /instances
+**RFC 4.1.6** - Returns array of instance objects, optionally filtered by Type ElementId.
+
+```bash
+# Get all instances
+curl http://localhost:8080/instances
+
+# Filter by type
+curl http://localhost:8080/instances?typeId=machine-type-001
+
+# Include optional metadata
+curl http://localhost:8080/instances?includeMetadata=true
 ```
+
+#### GET /object/{elementId}
+**RFC 4.1.8** - Returns instance object by ElementId with current values.
+
+```bash
+curl http://localhost:8080/object/machine-001
+```
+
+#### GET /relationships/{elementId}/{relationshipType}
+**RFC 4.1.7** - Returns array of objects related by specified relationship type.
+
+```bash
+# Get children of an object
+curl http://localhost:8080/relationships/machine-001/haschildren
+
+# Get parent of an object
+curl http://localhost:8080/relationships/sensor-001/hasparent
+```
+
+### Value Methods (RFC 4.2)
+
+#### GET /value/{elementId}
+**RFC 4.2.1.1** - Returns current value for requested object by ElementId.
+
+```bash
+# Get current value
+curl http://localhost:8080/value/machine-001
+
+# Include metadata
+curl http://localhost:8080/value/machine-001?includeMetadata=true
+```
+
+#### GET /history/{elementId}
+**RFC 4.2.1.2** - Returns array of historical values for requested object.
+
+```bash
+curl http://localhost:8080/history/machine-001
+```
+
+### Interactive Documentation
+
+FastAPI automatically generates interactive API documentation:
+- **Swagger UI**: http://localhost:8080/docs
+- **ReDoc**: http://localhost:8080/redoc
 
 
 
@@ -236,19 +245,17 @@ The server uses mock data stored in `mock_data.py` to simulate an I3X-compliant 
 
 The mock data structure follows the Industrial Information Interface eXchange (I3X) specification as defined in the RFC, providing a realistic representation of manufacturing data.
 
-### I3X Specification
+### RFC 001 Compliance
 
-This implementation follows the I3X specification which provides a common API that information platform vendors can implement to abstract vendor-specific implementations of data organization and contextualization into a set of standardized interfaces. The goal is to ensure applications written against one implementation can work against others, enabling portability and interoperability in manufacturing data systems.
+This implementation follows RFC 001 - Common API for Industrial Information Interface eXchange (I3X) which provides a common API that Contextualized Manufacturing Information Platforms (CMIPs) can implement. The specification defines:
 
-The full specification document (`api.md`) is available as part of the Smart Manufacturing API Working Group RFC 001. The specification defines:
+- **Address Space Organization** (RFC 3) - Complete collection of contextualized information
+- **Object Elements** (RFC 3.1) - Objects with attributes and required metadata
+- **Object Relationships** (RFC 3.2) - Hierarchical and non-hierarchical relationships
+- **Exploratory Methods** (RFC 4.1) - Read-only operations for browsing data
+- **Value Methods** (RFC 4.2) - Reading current and historical values
+- **Subscription Methods** (RFC 4.2.3) - Real-time data publishing (not yet implemented)
 
-- Address space organization
-- Object elements and their metadata
-- Relationship types (hierarchical and non-hierarchical)
-- Exploratory methods for browsing data
-- Value methods for reading and writing data
-- Subscription methods for real-time data
-
-This implementation currently focuses on the exploratory methods, specifically the browse functionality for retrieving namespaces, object types, instances, and relationship definitions.
+This implementation provides all required exploratory and value query methods as specified in the RFC, with proper metadata handling and JSON serialization as mandated by the specification.
 
 

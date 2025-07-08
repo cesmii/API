@@ -1,69 +1,106 @@
 import unittest
-import json
+from fastapi.testclient import TestClient
 from app import app
 
-class TestBrowseEndpoint(unittest.TestCase):
+class TestI3XEndpoints(unittest.TestCase):
     def setUp(self):
-        app.config['TESTING'] = True
-        self.client = app.test_client()
+        self.client = TestClient(app)
+    
+    def test_namespaces_endpoint(self):
+        """Test RFC 4.1.1 - Namespaces"""
+        response = self.client.get('/namespaces')
+        data = response.json()
         
-    def test_browse_endpoint(self):
-        response = self.client.get('/browse')
-        data = json.loads(response.data)
-        
-        # Check status code
         self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
         
-        # Check response structure
-        self.assertIn('status', data)
-        self.assertIn('data', data)
-        self.assertIn('count', data)
-        self.assertIn('timestamp', data)
+        # Check namespace structure
+        namespace = data[0]
+        self.assertIn('uri', namespace)
+        self.assertIn('name', namespace)
+    
+    def test_object_types_endpoint(self):
+        """Test RFC 4.1.3 - Object Types"""
+        response = self.client.get('/objectTypes')
+        data = response.json()
         
-        # Check data content
-        self.assertEqual(data['status'], 'success')
-        
-        # Check I3X data structure
-        i3x_data = data['data']
-        self.assertIn('namespaces', i3x_data)
-        self.assertIn('objectTypes', i3x_data)
-        self.assertIn('instances', i3x_data)
-        self.assertIn('relationships', i3x_data)
-        
-        # Check instances exist
-        self.assertGreater(len(i3x_data['instances']), 0)
-        
-        # Check instance structure
-        instance = i3x_data['instances'][0]
-        self.assertIn('elementId', instance)
-        self.assertIn('name', instance)
-        self.assertIn('typeId', instance)
-        self.assertIn('attributes', instance)
-
-    def test_get_instance_endpoint(self):
-        """Test retrieving a specific instance by elementId"""
-        response = self.client.get('/browse/instance/machine-001')
-        data = json.loads(response.data)
-        
-        # Check status code
         self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
         
-        # Check response structure
-        self.assertIn('status', data)
-        self.assertIn('data', data)
-        self.assertIn('timestamp', data)
+        # Check object type structure
+        obj_type = data[0]
+        self.assertIn('elementId', obj_type)
+        self.assertIn('name', obj_type)
+        self.assertIn('namespaceUri', obj_type)
+        self.assertIn('attributes', obj_type)
+    
+    def test_object_type_definition_endpoint(self):
+        """Test RFC 4.1.2 - Object Type Definition"""
+        response = self.client.get('/objectType/machine-type-001')
+        data = response.json()
         
-        # Check data content
-        self.assertEqual(data['status'], 'success')
-        self.assertEqual(data['data']['elementId'], 'machine-001')
-        self.assertEqual(data['data']['name'], 'CNC-101')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['elementId'], 'machine-type-001')
+        self.assertEqual(data['name'], 'CNCMachine')
         
-        # Test non-existent instance
-        response = self.client.get('/browse/instance/non-existent')
-        data = json.loads(response.data)
+        # Test non-existent type
+        response = self.client.get('/objectType/non-existent')
         self.assertEqual(response.status_code, 404)
-        self.assertEqual(data['status'], 'error')
-      
-
+    
+    def test_instances_endpoint(self):
+        """Test RFC 4.1.6 - Instances of an Object Type"""
+        response = self.client.get('/instances')
+        data = response.json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
+        
+        # Check required metadata per RFC 3.1.1
+        instance = data[0]
+        self.assertIn('elementId', instance)
+        self.assertIn('parentId', instance)
+        self.assertIn('hasChildren', instance)
+        self.assertIn('namespaceUri', instance)
+    
+    def test_object_definition_endpoint(self):
+        """Test RFC 4.1.8 - Object Definition"""
+        response = self.client.get('/object/machine-001')
+        data = response.json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['elementId'], 'machine-001')
+        self.assertIn('attributes', data)
+        
+        # Test non-existent object
+        response = self.client.get('/object/non-existent')
+        self.assertEqual(response.status_code, 404)
+    
+    def test_last_known_value_endpoint(self):
+        """Test RFC 4.2.1.1 - Object Element LastKnownValue"""
+        response = self.client.get('/value/machine-001')
+        data = response.json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['elementId'], 'machine-001')
+        self.assertIn('value', data)
+        
+        # Test with metadata
+        response = self.client.get('/value/machine-001?includeMetadata=true')
+        data = response.json()
+        self.assertIn('dataType', data)
+        self.assertIn('timestamp', data)
+    
+    def test_hierarchical_relationships_endpoint(self):
+        """Test RFC 4.1.4 - Relationship Types - Hierarchical"""
+        response = self.client.get('/relationshipTypes/hierarchical')
+        data = response.json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(data, list)
+        self.assertIn('HasParent', data)
+        self.assertIn('HasChildren', data)
 if __name__ == '__main__':
     unittest.main()

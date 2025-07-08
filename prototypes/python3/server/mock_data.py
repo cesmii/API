@@ -1,6 +1,6 @@
 from datetime import datetime
 
-# I3X API compliant mock data - Industrial Information Interface eXchange
+# I3X API compliant mock data - Industrial Information Interface eXchange (RFC 001)
 I3X_DATA = {
     "namespaces": [
         {"uri": "http://i3x.org/mfg/equipment", "name": "Equipment"},
@@ -12,19 +12,35 @@ I3X_DATA = {
             "elementId": "machine-type-001",
             "name": "CNCMachine",
             "namespaceUri": "http://i3x.org/mfg/equipment",
-            "attributes": ["serialNumber", "model", "status", "temperature", "powerConsumption"]
+            "attributes": [
+                {"name": "serialNumber", "dataType": "string"},
+                {"name": "model", "dataType": "string"},
+                {"name": "status", "dataType": "string"},
+                {"name": "temperature", "dataType": "object", "engUnit": "CEL"},
+                {"name": "powerConsumption", "dataType": "object", "engUnit": "KWH"}
+            ]
         },
         {
             "elementId": "sensor-type-001",
             "name": "TemperatureSensor",
             "namespaceUri": "http://i3x.org/mfg/equipment",
-            "attributes": ["value", "unit", "status", "calibrationDate"]
+            "attributes": [
+                {"name": "value", "dataType": "number", "engUnit": "CEL"},
+                {"name": "status", "dataType": "string"},
+                {"name": "calibrationDate", "dataType": "string"}
+            ]
         },
         {
             "elementId": "process-type-001",
             "name": "ManufacturingProcess",
             "namespaceUri": "http://i3x.org/mfg/process",
-            "attributes": ["name", "status", "startTime", "endTime", "efficiency"]
+            "attributes": [
+                {"name": "name", "dataType": "string"},
+                {"name": "status", "dataType": "string"},
+                {"name": "startTime", "dataType": "string"},
+                {"name": "endTime", "dataType": "string"},
+                {"name": "efficiency", "dataType": "number"}
+            ]
         }
     ],
     "instances": [
@@ -105,7 +121,7 @@ I3X_DATA = {
         }
     ],
     "relationships": {
-        "hierarchical": ["HasParent", "HasChild"],
+        "hierarchical": ["HasParent", "HasChildren"],
         "nonHierarchical": ["Monitors", "Controls", "ConnectsTo", "SuppliesTo"]
     }
 }
