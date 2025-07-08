@@ -25,6 +25,7 @@ i3x/
 
 1. **Create a virtual environment**:
 
+Windows:
 ```powershell
 # Navigate to the project directory
 cd c:\Users\<user>\i3x
@@ -36,9 +37,21 @@ python -m venv venv
 .\venv\Scripts\Activate
 ```
 
+Linux/Mac
+```bash
+# Navigate to the project directory
+cd ~/i3x
+
+# Create a virtual environemnt
+python -m venv venv
+
+# Activate the virtual environment
+chmod +x ./venv/bin/activate
+./venv/bin/activate
+
 2. **Install dependencies**:
 
-```powershell
+```
 pip install -r requirements.txt
 ```
 
@@ -56,7 +69,7 @@ Edit `config.json` to change the port, host, or debug settings:
 
 4. **Run the server**:
 
-```powershell
+```
 python app.py
 ```
 
@@ -64,11 +77,19 @@ The server will start on the configured port (default: 8080).
 
 ### Quick Setup with PowerShell Script
 
-For convenience, you can use the included PowerShell script to set up and run the server with a single command:
+For convenience, you can use the included scripts to set up and run the server with a single command:
 
+Windows:
 ```powershell
 # Run the setup script
 .\setup.ps1
+```
+
+Linux/Mac:
+```bash
+# Run the setup script
+chmox +x ./setup.sh
+./setup.sh
 ```
 
 This script will:
