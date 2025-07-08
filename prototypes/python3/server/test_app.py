@@ -1,6 +1,7 @@
 import unittest
 from fastapi.testclient import TestClient
 from app import app
+from models import Namespace, ObjectType, ObjectInstanceMinimal
 
 class TestI3XEndpoints(unittest.TestCase):
     def setUp(self):
@@ -15,10 +16,9 @@ class TestI3XEndpoints(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertGreater(len(data), 0)
         
-        # Check namespace structure
-        namespace = data[0]
-        self.assertIn('uri', namespace)
-        self.assertIn('name', namespace)
+        # Validate against Pydantic model
+        namespaces = [Namespace(**item) for item in data]
+        self.assertGreater(len(namespaces), 0)
     
     def test_object_types_endpoint(self):
         """Test RFC 4.1.3 - Object Types"""
@@ -29,12 +29,9 @@ class TestI3XEndpoints(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertGreater(len(data), 0)
         
-        # Check object type structure
-        obj_type = data[0]
-        self.assertIn('elementId', obj_type)
-        self.assertIn('name', obj_type)
-        self.assertIn('namespaceUri', obj_type)
-        self.assertIn('attributes', obj_type)
+        # Validate against Pydantic model
+        object_types = [ObjectType(**item) for item in data]
+        self.assertGreater(len(object_types), 0)
     
     def test_object_type_definition_endpoint(self):
         """Test RFC 4.1.2 - Object Type Definition"""
@@ -58,12 +55,9 @@ class TestI3XEndpoints(unittest.TestCase):
         self.assertIsInstance(data, list)
         self.assertGreater(len(data), 0)
         
-        # Check required metadata per RFC 3.1.1
-        instance = data[0]
-        self.assertIn('elementId', instance)
-        self.assertIn('parentId', instance)
-        self.assertIn('hasChildren', instance)
-        self.assertIn('namespaceUri', instance)
+        # Validate against Pydantic model
+        instances = [ObjectInstanceMinimal(**item) for item in data]
+        self.assertGreater(len(instances), 0)
     
     def test_object_definition_endpoint(self):
         """Test RFC 4.1.8 - Object Definition"""

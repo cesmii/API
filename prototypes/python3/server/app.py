@@ -4,6 +4,10 @@ import json
 from datetime import datetime, timezone
 from mock_data import I3X_DATA
 from typing import Optional, List
+from models import (
+    Namespace, ObjectType, ObjectInstanceMinimal, ObjectInstance,
+    LastKnownValue, HistoricalValue
+)
 
 app = FastAPI(
     title="I3X API", 
@@ -20,13 +24,13 @@ def load_config():
 config = load_config()
 
 # RFC 4.1.1 - Namespaces
-@app.get("/namespaces")
+@app.get("/namespaces", response_model=List[Namespace])
 def get_namespaces():
     """Return array of Namespaces registered in the CMIP"""
     return I3X_DATA['namespaces']
 
 # RFC 4.1.3 - Object Types
-@app.get("/objectTypes")
+@app.get("/objectTypes", response_model=List[ObjectType])
 def get_object_types(namespaceUri: Optional[str] = Query(default=None)):
     """Return array of Type definitions, optionally filtered by NamespaceURI"""
     if namespaceUri:
@@ -34,7 +38,7 @@ def get_object_types(namespaceUri: Optional[str] = Query(default=None)):
     return I3X_DATA['objectTypes']
 
 # RFC 4.1.2 - Object Type Definition
-@app.get("/objectType/{element_id}")
+@app.get("/objectType/{element_id}", response_model=ObjectType)
 def get_object_type_definition(element_id: str = Path(...)):
     """Return JSON structure defining a Type for the requested ElementId"""
     for obj_type in I3X_DATA['objectTypes']:
@@ -43,13 +47,13 @@ def get_object_type_definition(element_id: str = Path(...)):
     raise HTTPException(status_code=404, detail=f"Object type '{element_id}' not found")
 
 # RFC 4.1.4 - Relationship Types - Hierarchical
-@app.get("/relationshipTypes/hierarchical")
+@app.get("/relationshipTypes/hierarchical", response_model=List[str])
 def get_hierarchical_relationship_types():
     """Return hierarchical relationship types"""
     return I3X_DATA['relationships']['hierarchical']
 
 # RFC 4.1.5 - Relationship Types - Non-Hierarchical
-@app.get("/relationshipTypes/nonHierarchical")
+@app.get("/relationshipTypes/nonHierarchical", response_model=List[str])
 def get_non_hierarchical_relationship_types():
     """Return non-hierarchical relationship types"""
     return I3X_DATA['relationships']['nonHierarchical']
@@ -59,7 +63,7 @@ def get_non_hierarchical_relationship_types():
 def get_instances(
     typeId: Optional[str] = Query(default=None),
     includeMetadata: bool = Query(default=False)
-):
+) -> List[ObjectInstanceMinimal] | List[ObjectInstance]:
     """Return array of instance objects, optionally filtered by Type ElementId"""
     instances = I3X_DATA['instances']
     if typeId:
@@ -83,7 +87,7 @@ def get_instances(
 def get_object_definition(
     element_id: str = Path(...),
     includeMetadata: bool = Query(default=False)
-):
+) -> ObjectInstance:
     """Return instance object by ElementId with current values"""
     for instance in I3X_DATA['instances']:
         if instance['elementId'] == element_id:
@@ -109,7 +113,7 @@ def get_related_objects(
     relationship_type: str = Path(...),
     depth: int = Query(default=0),
     includeMetadata: bool = Query(default=False)
-):
+) -> List[ObjectInstanceMinimal] | List[ObjectInstance]:
     """Return array of objects related by specified relationship type"""
     related_objects = []
     
@@ -135,7 +139,7 @@ def get_related_objects(
     return related_objects
 
 # RFC 4.2.1.1 - Object Element LastKnownValue
-@app.get("/value/{element_id}")
+@app.get("/value/{element_id}", response_model=LastKnownValue)
 def get_last_known_value(
     element_id: str = Path(...),
     includeMetadata: bool = Query(default=False)
@@ -162,7 +166,7 @@ def get_last_known_value(
     raise HTTPException(status_code=404, detail=f"Element '{element_id}' not found")
 
 # RFC 4.2.1.2 - Object Element HistoricalValue
-@app.get("/history/{element_id}")
+@app.get("/history/{element_id}", response_model=List[HistoricalValue])
 def get_historical_values(
     element_id: str = Path(...),
     startTime: Optional[str] = Query(default=None),
