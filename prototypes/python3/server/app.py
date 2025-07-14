@@ -29,14 +29,6 @@ def get_namespaces():
     """Return array of Namespaces registered in the CMIP"""
     return I3X_DATA['namespaces']
 
-# RFC 4.1.3 - Object Types
-@app.get("/objectTypes", response_model=List[ObjectType])
-def get_object_types(namespaceUri: Optional[str] = Query(default=None)):
-    """Return array of Type definitions, optionally filtered by NamespaceURI"""
-    if namespaceUri:
-        return [t for t in I3X_DATA['objectTypes'] if t['namespaceUri'] == namespaceUri]
-    return I3X_DATA['objectTypes']
-
 # RFC 4.1.2 - Object Type Definition
 @app.get("/objectType/{element_id}", response_model=ObjectType)
 def get_object_type_definition(element_id: str = Path(...)):
@@ -45,6 +37,14 @@ def get_object_type_definition(element_id: str = Path(...)):
         if obj_type['elementId'] == element_id:
             return obj_type
     raise HTTPException(status_code=404, detail=f"Object type '{element_id}' not found")
+
+# RFC 4.1.3 - Object Types
+@app.get("/objectTypes", response_model=List[ObjectType])
+def get_object_types(namespaceUri: Optional[str] = Query(default=None)):
+    """Return array of Type definitions, optionally filtered by NamespaceURI"""
+    if namespaceUri:
+        return [t for t in I3X_DATA['objectTypes'] if t['namespaceUri'] == namespaceUri]
+    return I3X_DATA['objectTypes']
 
 # RFC 4.1.4 - Relationship Types - Hierarchical
 @app.get("/relationshipTypes/hierarchical", response_model=List[str])
@@ -82,30 +82,6 @@ def get_instances(
     
     return instances
 
-# RFC 4.1.8 - Object Definition
-@app.get("/object/{element_id}")
-def get_object_definition(
-    element_id: str = Path(...),
-    includeMetadata: bool = Query(default=False)
-) -> ObjectInstance:
-    """Return instance object by ElementId with current values"""
-    for instance in I3X_DATA['instances']:
-        if instance['elementId'] == element_id:
-            if not includeMetadata:
-                # Return minimal required metadata per RFC 3.1.1
-                return {
-                    "elementId": instance["elementId"],
-                    "name": instance["name"],
-                    "typeId": instance["typeId"],
-                    "parentId": instance["parentId"],
-                    "hasChildren": instance["hasChildren"],
-                    "namespaceUri": instance["namespaceUri"],
-                    "attributes": instance["attributes"]
-                }
-            return instance
-    
-    raise HTTPException(status_code=404, detail=f"Object '{element_id}' not found")
-
 # RFC 4.1.7 - Objects linked by Relationship Type
 @app.get("/relationships/{element_id}/{relationship_type}")
 def get_related_objects(
@@ -137,6 +113,30 @@ def get_related_objects(
         } for i in related_objects]
     
     return related_objects
+
+# RFC 4.1.8 - Object Definition
+@app.get("/object/{element_id}")
+def get_object_definition(
+    element_id: str = Path(...),
+    includeMetadata: bool = Query(default=False)
+) -> ObjectInstance:
+    """Return instance object by ElementId with current values"""
+    for instance in I3X_DATA['instances']:
+        if instance['elementId'] == element_id:
+            if not includeMetadata:
+                # Return minimal required metadata per RFC 3.1.1
+                return {
+                    "elementId": instance["elementId"],
+                    "name": instance["name"],
+                    "typeId": instance["typeId"],
+                    "parentId": instance["parentId"],
+                    "hasChildren": instance["hasChildren"],
+                    "namespaceUri": instance["namespaceUri"],
+                    "attributes": instance["attributes"]
+                }
+            return instance
+    
+    raise HTTPException(status_code=404, detail=f"Object '{element_id}' not found")
 
 # RFC 4.2.1.1 - Object Element LastKnownValue
 @app.get("/value/{element_id}", response_model=LastKnownValue)

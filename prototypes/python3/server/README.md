@@ -106,100 +106,13 @@ This script will:
 
 ## API Endpoints
 
-The I3X server implements RFC 001 - Common API for Industrial Information Interface eXchange (I3X). The available endpoints follow the specification exactly:
-
-### Exploratory Methods (RFC 4.1)
-
-#### GET /namespaces
-**RFC 4.1.1** - Returns array of Namespaces registered in the CMIP.
-
-```bash
-curl http://localhost:8080/namespaces
-```
-
-#### GET /objectTypes
-**RFC 4.1.3** - Returns array of Type definitions, optionally filtered by NamespaceURI.
-
-```bash
-# Get all object types
-curl http://localhost:8080/objectTypes
-
-# Filter by namespace
-curl http://localhost:8080/objectTypes?namespaceUri=http://i3x.org/mfg/equipment
-```
-
-#### GET /objectType/{elementId}
-**RFC 4.1.2** - Returns JSON structure defining a Type for the requested ElementId.
-
-```bash
-curl http://localhost:8080/objectType/machine-type-001
-```
-
-#### GET /relationshipTypes/hierarchical
-**RFC 4.1.4** - Returns hierarchical relationship types (HasParent, HasChildren).
-
-#### GET /relationshipTypes/nonHierarchical
-**RFC 4.1.5** - Returns non-hierarchical relationship types.
-
-#### GET /instances
-**RFC 4.1.6** - Returns array of instance objects, optionally filtered by Type ElementId.
-
-```bash
-# Get all instances
-curl http://localhost:8080/instances
-
-# Filter by type
-curl http://localhost:8080/instances?typeId=machine-type-001
-
-# Include optional metadata
-curl http://localhost:8080/instances?includeMetadata=true
-```
-
-#### GET /object/{elementId}
-**RFC 4.1.8** - Returns instance object by ElementId with current values.
-
-```bash
-curl http://localhost:8080/object/machine-001
-```
-
-#### GET /relationships/{elementId}/{relationshipType}
-**RFC 4.1.7** - Returns array of objects related by specified relationship type.
-
-```bash
-# Get children of an object
-curl http://localhost:8080/relationships/machine-001/haschildren
-
-# Get parent of an object
-curl http://localhost:8080/relationships/sensor-001/hasparent
-```
-
-### Value Methods (RFC 4.2)
-
-#### GET /value/{elementId}
-**RFC 4.2.1.1** - Returns current value for requested object by ElementId.
-
-```bash
-# Get current value
-curl http://localhost:8080/value/machine-001
-
-# Include metadata
-curl http://localhost:8080/value/machine-001?includeMetadata=true
-```
-
-#### GET /history/{elementId}
-**RFC 4.2.1.2** - Returns array of historical values for requested object.
-
-```bash
-curl http://localhost:8080/history/machine-001
-```
+The I3X server implements RFC 001 - Common API for Industrial Information Interface eXchange (I3X). The available endpoints follow the specification exactly. Check the interactive document to explore the API.
 
 ### Interactive Documentation
 
 FastAPI automatically generates interactive API documentation:
 - **Swagger UI**: http://localhost:8080/docs
 - **ReDoc**: http://localhost:8080/redoc
-
-
 
 ## Running Tests
 
