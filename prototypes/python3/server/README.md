@@ -48,6 +48,7 @@ python -m venv venv
 # Activate the virtual environment
 chmod +x ./venv/bin/activate
 ./venv/bin/activate
+```
 
 2. **Install dependencies**:
 
