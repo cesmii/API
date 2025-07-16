@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict, Any, Union, Callable
 from datetime import datetime
+from enum import Enum
 
 # RFC 4.1.1 - Namespace Model
 class Namespace(BaseModel):
@@ -53,3 +54,56 @@ class HistoricalValue(BaseModel):
     hasChildren: bool = Field(..., description="Boolean indicating if element has child objects")
     namespaceUri: str = Field(..., description="Namespace URI")
     dataType: Optional[str] = Field(None, description="Data type (when includeMetadata=true)")
+
+# RFC 4.2.2.1 - Object Element LastKnownValue
+class UpdateRequest(BaseModel):
+    elementIds: List[str]
+    values: List[Any]
+
+# TODO: the RFC doesn't say what this should be
+class UpdateResult(BaseModel):
+    elementId: str
+    success: bool
+    message: str
+
+# 4.2.2.2 Object Element HistoricalValue
+class HistoricalValueUpdate(BaseModel):
+    elementId: str
+    timestamp: str  # ISO8601 string
+    value: Any
+
+class HistoricalUpdateResult(BaseModel):
+    elementId: str
+    timestamp: str
+    success: bool
+    message: str
+
+class QoSLevel(str, Enum):
+    fire_and_forget = "QoS0"
+    guaranteed_delivery = "QoS2"
+
+class CreateSubscriptionRequest(BaseModel):
+    qos: QoSLevel
+
+class CreateSubscriptionResponse(BaseModel):
+    subscriptionId: str
+    message: str
+
+class RegisterMonitoredItemsRequest(BaseModel):
+    elementIds: List[str]
+    includeMetadata: Optional[bool] = False
+    maxDepth: Optional[int] = 0  # 0 means no limit
+
+class SyncResponseItem(BaseModel):
+    elementId: str
+    value: dict
+    timestamp: str
+    dataType: str = "object"
+    name: str
+    typeId: str
+    parentId: Optional[str]
+    hasChildren: bool
+    namespaceUri: str
+
+class UnsubscribeRequest(BaseModel):
+    subscriptionIds: List[str]
