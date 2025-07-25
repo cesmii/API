@@ -1,5 +1,14 @@
 {
     "port": 8080,
     "host": "0.0.0.0",
-    "debug": true
+    "debug": true,
+    "app": {
+        "title": "I3X API Prototype",
+        "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
+        "version": "0.0.1"
+    },
+    "data_source": {
+        "type": "mock",
+        "config": {}
+    }
 }

@@ -1,4 +1,5 @@
 import unittest
+import json
 from fastapi.testclient import TestClient
 from app import app
 from models import Namespace, ObjectType, ObjectInstanceMinimal

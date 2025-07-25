@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse
 from typing import List, Optional, Any, Callable
 from datetime import datetime, timezone
@@ -9,9 +9,13 @@ import random
 
 from pydantic import BaseModel, Field, ConfigDict
 from models import CreateSubscriptionRequest, CreateSubscriptionResponse, RegisterMonitoredItemsRequest, SyncResponseItem, UnsubscribeRequest
-from mock_data import I3X_DATA
+from data_sources.data_interface import I3XDataSource
 
 ns_subscriptions = APIRouter(prefix="", tags=["Subscription Methods"])
+
+def get_data_source(request: Request) -> I3XDataSource:
+    """Dependency to inject data source"""
+    return request.app.state.data_source
 
 # RFC 4.2.3.1 - Create Subscription
 @ns_subscriptions.post("/subscribe", response_model=CreateSubscriptionResponse)
@@ -49,15 +53,18 @@ async def register_monitored_items(request: Request, subscription_id: str, req: 
     if not sub:
         raise HTTPException(status_code=404, detail="Subscription not found")
 
+    # Get data source
+    data_source = request.app.state.data_source
+    
     # Validate that root elementIds exist
-    invalid = [eid for eid in req.elementIds if not any(i['elementId'] == eid for i in I3X_DATA['instances'])]
+    invalid = [eid for eid in req.elementIds if not data_source.get_instance_by_id(eid)]
     if invalid:
         raise HTTPException(status_code=404, detail=f"Invalid elementIds: {', '.join(invalid)}")
 
     # Collect all monitored elementIds including descendants
     all_element_ids = set()
     for eid in req.elementIds:
-        tree = collect_instance_tree(eid, req.maxDepth, 0, I3X_DATA["instances"])
+        tree = collect_instance_tree(eid, req.maxDepth, 0, data_source.get_all_instances())
         all_element_ids.update([i["elementId"] for i in tree])
 
     # Update the subscription
@@ -135,14 +142,15 @@ def unsubscribe(request: Request, req: UnsubscribeRequest):
 # Subscription thread responsible creating updated for items being monitored.
 # If QoS is QoS0, it will call the handler immediately to send updates
 # if QoS is QoS2, it will store the updates in a pending dictionary to be sent on the /sync call
-def subscription_worker(I3X_DATA_SUBSCRIPTIONS, I3X_DATA, running_flag):
+def subscription_worker(I3X_DATA_SUBSCRIPTIONS, data_source, running_flag):
     # Create a map of elementId to value for quick access
-    instance_index = {i["elementId"]: i for i in I3X_DATA["instances"]}
+    instances = data_source.get_all_instances()
+    instance_index = {i["elementId"]: i for i in instances}
 
     while running_flag["running"]:
 
         # Create random values
-        for instance in I3X_DATA["instances"]:
+        for instance in instances:
             # Hack to skip instances with "static" in their elementId
             if "static" not in instance or instance["static"] == False:
                 randomize_numeric_values(instance["attributes"])
