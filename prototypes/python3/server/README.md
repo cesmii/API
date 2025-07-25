@@ -2,18 +2,20 @@
 
 This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (Industrial Information Interface eXchange) API for Contextualized Manufacturing Information. The server provides endpoints for browsing equipment, sensors, and process data in a manufacturing environment. The server port is configurable via a config file.
 
-## Project Structure
-
-```
-i3x/
-├── app.py             # Main FastAPI application with I3X API implementation
-├── config.json        # Configuration file for server settings
-├── mock_data.py       # I3X-compliant mock data structures
-├── requirements.txt   # Python dependencies
-├── test_app.py        # Unit tests
-├── setup.ps1          # PowerShell setup script
-└── README.md          # This file
-```
+### Core Structure
+- **app.py**: Main FastAPI application with startup/shutdown lifecycle and configurable data source initialization
+- **models.py**: Pydantic models for all I3X RFC-compliant data structures
+- **data_sources/**: Abstraction layer for data access
+  - `data_interface.py`: Abstract I3XDataSource interface
+  - `factory.py`: Factory pattern for creating data sources from config
+  - `mock/`: Mock data source implementation
+    - `mock_data.py`: I3X-compliant simulated manufacturing data
+    - `mock_data_source.py`: Mock implementation using mock_data.py
+- **routers/**: API endpoint implementations organized by functionality (use dependency injection for data access)
+  - `exploratory.py`: Browse equipment/sensors (RFC 4.1.x)
+  - `values.py`: Read current/historical values (RFC 4.2.1.x)  
+  - `updates.py`: Write operations (RFC 4.2.2.x)
+  - `subscriptions.py`: Real-time data streaming (RFC 4.2.3.x)
 
 ## Setting Up the Virtual Environment
 
