@@ -14,13 +14,22 @@ from routers.subscriptions import ns_subscriptions, subscription_worker
 
 from data_sources.factory import DataSourceFactory
 
+# Load configuration helper function
+def load_config():
+    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    with open(config_path, "r") as f:
+        return json.load(f)
+
+# Load config to get app settings
+config = load_config()
+app_config = config.get("app", {})
+
 # Global flag for subscription thread
 SUBSCRIPTION_THREAD_FLAG = {"running": True}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup - Initialize data source
-    config = load_config()
     try:
         data_source_config = config.get("data_source", {"type": "mock", "config": {}})
         data_source = DataSourceFactory.create_data_source(data_source_config)
@@ -44,9 +53,9 @@ async def lifespan(app: FastAPI):
     SUBSCRIPTION_THREAD_FLAG["running"] = False
 
 app = FastAPI(
-    title="I3X API", 
-    description="Industrial Information Interface eXchange API - RFC 001 Compliant",
-    version="1.0.0",
+    title=app_config.get("title", "I3X API"),
+    description=app_config.get("description", "Industrial Information Interface eXchange API - RFC 001 Compliant"),
+    version=app_config.get("version", "1.0.0"),
     lifespan=lifespan
 )
 
@@ -59,12 +68,6 @@ app.include_router(ns_values)
 app.include_router(ns_updates)
 app.include_router(ns_subscriptions)
 
-# Load configuration helper function
-def load_config():
-    config_path = os.path.join(os.path.dirname(__file__), "config.json")
-    with open(config_path, "r") as f:
-        return json.load(f)
-
 
 if __name__ == '__main__':
     import uvicorn
@@ -75,4 +78,5 @@ if __name__ == '__main__':
     host = config.get("host", "0.0.0.0")
     
     print(f"Starting server on {host}:{port} (debug: {debug})")
+    print(f"Swagger page at http://localhost:{port}/docs")
     uvicorn.run("app:app", host=host, port=port, reload=debug)

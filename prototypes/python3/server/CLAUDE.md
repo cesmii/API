@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Configuration
 - Server settings in `config.json` (port, host, debug mode)
+- **App configuration**: `app` section contains FastAPI metadata (title, description, version)
 - **Data source configuration**: `data_source.type` field determines which data source to use
 - Default port: 8080, accessible at http://localhost:8080/docs for Swagger UI
 
