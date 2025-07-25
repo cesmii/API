@@ -11,7 +11,7 @@ from routers.values import ns_values
 from routers.updates import ns_updates
 from routers.subscriptions import ns_subscriptions, subscription_worker
 
-from mock_data import I3X_DATA
+from data_sources.factory import DataSourceFactory
 
 app = FastAPI(
     title="I3X API", 
@@ -19,8 +19,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Setup app state
-app.state.I3X_DATA = I3X_DATA
+# Setup app state (data source will be set after config is loaded)
 app.state.I3X_DATA_SUBSCRIPTIONS = []  # List[Subscription]
 SUBSCRIPTION_THREAD_FLAG = {"running": True}
 
@@ -38,12 +37,25 @@ def load_config():
 
 config = load_config()
 
+# Initialize data source from configuration
+try:
+    data_source_config = config.get("data_source", {"type": "mock", "config": {}})
+    data_source = DataSourceFactory.create_data_source(data_source_config)
+    print(f"Initialized {data_source_config['type']} data source")
+except Exception as e:
+    print(f"Failed to initialize data source: {e}")
+    print("Falling back to mock data source")
+    data_source = DataSourceFactory.create_data_source({"type": "mock", "config": {}})
+
+# Set the data source in app state
+app.state.data_source = data_source
+
 # Start & stop to manage the subscription thread
 @app.on_event("startup")
 def start_subscription_thread():
     threading.Thread(
         target=subscription_worker,
-        args=(app.state.I3X_DATA_SUBSCRIPTIONS, app.state.I3X_DATA, SUBSCRIPTION_THREAD_FLAG),
+        args=(app.state.I3X_DATA_SUBSCRIPTIONS, app.state.data_source, SUBSCRIPTION_THREAD_FLAG),
         daemon=True
     ).start()
 
