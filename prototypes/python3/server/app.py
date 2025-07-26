@@ -2,6 +2,7 @@ import os
 import json
 import threading
 from datetime import datetime, timezone
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
@@ -13,16 +14,33 @@ from routers.subscriptions import ns_subscriptions, subscription_worker
 
 from mock_data import I3X_DATA
 
+# Global flag for subscription thread
+SUBSCRIPTION_THREAD_FLAG = {"running": True}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    threading.Thread(
+        target=subscription_worker,
+        args=(app.state.I3X_DATA_SUBSCRIPTIONS, app.state.I3X_DATA, SUBSCRIPTION_THREAD_FLAG),
+        daemon=True
+    ).start()
+    
+    yield
+    
+    # Shutdown
+    SUBSCRIPTION_THREAD_FLAG["running"] = False
+
 app = FastAPI(
     title="I3X API", 
     description="Industrial Information Interface eXchange API - RFC 001 Compliant",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Setup app state
 app.state.I3X_DATA = I3X_DATA
 app.state.I3X_DATA_SUBSCRIPTIONS = []  # List[Subscription]
-SUBSCRIPTION_THREAD_FLAG = {"running": True}
 
 # Include namespaces
 app.include_router(ns_exploratory)
@@ -37,19 +55,6 @@ def load_config():
         return json.load(f)
 
 config = load_config()
-
-# Start & stop to manage the subscription thread
-@app.on_event("startup")
-def start_subscription_thread():
-    threading.Thread(
-        target=subscription_worker,
-        args=(app.state.I3X_DATA_SUBSCRIPTIONS, app.state.I3X_DATA, SUBSCRIPTION_THREAD_FLAG),
-        daemon=True
-    ).start()
-
-@app.on_event("shutdown")
-def stop_subscription_thread():
-    SUBSCRIPTION_THREAD_FLAG["running"] = False
 
 if __name__ == '__main__':
     import uvicorn
