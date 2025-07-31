@@ -31,7 +31,23 @@ async def run_qos0_stream(subscription_id: int):
                     except Exception as e:
                         print(f"Failed to decode JSON line: {line}, error: {e}")
 
+
+### Exploratory Methods ###
+async def get_namespaces():
+    """get_namespaces calls get namespaces exploratory method
+
+    :return: dictionary of namespace names to uris
+    """
+    url = f"{BASE_URL}/namespaces"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        namespaces = response.json()
+        return namespaces
+
 async def create_subscription(qos):
+
+
     url = f"{BASE_URL}/subscribe"
     payload = {"qos": qos}
     async with httpx.AsyncClient() as client:
@@ -42,14 +58,17 @@ async def create_subscription(qos):
         return subscription_id
 
 async def main():
-    print("Welcome to the I3X API Test Client.\nPlease select mode of communication (TODO):\n1:QoS0\n2:QoS1\n3QoS3\nOr press X to quit.")
+    print(get_namespaces())
+    print(f"Welcome to the I3X API Test Client.\nPlease select mode of communication (TODO):\n1:QoS0\n2:QoS1\n3QoS3\nOr press X to quit.")
+    
+
     user_selection = input()
     while(user_selection.upper() not in ["X","1","2","3"]):
         print("Invalid input received. Received '{user_selection}'. Valid selections:\n0:Quit\n1:QoS0\n2:QoS1\n3QoS3")
         user_selection = input()
     
-    qos = None
-
+    qos = QoS0
+    """
     match user_selection.upper():
         case "X":
             quit()
@@ -62,7 +81,7 @@ async def main():
         case _:
             print("Unable to process input. Input received: '{user_selection}'. Please try again.")
             quit()
-            
+   """"
     
     subscription_id = await create_subscription(qos)
     await run_qos0_stream(subscription_id)
