@@ -2,18 +2,20 @@
 
 This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (Industrial Information Interface eXchange) API for Contextualized Manufacturing Information. The server provides endpoints for browsing equipment, sensors, and process data in a manufacturing environment. The server port is configurable via a config file.
 
-## Project Structure
-
-```
-i3x/
-├── app.py             # Main FastAPI application with I3X API implementation
-├── config.json        # Configuration file for server settings
-├── mock_data.py       # I3X-compliant mock data structures
-├── requirements.txt   # Python dependencies
-├── test_app.py        # Unit tests
-├── setup.ps1          # PowerShell setup script
-└── README.md          # This file
-```
+### Core Structure
+- **app.py**: Main FastAPI application with startup/shutdown lifecycle and configurable data source initialization
+- **models.py**: Pydantic models for all I3X RFC-compliant data structures
+- **data_sources/**: Abstraction layer for data access
+  - `data_interface.py`: Abstract I3XDataSource interface
+  - `factory.py`: Factory pattern for creating data sources from config
+  - `mock/`: Mock data source implementation
+    - `mock_data.py`: I3X-compliant simulated manufacturing data
+    - `mock_data_source.py`: Mock implementation using mock_data.py
+- **routers/**: API endpoint implementations organized by functionality (use dependency injection for data access)
+  - `exploratory.py`: Browse equipment/sensors (RFC 4.1.x)
+  - `values.py`: Read current/historical values (RFC 4.2.1.x)  
+  - `updates.py`: Write operations (RFC 4.2.2.x)
+  - `subscriptions.py`: Real-time data streaming (RFC 4.2.3.x)
 
 ## Docker Deployment
 
@@ -64,6 +66,7 @@ python -m venv venv
 # Activate the virtual environment
 chmod +x ./venv/bin/activate
 ./venv/bin/activate
+```
 
 2. **Install dependencies**:
 
@@ -122,100 +125,13 @@ This script will:
 
 ## API Endpoints
 
-The I3X server implements RFC 001 - Common API for Industrial Information Interface eXchange (I3X). The available endpoints follow the specification exactly:
-
-### Exploratory Methods (RFC 4.1)
-
-#### GET /namespaces
-**RFC 4.1.1** - Returns array of Namespaces registered in the CMIP.
-
-```bash
-curl http://localhost:8080/namespaces
-```
-
-#### GET /objectTypes
-**RFC 4.1.3** - Returns array of Type definitions, optionally filtered by NamespaceURI.
-
-```bash
-# Get all object types
-curl http://localhost:8080/objectTypes
-
-# Filter by namespace
-curl http://localhost:8080/objectTypes?namespaceUri=http://i3x.org/mfg/equipment
-```
-
-#### GET /objectType/{elementId}
-**RFC 4.1.2** - Returns JSON structure defining a Type for the requested ElementId.
-
-```bash
-curl http://localhost:8080/objectType/machine-type-001
-```
-
-#### GET /relationshipTypes/hierarchical
-**RFC 4.1.4** - Returns hierarchical relationship types (HasParent, HasChildren).
-
-#### GET /relationshipTypes/nonHierarchical
-**RFC 4.1.5** - Returns non-hierarchical relationship types.
-
-#### GET /instances
-**RFC 4.1.6** - Returns array of instance objects, optionally filtered by Type ElementId.
-
-```bash
-# Get all instances
-curl http://localhost:8080/instances
-
-# Filter by type
-curl http://localhost:8080/instances?typeId=machine-type-001
-
-# Include optional metadata
-curl http://localhost:8080/instances?includeMetadata=true
-```
-
-#### GET /object/{elementId}
-**RFC 4.1.8** - Returns instance object by ElementId with current values.
-
-```bash
-curl http://localhost:8080/object/machine-001
-```
-
-#### GET /relationships/{elementId}/{relationshipType}
-**RFC 4.1.7** - Returns array of objects related by specified relationship type.
-
-```bash
-# Get children of an object
-curl http://localhost:8080/relationships/machine-001/haschildren
-
-# Get parent of an object
-curl http://localhost:8080/relationships/sensor-001/hasparent
-```
-
-### Value Methods (RFC 4.2)
-
-#### GET /value/{elementId}
-**RFC 4.2.1.1** - Returns current value for requested object by ElementId.
-
-```bash
-# Get current value
-curl http://localhost:8080/value/machine-001
-
-# Include metadata
-curl http://localhost:8080/value/machine-001?includeMetadata=true
-```
-
-#### GET /history/{elementId}
-**RFC 4.2.1.2** - Returns array of historical values for requested object.
-
-```bash
-curl http://localhost:8080/history/machine-001
-```
+The I3X server implements RFC 001 - Common API for Industrial Information Interface eXchange (I3X). The available endpoints follow the specification exactly. Check the interactive document to explore the API.
 
 ### Interactive Documentation
 
 FastAPI automatically generates interactive API documentation:
 - **Swagger UI**: http://localhost:8080/docs
 - **ReDoc**: http://localhost:8080/redoc
-
-
 
 ## Running Tests
 

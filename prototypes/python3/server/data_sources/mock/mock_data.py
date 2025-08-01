@@ -68,6 +68,7 @@ I3X_DATA = {
         },
         {
             "elementId": "machine-002",
+            "static": True,         # Hack to create an instance that doesn't change values
             "name": "CNC-102",
             "typeId": "machine-type-001",
             "parentId": "plant-001",
@@ -123,5 +124,5 @@ I3X_DATA = {
     "relationships": {
         "hierarchical": ["HasParent", "HasChildren"],
         "nonHierarchical": ["Monitors", "Controls", "ConnectsTo", "SuppliesTo"]
-    }
+    },
 }
