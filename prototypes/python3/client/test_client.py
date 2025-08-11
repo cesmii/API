@@ -9,13 +9,14 @@ BASE_URL = "http://localhost:8080"  # Change to your API base URL
 #######################################
 ##### Test Client Helper Methods ######
 #######################################
+""" DEPRECATED::
 async def api_call(url: str = None, method: str = None, payrams: dict = None):
-    """get executes a get request against
+    """"""get executes a get request against
     :param method: http method, choose from GET, POST, and PUT
     :param url: complete url of API method being called, up to the ?
     :param payrams: params if GET request, payload if PUT/POST request. expects caller enforces expected input
     :return: response from calling url with associated method and passed payload/params
-    """
+    """"""
     if url is None:
         raise TypeError("url cannot be None")
     if payrams is None:
@@ -33,7 +34,37 @@ async def api_call(url: str = None, method: str = None, payrams: dict = None):
 
         response.raise_for_status()
         return response.json()
+"""
+def get_user_selection(valid_selections: list[str] = None):
+    """Gets user to select item from list of valid selections
 
+    :param valid_selections: array of strings denoting valid selections
+    :return: string user_selection from array of valid selections
+    """
+    if valid_selections is None:
+        raise TypeError("valid_selections cannot be None")
+
+    user_selection = input()
+    while user_selection.upper() not in valid_selections:
+        print(f"Invalid input received. Received '{user_selection}'. Valid selections:{valid_selections}")
+        user_selection = input()
+
+    return user_selection
+
+async def get(url: str = None, params: dict = None):
+    """get executes a get request against
+    :param url: complete url of API method being called, up to the ?
+    :param params: params if GET request, payload if PUT/POST request. expects caller enforces expected input
+    :return: response from calling url with associated method and passed payload/params
+    """
+    if url is None:
+        raise TypeError("url cannot be None")
+    if params is None:
+        params = {}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
 
 #######################################
 ######## Exploratory Methods ##########
@@ -42,7 +73,7 @@ async def get_namespaces():
     """get_namespaces calls Get Namespaces exploratory method
     :return: namespaces dict"""
     url = f"{BASE_URL}/namespaces"
-    return await api_call(url, "GET")
+    return await get(url)
 
 async def get_object_type(element_id: str):
     """get_object_type calls Get Object Type Definition exploratory method
@@ -51,7 +82,7 @@ async def get_object_type(element_id: str):
     if element_id is None:
         raise TypeError("element_id cannot be None")
     url = f"{BASE_URL}/objectType/{element_id}"
-    return await api_call(url, "GET")
+    return await get(url)
 
 async def get_object_types(namespace_uri: str = None):
     """get_object_types calls Get Object Types Exploratory method
@@ -62,7 +93,7 @@ async def get_object_types(namespace_uri: str = None):
     params = {}
     if namespace_uri is not None:
         params["namespaceUri"] = namespace_uri
-    return await api_call(url, "GET")
+    return await get(url)
 
 async def get_relationship_types(hierarchical: bool = True):
     """get_relationship_types calls Get Relationship Types exploratory method
@@ -74,7 +105,7 @@ async def get_relationship_types(hierarchical: bool = True):
         url += "/hierarchical"
     else:
         url += "/nonHierarchical"
-    return await api_call(url, "GET")
+    return await get(url)
 
 async def get_instances(type_id: str = None, include_metadata: bool = False):
     """get_instances calls Get Instances Exploratory method
@@ -88,7 +119,7 @@ async def get_instances(type_id: str = None, include_metadata: bool = False):
         params["typeId"] = type_id
     if include_metadata:
         params['includeMetadata'] = "true"
-    return await api_call(url, "GET", params)
+    return await get(url, params)
 
 
 async def get_relationships(element_id: str, relationship_type: str = None, depth: int = 0, include_metadata: bool = False):
@@ -107,7 +138,7 @@ async def get_relationships(element_id: str, relationship_type: str = None, dept
     params = {'depth': depth, 'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
-    return await api_call(url, "GET", params)
+    return await get(url, params)
 
 async def get_object (element_id: str, include_metadata: bool = False):
     """get_object calls Get Object Definition Exploratory method
@@ -121,7 +152,7 @@ async def get_object (element_id: str, include_metadata: bool = False):
     params = {'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
-    return await api_call(url, "GET", params)
+    return await get(url, params)
 
 #######################################
 ########### Value Methods #############
@@ -138,7 +169,7 @@ async def get_value(element_id: str = None, include_metadata: bool = False):
     if include_metadata:
         params['includeMetadata'] = "true"
 
-    return await api_call(url, "GET", params)
+    return await get(url, params)
 
 async def get_history(element_id: str, include_metadata: bool = False, start_time: str = None, end_time: str = None ):
     """get_history calls Get History Exploratory method
@@ -157,12 +188,19 @@ async def get_history(element_id: str, include_metadata: bool = False, start_tim
     if end_time is not None:
         params['endTime'] = end_time
 
-    return await api_call(url, "GET", params)
+    return await get(url, params)
 
 #######################################
 ########### Update Methods ############
 #######################################
-#TODO: add update methods
+async def update(element_ids:[]=None,values:[]=None):
+    """update calls Update Elements API methods
+    :param element_ids:
+    :param values:
+    :return:
+    """
+    pass
+   #TODO: add update methods
 
 #######################################
 ######## Subscription Methods #########
@@ -185,22 +223,73 @@ async def subscribe(qos: str):
 
 
 async def main():
+    """
     try:
         print(await get_history("sensor-001", include_metadata=True),"2025-01-07T10:15:30Z","2025-08-07T10:15:30Z")
     except Exception as e:
         print(f"an exception occurred: {e}")
+    """
+    try:
+        print("Welcome to the CESMII I3X API Test Client.")
+        selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
+
+        ##### MAIN INPUT LOOP #####
+        while True: #broken by user input
+            print(f"\nPlease make a selection.{selections}")
+            user_selection = get_user_selection(["1","2","3","4","X"])
+            if user_selection == "X":
+                quit()
+
+            ##### EXPLORATORY METHODS #####
+            elif user_selection == "1":
+                print(f"Exploratory Methods\n0: Back\n1: Get Namespaces\n2: Get Object Type Definition\n3: Get Object Types\n4: Get Relationship Types\n6: Get Instances\n7: Get Related Objects\n8: Get Object Definition\nX: Quit\n")
+                user_selection_exploratory = get_user_selection(["0","1","2","3","4","5","6","7","8","9","X"])
+                if user_selection_exploratory == "X":
+                    exit()
+                elif user_selection_exploratory == "0":
+                    continue
+                elif user_selection_exploratory == "1":
+                    print(await get_namespaces())
+                elif user_selection_exploratory == "2":
+                    object_type = input("Enter Object Type: ")
+                    try:
+                        print(await get_object_type(object_type))
+                    except Exception as e:
+                        if str(e).startswith("Client error '404 Not Found' for url"):
+                            print(f"Object type {object_type} not found")
+                        else:
+                            raise e
+                elif user_selection_exploratory == "3":
+                    print(await get_object_types())
+                elif user_selection_exploratory == "4":
+                    print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
+                    user_selection_relationship_types = get_user_selection(["1","2"])
+                    print(await get_relationship_types((user_selection_relationship_types == "1")))
+                #elif user_selection_exploratory == "5":
+                    #print(await get_object_types())
+
+            ##### VALUE METHODS #####
+            elif user_selection == "2":
+                pass
+
+            ##### UPDATE METHODS #####
+            elif user_selection == "3":
+                pass
+
+            ##### SUBSCRIPTION METHODS #####
+            elif user_selection == "4":
+                pass
+
+
+            print(f"Press enter to continue...")
+            input()
+
+
+    except Exception as e:
+        print(f"an exception occurred: {e}")
+        exit()
 
     """
-    print(f"Welcome to the I3X API Test Client.\nPlease select mode of communication (TODO):\n1:QoS0\n2:QoS1\n3QoS3\nOr press X to quit.")
-    
-    
-    user_selection = input()
-    while(user_selection.upper() not in ["X","1","2","3"]):
-        print("Invalid input received. Received '{user_selection}'. Valid selections:\n0:Quit\n1:QoS0\n2:QoS1\n3QoS3")
-        user_selection = input()
-    
-    
-    
     qos = None
     match user_selection.upper():
         case "X":
@@ -214,11 +303,10 @@ async def main():
         case _:
             print("Unable to process input. Input received: '{user_selection}'. Please try again.")
             quit()
-   
-    
     subscription_id = await create_subscription(qos)
     await run_qos0_stream(subscription_id)
     """
+
 
 if __name__ == "__main__":
     asyncio.run(main())
