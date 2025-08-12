@@ -2,8 +2,6 @@ import asyncio
 import httpx
 import json
 
-BASE_URL = "http://localhost:8080"  # Change to your API base URL
-
 #######################################
 ##### Test Client Helper Methods ######
 #######################################
@@ -18,7 +16,7 @@ def get_user_selection(valid_selections: list[str] = None):
 
     user_selection = input().strip()
     while user_selection.upper() not in valid_selections:
-        print(f"Invalid input received. Received '{user_selection}'. Valid selections:{valid_selections}")
+        print(f"Invalid input received. Received '{user_selection}'. Valid selections:{valid_selections}. Please enter a valid selection.")
         user_selection = input().strip()
 
     return user_selection
@@ -85,51 +83,66 @@ async def post(url: str = None, payload: dict = None):
 #######################################
 ######## Exploratory Methods ##########
 #######################################
-async def get_namespaces():
+async def get_namespaces(base_url: str = None):
     """get_namespaces calls Get Namespaces exploratory method
+    :param base_url: base URL of API method being called
     :return: namespaces dict"""
-    url = f"{BASE_URL}/namespaces"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/namespaces"
     return await get(url)
 
-async def get_object_type(element_id: str):
+async def get_object_type(base_url: str = None,element_id: str = None):
     """get_object_type calls Get Object Type Definition exploratory method
+    :param base_url: base URL of API method being called
     :param element_id: element id
     :return: object type def dict"""
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if element_id is None:
         raise TypeError("element_id cannot be None")
-    url = f"{BASE_URL}/objectType/{element_id}"
+    url = f"{base_url}/objectType/{element_id}"
     return await get(url)
 
-async def get_object_types(namespace_uri: str = None):
+async def get_object_types(base_url: str = None,namespace_uri: str = None):
     """get_object_types calls Get Object Types Exploratory method
+    :param base_url: base URL of API method being called
     :param namespace_uri: namespace uri, optional
     :return: object types dict
     """
-    url = f"{BASE_URL}/objectTypes"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/objectTypes"
     params = {}
     if namespace_uri is not None:
         params["namespaceUri"] = namespace_uri
     return await get(url)
 
-async def get_relationship_types(hierarchical: bool = True):
+async def get_relationship_types(base_url: str = None,hierarchical: bool = True):
     """get_relationship_types calls Get Relationship Types exploratory method
+    :param base_url: base URL of API method being called
     :param hierarchical: boolean, if true get hierarchical relationships, non-hierarchical if false
     :return: relationship types arr
     """
-    url = f"{BASE_URL}/relationshipTypes"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/relationshipTypes"
     if hierarchical:
         url += "/hierarchical"
     else:
         url += "/nonHierarchical"
     return await get(url)
 
-async def get_instances(type_id: str = None, include_metadata: bool = False):
+async def get_instances(base_url: str = None,type_id: str = None, include_metadata: bool = False):
     """get_instances calls Get Instances Exploratory method
+    :param base_url: base URL of API method being called
     :param type_id: type id, optional
     :param include_metadata: boolean, if true get instances metadata, default false
     :return: instances dict
     """
-    url = f"{BASE_URL}/instances"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/instances"
     params = {}
     if type_id is not None:
         params["typeId"] = type_id
@@ -140,14 +153,17 @@ async def get_instances(type_id: str = None, include_metadata: bool = False):
     return await get(url, params)
 
 
-async def get_relationships(element_id: str, relationship_type: str = None, depth: int = 0, include_metadata: bool = False):
+async def get_relationships(base_url: str = None,element_id: str=None, relationship_type: str = None, depth: int = 0, include_metadata: bool = False):
     """get_relationships calls Get Relationships Exploratory method
+    :param base_url: base URL of API method being called
     :param element_id: element id
     :param relationship_type: relationship type
     :param depth: depth, default 0
     :param include_metadata: boolean, if true get relationship metadata, default false
     :return: relationships dict"""
-    url = f"{BASE_URL}/relationships"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/relationships"
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
     if relationship_type is None:
@@ -158,12 +174,15 @@ async def get_relationships(element_id: str, relationship_type: str = None, dept
         params['includeMetadata'] = "true"
     return await get(url, params)
 
-async def get_object (element_id: str, include_metadata: bool = False):
+async def get_object (base_url: str = None,element_id: str=None, include_metadata: bool = False):
     """get_object calls Get Object Definition Exploratory method
+    :param base_url: base URL of API method being called
     :param element_id: element id
     :param include_metadata: boolean, if true get object metadata, default false
     :return: object dict"""
-    url = f"{BASE_URL}/object"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/object"
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
     url += f"/{element_id}"
@@ -175,29 +194,35 @@ async def get_object (element_id: str, include_metadata: bool = False):
 #######################################
 ########### Value Methods #############
 #######################################
-async def get_value(element_id: str = None, include_metadata: bool = False):
+async def get_value(base_url: str = None,element_id: str = None, include_metadata: bool = False):
     """get_value calls Get Value Value method
+    :param base_url: base URL of API method being called
     :param include_metadata: boolean, if true get object metadata, default false
     :param element_id: element id
     :return: value dict"""
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{BASE_URL}/value/{element_id}"
+    url = f"{base_url}/value/{element_id}"
     params = {'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
 
     return await get(url, params)
 
-async def get_history(element_id: str, start_time: str = None, end_time: str = None,include_metadata: bool = False ):
+async def get_history(base_url: str = None,element_id: str = None, start_time: str = None, end_time: str = None,include_metadata: bool = False ):
     """get_history calls Get History Exploratory method
+    :param base_url: base url of API method being called
     :param element_id: element id
     :param include_metadata: boolean, if true get history metadata, default false
     :param start_time: start time, optional
     :param end_time: end time, optional"""
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{BASE_URL}/history/{element_id}"
+    url = f"{base_url}/history/{element_id}"
     params = {include_metadata: "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
@@ -211,15 +236,18 @@ async def get_history(element_id: str, start_time: str = None, end_time: str = N
 #######################################
 ########### Update Methods ############
 #######################################
-async def update(element_ids: list[str] = None,values: list[str] = None, timestamps: list[str] = None):
+async def update(base_url: str = None,element_ids: list[str] = None,values: list[str] = None, timestamps: list[str] = None):
     """update calls Update Elements API method
+    :param base_url: base URL of API method being called
     :param element_ids: element ids to update, required
     :param values: values to update, required
     :param timestamps: timestamps to update, optional - if in place, updates historical values. Else, current value
     Indices of item across element ID/value/timestamps
     :return: JSON response from update
     """
-    url = f"{BASE_URL}/update"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/update"
     if element_ids is None or element_ids == []:
         raise ValueError("element_ids is required to run update")
     if values is None or values == []:
@@ -247,24 +275,30 @@ async def update(element_ids: list[str] = None,values: list[str] = None, timesta
 #######################################
 ######## Subscription Methods #########
 #######################################
-async def subscribe(qos: str):
+async def subscribe(base_url: str = None,qos: str = None):
     """
     Calls Create Subscription API method
+    :param base_url: base URL of API method being called
     :param qos: Subscription qos
     :return: Json response from subscribe (containing subscription ID)
     """
-    url = f"{BASE_URL}/subscribe"
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/subscribe"
     return await post(url, {"qos": qos})
 
-async def register(subscription_id: str = None, element_ids: list[str] = None, include_metadata: bool = False, max_depth: int = 0):
+async def register(base_url: str = None,subscription_id: str = None, element_ids: list[str] = None, include_metadata: bool = False, max_depth: int = 0):
     """
     register calls Register Monitored Items API method
+    :param base_url: base URL of API method being called
     :param max_depth: Max depth of elements to register
     :param include_metadata: Include metadata if true, default false
     :param subscription_id: subscription id to register elements for
     :param element_ids: element ids to register
     :return: JSON response from register
     """
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if subscription_id is None:
         raise ValueError("subscription_id is required to run register")
     if element_ids is None:
@@ -276,7 +310,7 @@ async def register(subscription_id: str = None, element_ids: list[str] = None, i
         "includeMetadata": include_metadata,
     }
 
-    url = f"{BASE_URL}/subscribe/{subscription_id}/register"
+    url = f"{base_url}/subscribe/{subscription_id}/register"
 
     async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream("POST", url, json=payload) as response:
@@ -296,26 +330,32 @@ async def register(subscription_id: str = None, element_ids: list[str] = None, i
 
         return "" # if this is QoS0, handle prints here and have caller print nothing
 
-async def sync(subscription_id: str = None):
+async def sync(base_url: str = None,subscription_id: str = None):
     """
     sync calls Sync QoS2 API method
+    :param base_url: base URL of API method being called
     :param subscription_id: subscription id to sync elements for
     :return: json response from sync
     """
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if subscription_id is None:
         raise ValueError("subscription_id is required to run sync")
-    url = f"{BASE_URL}/subscribe/{subscription_id}/sync"
+    url = f"{base_url}/subscribe/{subscription_id}/sync"
     return await post(url)
 
-async def unsubscribe(subscription_ids: list[str] = None):
+async def unsubscribe(base_url: str = None,subscription_ids: list[str] = None):
     """
     unsubscribe calls Unsubscribe Elements API method
+    :param base_url: base URL of API method being called
     :param subscription_ids: array subscription ids to unsubscribe from
     :return: json response from unsubscribe
     """
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
     if subscription_ids is None or subscription_ids == []:
         raise ValueError("subscription_ids is required to run unsubscribe")
-    url = f"{BASE_URL}/unsubscribe"
+    url = f"{base_url}/unsubscribe"
     return await post(url,{"subscriptionIds": subscription_ids})
 
 #######################################
@@ -324,6 +364,12 @@ async def unsubscribe(subscription_ids: list[str] = None):
 async def main():
     try:
         print("Welcome to the CESMII I3X API Test Client.")
+        default_url = "http://localhost:8080"
+        base_url = input(f"Enter the base url (or press enter to leave as default '{default_url}'): ").strip()
+        if not base_url:
+            base_url = default_url
+
+
         selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
 
         ##### MAIN INPUT LOOP #####
@@ -343,26 +389,26 @@ async def main():
                     elif user_selection == "0":
                         break
                     elif user_selection == "1":
-                        print(await get_namespaces())
+                        print(await get_namespaces(base_url))
                     elif user_selection == "2":
                         object_type = input("Enter Object Type: ").strip()
                         try:
-                            print(await get_object_type(object_type))
+                            print(await get_object_type(base_url, object_type))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Object type {object_type} not found")
                             else:
                                 raise e
                     elif user_selection == "3":
-                        print(await get_object_types())
+                        print(await get_object_types(base_url))
                     elif user_selection == "4":
                         print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
                         user_selection_relationship_types = get_user_selection(["1","2"])
-                        print(await get_relationship_types((user_selection_relationship_types == "1")))
+                        print(await get_relationship_types(base_url,(user_selection_relationship_types == "1")))
                     elif user_selection == "5":
                         type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
                         try:
-                            print(await get_instances(type_id,get_include_metadata()))
+                            print(await get_instances(base_url,type_id,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Type ID {type_id} not found")
@@ -383,11 +429,11 @@ async def main():
                                 print(f"ElementID '{element_id}' or Relationship Type '{relationship_type}' not found")
                             else:
                                 raise e
-                        print(await get_relationships(element_id,relationship_type,query_depth,get_include_metadata()))
+                        print(await get_relationships(base_url,element_id,relationship_type,query_depth,get_include_metadata()))
                     elif user_selection == "7":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
-                            print(await get_object(element_id,get_include_metadata()))
+                            print(await get_object(base_url,element_id,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -407,7 +453,7 @@ async def main():
                     elif user_selection == "1":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
-                            print(await get_value(element_id, get_include_metadata()))
+                            print(await get_value(base_url, element_id, get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -422,7 +468,7 @@ async def main():
                         if not end_time:
                             end_time = None
                         try:
-                            print(await get_history(element_id,start_time,end_time,get_include_metadata()))
+                            print(await get_history(base_url, element_id,start_time,end_time,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -464,7 +510,7 @@ async def main():
                                 break
 
                         if element_ids != [] and values != []:
-                            print(await update(element_ids,values,timestamps))
+                            print(await update(base_url, element_ids,values,timestamps))
                     print("\n")
 
             ##### SUBSCRIPTION METHODS #####
@@ -480,7 +526,7 @@ async def main():
                         print("Choose Subscription Type:\n0: QoS0\n2: QoS2")
                         user_selection = get_user_selection(["0","2"])
                         qos = "QoS" + user_selection
-                        print(await subscribe(qos))
+                        print(await subscribe(base_url,qos))
                     elif user_selection == "2":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         element_ids = []
@@ -497,14 +543,14 @@ async def main():
                             print(f"Max depth entered - '{max_depth}' - is invalid. must be an integer, defaulting to 0.")
                             max_depth = 0
                         try:
-                            print(await register(subscription_id,element_ids,get_include_metadata(),max_depth))
+                            print(await register(base_url,subscription_id,element_ids,get_include_metadata(),max_depth))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
-                                print(f"Subscription ID '{subscription_id}' not found")
+                                print(f"Subscription ID '{subscription_id}' or element in '{element_ids}' not found")
                     elif user_selection == "3":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         try:
-                            print(await sync(subscription_id))
+                            print(await sync(base_url, subscription_id))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Subscription ID '{subscription_id}' not found")
@@ -516,7 +562,7 @@ async def main():
                             another = input("Enter another Subscription ID? (1: yes, else no): ").strip()
                             if another != "1":
                                 break
-                        print(await unsubscribe(subscription_ids))
+                        print(await unsubscribe(base_url,subscription_ids))
 
     except Exception as e:
         print(f"an exception occurred: {e}")
