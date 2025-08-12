@@ -44,12 +44,24 @@ def get_user_selection(valid_selections: list[str] = None):
     if valid_selections is None:
         raise TypeError("valid_selections cannot be None")
 
-    user_selection = input()
+    user_selection = input().strip()
     while user_selection.upper() not in valid_selections:
         print(f"Invalid input received. Received '{user_selection}'. Valid selections:{valid_selections}")
-        user_selection = input()
+        user_selection = input().strip()
 
     return user_selection
+
+def get_include_metadata():
+    """Prompts user if they want to 'Include Metadata'
+
+    :return: True if user selected to include metadata, false otherwise
+    """
+    print(f"Include Metadata? \n1: Yes\n2: No")
+    user_selection_include_metadata = get_user_selection(["1", "2"])
+    if user_selection_include_metadata == "1":
+        return True
+    else:
+        return False
 
 async def get(url: str = None, params: dict = None):
     """get executes a get request against
@@ -119,6 +131,8 @@ async def get_instances(type_id: str = None, include_metadata: bool = False):
         params["typeId"] = type_id
     if include_metadata:
         params['includeMetadata'] = "true"
+    else:
+        params['includeMetadata'] = "false"
     return await get(url, params)
 
 
@@ -171,7 +185,7 @@ async def get_value(element_id: str = None, include_metadata: bool = False):
 
     return await get(url, params)
 
-async def get_history(element_id: str, include_metadata: bool = False, start_time: str = None, end_time: str = None ):
+async def get_history(element_id: str, start_time: str = None, end_time: str = None,include_metadata: bool = False ):
     """get_history calls Get History Exploratory method
     :param element_id: element id
     :param include_metadata: boolean, if true get history metadata, default false
@@ -242,35 +256,104 @@ async def main():
 
             ##### EXPLORATORY METHODS #####
             elif user_selection == "1":
-                print(f"Exploratory Methods\n0: Back\n1: Get Namespaces\n2: Get Object Type Definition\n3: Get Object Types\n4: Get Relationship Types\n6: Get Instances\n7: Get Related Objects\n8: Get Object Definition\nX: Quit\n")
-                user_selection_exploratory = get_user_selection(["0","1","2","3","4","5","6","7","8","9","X"])
-                if user_selection_exploratory == "X":
-                    exit()
-                elif user_selection_exploratory == "0":
-                    continue
-                elif user_selection_exploratory == "1":
-                    print(await get_namespaces())
-                elif user_selection_exploratory == "2":
-                    object_type = input("Enter Object Type: ")
-                    try:
-                        print(await get_object_type(object_type))
-                    except Exception as e:
-                        if str(e).startswith("Client error '404 Not Found' for url"):
-                            print(f"Object type {object_type} not found")
-                        else:
-                            raise e
-                elif user_selection_exploratory == "3":
-                    print(await get_object_types())
-                elif user_selection_exploratory == "4":
-                    print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
-                    user_selection_relationship_types = get_user_selection(["1","2"])
-                    print(await get_relationship_types((user_selection_relationship_types == "1")))
-                #elif user_selection_exploratory == "5":
-                    #print(await get_object_types())
+                while True:
+                    print(f"Exploratory Methods\n0: Back\n1: Get Namespaces\n2: Get Object Type Definition\n3: Get Object Types\n4: Get Relationship Types\n5: Get Instances\n6: Get Related Objects\n7: Get Object Definition\nX: Quit\n")
+                    user_selection_exploratory = get_user_selection(["0","1","2","3","4","5","6","7","8","9","X"])
+                    if user_selection_exploratory == "X":
+                        exit()
+                    elif user_selection_exploratory == "0":
+                        break
+                    elif user_selection_exploratory == "1":
+                        print(await get_namespaces())
+                    elif user_selection_exploratory == "2":
+                        object_type = input("Enter Object Type: ").strip()
+                        try:
+                            print(await get_object_type(object_type))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"Object type {object_type} not found")
+                            else:
+                                raise e
+                    elif user_selection_exploratory == "3":
+                        print(await get_object_types())
+                    elif user_selection_exploratory == "4":
+                        print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
+                        user_selection_relationship_types = get_user_selection(["1","2"])
+                        print(await get_relationship_types((user_selection_relationship_types == "1")))
+                    elif user_selection_exploratory == "5":
+                        type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
+                        try:
+                            print(await get_instances(type_id,get_include_metadata()))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"Type ID {type_id} not found")
+                            else:
+                                raise e
+                    elif user_selection_exploratory == "6":
+                        element_id = input("Enter ElementID (required): ").strip()
+                        relationship_type = input("Enter Relationship Type (required, see 'Get Relationship Types'): ").strip()
+                        query_depth = input("Enter Query Depth (optional, integer, default 0): ").strip()
+                        try:
+                            query_depth = int(query_depth) if query_depth else 0
+                        except ValueError:
+                            print(f"Query depth entered - '{query_depth}' - is invalid. must be an integer, defaulting to 0.")
+                            query_depth = 0
+
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"ElementID '{element_id}' or Relationship Type '{relationship_type}' not found")
+                            else:
+                                raise e
+                        print(await get_relationships(element_id,relationship_type,query_depth,get_include_metadata()))
+                    elif user_selection_exploratory == "7":
+                        element_id = input("Enter ElementID (required): ").strip()
+                        try:
+                            print(await get_object(element_id,get_include_metadata()))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"ElementID '{element_id}' not found")
+                            else:
+                                raise e
+
+                    print("\n\n")
 
             ##### VALUE METHODS #####
             elif user_selection == "2":
-                pass
+                while True:
+                    print(f"Value Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n")
+                    user_selection_exploratory = get_user_selection(["0", "1", "2", "X"])
+                    if user_selection_exploratory == "X":
+                        exit()
+                    elif user_selection_exploratory == "0":
+                        break
+                    elif user_selection_exploratory == "1":
+                        element_id = input("Enter ElementID (required): ").strip()
+                        try:
+                            print(await get_value(element_id, get_include_metadata()))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"ElementID '{element_id}' not found")
+                            else:
+                                raise e
+                    elif user_selection_exploratory == "2":
+                        element_id = input("Enter ElementID (required): ").strip()
+                        start_time = input("Enter Start Time (optional): ").strip()
+                        end_time = input("Enter End Time (optional): ").strip()
+                        #TODO: Could use better error handling on start_time/end_time
+                        if not start_time:
+                            start_time = None
+                        if not end_time:
+                            end_time = None
+                        try:
+                            print(await get_history(element_id,start_time,end_time,get_include_metadata()))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"ElementID '{element_id}' not found")
+                            else:
+                                raise e
+                        pass
+
+                    print("\n\n")
 
             ##### UPDATE METHODS #####
             elif user_selection == "3":
@@ -279,10 +362,6 @@ async def main():
             ##### SUBSCRIPTION METHODS #####
             elif user_selection == "4":
                 pass
-
-
-            print(f"Press enter to continue...")
-            input()
 
 
     except Exception as e:
