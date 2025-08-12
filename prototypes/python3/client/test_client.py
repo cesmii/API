@@ -2,8 +2,6 @@ import asyncio
 import httpx
 import json
 
-# TODO - created from qos0_test_client.py, WIP test client
-
 BASE_URL = "http://localhost:8080"  # Change to your API base URL
 
 #######################################
@@ -67,7 +65,7 @@ async def get(url: str = None, params: dict = None):
     """get executes a get request against
     :param url: complete url of API method being called, up to the ?
     :param params: params if GET request, payload if PUT/POST request. expects caller enforces expected input
-    :return: response from calling url with associated method and passed payload/params
+    :return: response from calling url with associated method and passed params
     """
     if url is None:
         raise TypeError("url cannot be None")
@@ -75,6 +73,38 @@ async def get(url: str = None, params: dict = None):
         params = {}
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
+
+async def put(url: str = None, payload: dict = None):
+    """post executes a post request against url
+    :param payload: JSON Payload to pass to post request
+    :param url: complete url of API method being called
+    :return: response returned from post request
+    """
+    if url is None:
+        raise TypeError("url cannot be None")
+    if payload is None:
+        payload = {}
+
+    async with httpx.AsyncClient() as client:
+        response = await client.put(url, json=payload)
+        response.raise_for_status()
+        return response.json()
+
+async def post(url: str = None, payload: dict = None):
+    """post executes a post request against url
+    :param payload: JSON Payload to pass to post request
+    :param url: complete url of API method being called
+    :return: response returned from post request
+    """
+    if url is None:
+        raise TypeError("url cannot be None")
+    if payload is None:
+        payload = {}
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload)
         response.raise_for_status()
         return response.json()
 
@@ -207,14 +237,38 @@ async def get_history(element_id: str, start_time: str = None, end_time: str = N
 #######################################
 ########### Update Methods ############
 #######################################
-async def update(element_ids:[]=None,values:[]=None):
-    """update calls Update Elements API methods
-    :param element_ids:
-    :param values:
-    :return:
+async def update(element_ids: list[str] = None,values: list[str] = None, timestamps: list[str] = None):
+    """update calls Update Elements API method
+    :param element_ids: element ids to update, required
+    :param values: values to update, required
+    :param timestamps: timestamps to update, optional - if in place, updates historical values. Else, current value
+    Indices of item across element ID/value/timestamps
+    :return: JSON response from update
     """
-    pass
-   #TODO: add update methods
+    url = f"{BASE_URL}/update"
+    if element_ids is None or element_ids == []:
+        raise ValueError("element_ids is required to run update")
+    if values is None or values == []:
+        raise ValueError("values is required to run update")
+    if len(element_ids) != len(values):
+        raise ValueError("element_ids and values must have same length")
+
+    if timestamps is not None and timestamps != [] and len(timestamps) == len(values):
+        updates = []
+        for element_id, value, timestamp in zip(element_ids, values, timestamps):
+            updates.append({
+                "elementId": element_id,
+                "value": value,
+                "timestamp": timestamp
+            })
+        url += "/historical"
+        payload = updates
+    else:
+        payload = {
+            "elementIds": element_ids,
+            "values": values,
+        }
+    return await put(url, payload)
 
 #######################################
 ######## Subscription Methods #########
@@ -251,21 +305,21 @@ async def main():
         while True: #broken by user input
             print(f"\nPlease make a selection.{selections}")
             user_selection = get_user_selection(["1","2","3","4","X"])
-            if user_selection == "X":
-                quit()
+            if user_selection.upper() == "X":
+                exit()
 
             ##### EXPLORATORY METHODS #####
             elif user_selection == "1":
                 while True:
                     print(f"Exploratory Methods\n0: Back\n1: Get Namespaces\n2: Get Object Type Definition\n3: Get Object Types\n4: Get Relationship Types\n5: Get Instances\n6: Get Related Objects\n7: Get Object Definition\nX: Quit\n")
-                    user_selection_exploratory = get_user_selection(["0","1","2","3","4","5","6","7","8","9","X"])
-                    if user_selection_exploratory == "X":
+                    user_selection = get_user_selection(["0","1","2","3","4","5","6","7","8","9","X"])
+                    if user_selection.upper() == "X":
                         exit()
-                    elif user_selection_exploratory == "0":
+                    elif user_selection == "0":
                         break
-                    elif user_selection_exploratory == "1":
+                    elif user_selection == "1":
                         print(await get_namespaces())
-                    elif user_selection_exploratory == "2":
+                    elif user_selection == "2":
                         object_type = input("Enter Object Type: ").strip()
                         try:
                             print(await get_object_type(object_type))
@@ -274,13 +328,13 @@ async def main():
                                 print(f"Object type {object_type} not found")
                             else:
                                 raise e
-                    elif user_selection_exploratory == "3":
+                    elif user_selection == "3":
                         print(await get_object_types())
-                    elif user_selection_exploratory == "4":
+                    elif user_selection == "4":
                         print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
                         user_selection_relationship_types = get_user_selection(["1","2"])
                         print(await get_relationship_types((user_selection_relationship_types == "1")))
-                    elif user_selection_exploratory == "5":
+                    elif user_selection == "5":
                         type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
                         try:
                             print(await get_instances(type_id,get_include_metadata()))
@@ -289,7 +343,7 @@ async def main():
                                 print(f"Type ID {type_id} not found")
                             else:
                                 raise e
-                    elif user_selection_exploratory == "6":
+                    elif user_selection == "6":
                         element_id = input("Enter ElementID (required): ").strip()
                         relationship_type = input("Enter Relationship Type (required, see 'Get Relationship Types'): ").strip()
                         query_depth = input("Enter Query Depth (optional, integer, default 0): ").strip()
@@ -305,7 +359,7 @@ async def main():
                             else:
                                 raise e
                         print(await get_relationships(element_id,relationship_type,query_depth,get_include_metadata()))
-                    elif user_selection_exploratory == "7":
+                    elif user_selection == "7":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
                             print(await get_object(element_id,get_include_metadata()))
@@ -314,19 +368,18 @@ async def main():
                                 print(f"ElementID '{element_id}' not found")
                             else:
                                 raise e
-
-                    print("\n\n")
+                    print("\n")
 
             ##### VALUE METHODS #####
             elif user_selection == "2":
                 while True:
                     print(f"Value Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n")
-                    user_selection_exploratory = get_user_selection(["0", "1", "2", "X"])
-                    if user_selection_exploratory == "X":
+                    user_selection = get_user_selection(["0", "1", "2", "X"])
+                    if user_selection.upper() == "X":
                         exit()
-                    elif user_selection_exploratory == "0":
+                    elif user_selection == "0":
                         break
-                    elif user_selection_exploratory == "1":
+                    elif user_selection == "1":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
                             print(await get_value(element_id, get_include_metadata()))
@@ -335,11 +388,10 @@ async def main():
                                 print(f"ElementID '{element_id}' not found")
                             else:
                                 raise e
-                    elif user_selection_exploratory == "2":
+                    elif user_selection == "2":
                         element_id = input("Enter ElementID (required): ").strip()
                         start_time = input("Enter Start Time (optional): ").strip()
                         end_time = input("Enter End Time (optional): ").strip()
-                        #TODO: Could use better error handling on start_time/end_time
                         if not start_time:
                             start_time = None
                         if not end_time:
@@ -351,13 +403,50 @@ async def main():
                                 print(f"ElementID '{element_id}' not found")
                             else:
                                 raise e
-                        pass
-
-                    print("\n\n")
+                    print("\n")
 
             ##### UPDATE METHODS #####
             elif user_selection == "3":
-                pass
+                while True:
+                    print(f"Update Methods\n0: Back\n1: Update Elements\n2: Update Historical Values\nX: Quit\n")
+                    user_selection = get_user_selection(["0", "1", "2", "X"])
+                    if user_selection.upper() == "X":
+                        exit()
+                    elif user_selection == "0":
+                        break
+                    elif user_selection == "1" or user_selection == "2":
+                        element_ids = []
+                        values = []
+                        timestamps = None
+                        if user_selection == "2": # TODO: historical updates currently not supported 8/11/25, untested
+                            timestamps = [] # only used for user selection 2
+                        while True:
+                            element_id = input("Enter Element ID to update: ").strip()
+                            value = input(f"Enter new value for Element ID '{element_id}': ").strip()
+                            timestamp = None
+                            if timestamps is not None:
+                                timestamp = input(f"Enter timestamp to update for Element ID '{element_id}': ").strip()
+                            try:
+                                element_ids.append(element_id)
+                                values.append(json.loads(value))
+                                if timestamps is not None:
+                                    timestamps.append(timestamp)
+                            except ValueError:
+                                print(f"Unable to parse value '{value}' as JSON, not adding element id/value to update.")
+
+                            another = input("Enter another value? (1: yes, else no): ").strip()
+                            if another != "1":
+                                break
+
+                        if element_ids != [] and values != []:
+                            response = await update(element_ids,values,timestamps)
+                            for update_response in response:
+                                if not update_response['success']:
+                                    print(f"Update to {update_response['elementId']} failed. Message: {update_response['message']}")
+                                else:
+                                    print(f"Update to {update_response['elementId']} succeeded.")
+
+                    print("\n")
 
             ##### SUBSCRIPTION METHODS #####
             elif user_selection == "4":
