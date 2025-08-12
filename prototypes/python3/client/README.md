@@ -45,13 +45,9 @@ chmod +x ./venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. **Configure the server** (optional):
-
-Hardcoded for now
-
-4. **Run the client**:
+3. **Run the client**:
 
 ```
-python qos0_test_client.py
+python test_client.py
 ```
 
