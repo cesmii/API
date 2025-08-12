@@ -5,7 +5,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # Create virtual environment if it doesn't exist
 if [ ! -f $SCRIPT_DIR/venv ]; then
 	echo Creating virtual environment...
-	python -m venv venv #TODO - try py and python instead of python3? Can you get error output here
+	python3 -m venv venv
 fi
 
 # Activate virtual environment
@@ -19,4 +19,4 @@ echo Install dependencies...
 
 # Run the server
 echo Starting client...
-./venv/bin/python3 qos0_test_client.py
+./venv/bin/python3 test_client.py
