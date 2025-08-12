@@ -7,32 +7,6 @@ BASE_URL = "http://localhost:8080"  # Change to your API base URL
 #######################################
 ##### Test Client Helper Methods ######
 #######################################
-""" DEPRECATED::
-async def api_call(url: str = None, method: str = None, payrams: dict = None):
-    """"""get executes a get request against
-    :param method: http method, choose from GET, POST, and PUT
-    :param url: complete url of API method being called, up to the ?
-    :param payrams: params if GET request, payload if PUT/POST request. expects caller enforces expected input
-    :return: response from calling url with associated method and passed payload/params
-    """"""
-    if url is None:
-        raise TypeError("url cannot be None")
-    if payrams is None:
-        payrams = {}
-
-    async with httpx.AsyncClient() as client:
-        if method == "GET":
-            response = await client.get(url, params=payrams)
-        elif method == "POST":
-            response = await client.post(url, json=payrams)
-        elif method == "PUT":
-            response = await client.put(url, json=payrams)
-        else:
-            raise TypeError("method must be 'GET', 'POST', or 'PUT'")
-
-        response.raise_for_status()
-        return response.json()
-"""
 def get_user_selection(valid_selections: list[str] = None):
     """Gets user to select item from list of valid selections
 
@@ -77,10 +51,10 @@ async def get(url: str = None, params: dict = None):
         return response.json()
 
 async def put(url: str = None, payload: dict = None):
-    """post executes a post request against url
-    :param payload: JSON Payload to pass to post request
+    """put executes a put request against url
+    :param payload: JSON Payload to pass to put request
     :param url: complete url of API method being called
-    :return: response returned from post request
+    :return: response returned from put request
     """
     if url is None:
         raise TypeError("url cannot be None")
@@ -274,29 +248,80 @@ async def update(element_ids: list[str] = None,values: list[str] = None, timesta
 ######## Subscription Methods #########
 #######################################
 async def subscribe(qos: str):
+    """
+    Calls Create Subscription API method
+    :param qos: Subscription qos
+    :return: Json response from subscribe (containing subscription ID)
+    """
     url = f"{BASE_URL}/subscribe"
-    payload = {"qos": qos}
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload)
-        response.raise_for_status()
-        subscription_id = response.json()["subscriptionId"]
-        print(f"Created subscription with ID: {subscription_id}")
-        return subscription_id
+    return await post(url, {"qos": qos})
 
-#TODO: add remaining subscription methods
+async def register(subscription_id: str = None, element_ids: list[str] = None, include_metadata: bool = False, max_depth: int = 0):
+    """
+    register calls Register Monitored Items API method
+    :param max_depth: Max depth of elements to register
+    :param include_metadata: Include metadata if true, default false
+    :param subscription_id: subscription id to register elements for
+    :param element_ids: element ids to register
+    :return: JSON response from register
+    """
+    if subscription_id is None:
+        raise ValueError("subscription_id is required to run register")
+    if element_ids is None:
+        raise ValueError("element_ids is required to run register")
+
+    payload = {
+        "elementIds": element_ids,
+        "maxDepth": max_depth,
+        "includeMetadata": include_metadata,
+    }
+
+    url = f"{BASE_URL}/subscribe/{subscription_id}/register"
+
+    async with httpx.AsyncClient(timeout=None) as client:
+        async with client.stream("POST", url, json=payload) as response:
+            response.raise_for_status()
+
+            async for line in response.aiter_lines():
+                if line:
+                    try:
+                        data = json.loads(line)
+                        for update_received in data:
+                            if update_received == 'message' and len(data) == 1:
+                                return data # this is QoS2, return message to user
+                            print(update_received)
+                            # TODO: current state will run until program is killed externally. Add some threaded keyboard interrupt?
+                    except Exception as e:
+                        print(f"Failed to decode JSON line: {line}, error: {e}")
+
+        return "" # if this is QoS0, handle prints here and have caller print nothing
+
+async def sync(subscription_id: str = None):
+    """
+    sync calls Sync QoS2 API method
+    :param subscription_id: subscription id to sync elements for
+    :return: json response from sync
+    """
+    if subscription_id is None:
+        raise ValueError("subscription_id is required to run sync")
+    url = f"{BASE_URL}/subscribe/{subscription_id}/sync"
+    return await post(url)
+
+async def unsubscribe(subscription_ids: list[str] = None):
+    """
+    unsubscribe calls Unsubscribe Elements API method
+    :param subscription_ids: array subscription ids to unsubscribe from
+    :return: json response from unsubscribe
+    """
+    if subscription_ids is None or subscription_ids == []:
+        raise ValueError("subscription_ids is required to run unsubscribe")
+    url = f"{BASE_URL}/unsubscribe"
+    return await post(url,{"subscriptionIds": subscription_ids})
 
 #######################################
 ########## Client Functions ###########
 #######################################
-
-
 async def main():
-    """
-    try:
-        print(await get_history("sensor-001", include_metadata=True),"2025-01-07T10:15:30Z","2025-08-07T10:15:30Z")
-    except Exception as e:
-        print(f"an exception occurred: {e}")
-    """
     try:
         print("Welcome to the CESMII I3X API Test Client.")
         selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
@@ -439,42 +464,63 @@ async def main():
                                 break
 
                         if element_ids != [] and values != []:
-                            response = await update(element_ids,values,timestamps)
-                            for update_response in response:
-                                if not update_response['success']:
-                                    print(f"Update to {update_response['elementId']} failed. Message: {update_response['message']}")
-                                else:
-                                    print(f"Update to {update_response['elementId']} succeeded.")
-
+                            print(await update(element_ids,values,timestamps))
                     print("\n")
 
             ##### SUBSCRIPTION METHODS #####
             elif user_selection == "4":
-                pass
-
+                while True:
+                    print(f"Subscription Methods\n0: Back\n1: Subscribe\n2: Register Monitored Items\n3: Sync QoS2 subscription\n4: Unsubscribe\nX: Quit\n")
+                    user_selection = get_user_selection(["0","1","2","3","4","X"])
+                    if user_selection.upper() == "X":
+                        exit()
+                    elif user_selection == "0":
+                        break
+                    elif user_selection == "1":
+                        print("Choose Subscription Type:\n0: QoS0\n2: QoS2")
+                        user_selection = get_user_selection(["0","2"])
+                        qos = "QoS" + user_selection
+                        print(await subscribe(qos))
+                    elif user_selection == "2":
+                        subscription_id = input("Enter Subscription ID: ").strip()
+                        element_ids = []
+                        while True:
+                            element_id = input("Enter Element ID to register: ").strip()
+                            element_ids.append(element_id)
+                            another = input("Register another Element ID? (1: yes, else no): ").strip()
+                            if another != "1":
+                                break
+                        max_depth = input("Enter Max Depth (optional, integer, default 0): ").strip()
+                        try:
+                            max_depth = int(max_depth) if max_depth else 0
+                        except ValueError:
+                            print(f"Max depth entered - '{max_depth}' - is invalid. must be an integer, defaulting to 0.")
+                            max_depth = 0
+                        try:
+                            print(await register(subscription_id,element_ids,get_include_metadata(),max_depth))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"Subscription ID '{subscription_id}' not found")
+                    elif user_selection == "3":
+                        subscription_id = input("Enter Subscription ID: ").strip()
+                        try:
+                            print(await sync(subscription_id))
+                        except Exception as e:
+                            if str(e).startswith("Client error '404 Not Found' for url"):
+                                print(f"Subscription ID '{subscription_id}' not found")
+                    elif user_selection == "4":
+                        subscription_ids = []
+                        while True:
+                            subscription_id = input("Enter Subscription ID to unsubscribe from: ").strip()
+                            subscription_ids.append(subscription_id)
+                            another = input("Enter another Subscription ID? (1: yes, else no): ").strip()
+                            if another != "1":
+                                break
+                        print(await unsubscribe(subscription_ids))
 
     except Exception as e:
         print(f"an exception occurred: {e}")
         exit()
-
-    """
-    qos = None
-    match user_selection.upper():
-        case "X":
-            quit()
-        case "1":
-            qos = "QoS0"
-        case "2":
-            qos = "QoS1"
-        case "2":
-            qos = "QoS2"
-        case _:
-            print("Unable to process input. Input received: '{user_selection}'. Please try again.")
-            quit()
-    subscription_id = await create_subscription(qos)
-    await run_qos0_stream(subscription_id)
-    """
-
 
 if __name__ == "__main__":
     asyncio.run(main())
