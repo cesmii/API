@@ -12,8 +12,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Configuration
 - Server settings in `config.json` (port, host, debug mode)
-- **App configuration**: `app` section contains FastAPI metadata (title, description, version)
-- **Data source configuration**: `data_source.type` field determines which data source to use
+- **App configuration**: `app` section contains configurable FastAPI metadata (title, description, version) - loaded at startup
+- **Data source configuration**: Supports both single and multi-source configurations
+  - **Single source**: `data_source.type` field determines which data source to use
+  - **Multi-source**: `data_sources` object with named sources + `data_source_routing` for operation mapping
 - Default port: 8080, accessible at http://localhost:8080/docs for Swagger UI
 
 ## Architecture Overview
@@ -25,7 +27,8 @@ This is a FastAPI-based I3X (Industrial Information Interface eXchange) API serv
 - **models.py**: Pydantic models for all I3X RFC-compliant data structures
 - **data_sources/**: Abstraction layer for data access
   - `data_interface.py`: Abstract I3XDataSource interface
-  - `factory.py`: Factory pattern for creating data sources from config
+  - `factory.py`: Factory pattern for creating single or multiple data sources from config
+  - `manager.py`: DataSourceManager for routing operations across multiple data sources
   - `mock/`: Mock data source implementation
     - `mock_data.py`: I3X-compliant simulated manufacturing data
     - `mock_data_source.py`: Mock implementation using mock_data.py
@@ -43,17 +46,48 @@ This is a FastAPI-based I3X (Industrial Information Interface eXchange) API serv
 - **RFC Compliance**: All endpoints follow I3X RFC 001 specification exactly
 
 ### Data Flow
-1. Data source configured from `config.json` and created via `DataSourceFactory` at startup
-2. Data source injected into all router endpoints via FastAPI dependency injection
-3. Subscription worker thread runs continuously for real-time updates using the configured data source
-4. Pydantic models ensure RFC-compliant JSON serialization
+1. Data source(s) configured from `config.json` and created via `DataSourceFactory` at startup
+   - Single source: Creates individual data source instance
+   - Multi-source: Creates `DataSourceManager` that routes operations to appropriate sources
+2. Data source/manager injected into all router endpoints via FastAPI dependency injection
+3. Operations automatically routed to configured data sources based on `data_source_routing` mapping
+4. Subscription worker thread runs continuously for real-time updates using the configured data source
+5. Pydantic models ensure RFC-compliant JSON serialization
+
+### Multi-Data Source Configuration
+
+**Example Multi-Source Configuration:**
+```json
+{
+  "data_sources": {
+    "exploratory": {"type": "mock", "config": {}},
+    "values": {"type": "database", "config": {"host": "db.example.com"}},
+    "updates": {"type": "cache", "config": {"redis_url": "redis://localhost"}},
+    "subscriptions": {"type": "streaming", "config": {"broker": "kafka://localhost"}}
+  },
+  "data_source_routing": {
+    "primary": "exploratory",
+    "get_namespaces": "exploratory",
+    "get_object_types": "exploratory", 
+    "get_instance_by_id": "values",
+    "update_instance_values": "updates",
+    "get_all_instances": "subscriptions"
+  }
+}
+```
+
+**Benefits:**
+- **Operation-specific optimization**: Route read operations to read-optimized sources, writes to write-optimized sources
+- **Scalability**: Distribute load across multiple backend systems
+- **Flexibility**: Mix different data source types (databases, caches, message queues) for optimal performance
+- **Backward compatibility**: Single-source configuration still supported
 
 ### Adding New Data Sources
 1. Create a new subfolder in `data_sources/` (e.g., `data_sources/database/`)
 2. Implement the `I3XDataSource` interface in your new subfolder
-3. Update `DataSourceFactory.create_data_source()` to import and handle the new type
-4. Add configuration example to `config.json`
-5. No router changes needed - dependency injection handles the abstraction
+3. Update `DataSourceFactory._create_single_source()` to import and handle the new type
+4. Add configuration examples to `config.json` for both single and multi-source setups
+5. No router changes needed - dependency injection and routing handled transparently
 
 Example structure for a new data source:
 ```
@@ -62,6 +96,7 @@ data_sources/
 │   ├── __init__.py
 │   ├── database_source.py
 │   └── connection.py
+├── manager.py        # Routes operations to appropriate sources
 └── mock/
     ├── __init__.py
     ├── mock_data.py

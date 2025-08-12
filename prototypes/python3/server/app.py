@@ -29,14 +29,20 @@ SUBSCRIPTION_THREAD_FLAG = {"running": True}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup - Initialize data source
+    # Startup - Initialize data source(s)
     try:
-        data_source_config = config.get("data_source", {"type": "mock", "config": {}})
-        data_source = DataSourceFactory.create_data_source(data_source_config)
-        print(f"Initialized {data_source_config['type']} data source")
+        # Try new multi-source configuration first
+        if "data_sources" in config:
+            data_source = DataSourceFactory.create_data_source(config)
+            print(f"Initialized multi-source data manager with {len(config['data_sources'])} sources")
+        else:
+            # Fall back to single source configuration
+            data_source_config = config.get("data_source", {"type": "mock", "config": {}})
+            data_source = DataSourceFactory.create_data_source(data_source_config)
+            print(f"Initialized single {data_source_config['type']} data source")
     except Exception as e:
-        print(f"Failed to initialize data source: {e}")
-        print("Falling back to mock data source")
+        print(f"Failed to initialize data source(s): {e}")
+        print("Falling back to single mock data source")
         data_source = DataSourceFactory.create_data_source({"type": "mock", "config": {}})
     
     # Set the data source in app state
