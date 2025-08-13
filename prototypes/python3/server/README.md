@@ -28,9 +28,6 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
 #### Run:
 > docker run --rm -it -p 8080:8080 cesmii/api:dev
 
-> [!NOTE]
-> This is for dev purposes only. Recommend running gunicorn or some other production WSGI server for a production environment. 
-
 ### References
 * [Docker's Python guide](https://docs.docker.com/language/python/)
 
