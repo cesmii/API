@@ -16,4 +16,4 @@ pip install -r requirements.txt
 
 # Run the server
 Write-Host "Starting server..." -ForegroundColor Green
-python qos0_test_client.py
+python test_client.py

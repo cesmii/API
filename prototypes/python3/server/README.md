@@ -7,7 +7,8 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
 - **models.py**: Pydantic models for all I3X RFC-compliant data structures
 - **data_sources/**: Abstraction layer for data access
   - `data_interface.py`: Abstract I3XDataSource interface
-  - `factory.py`: Factory pattern for creating data sources from config
+  - `factory.py`: Factory pattern for creating single or multiple data sources from config
+  - `manager.py`: DataSourceManager for routing operations across multiple data sources
   - `mock/`: Mock data source implementation
     - `mock_data.py`: I3X-compliant simulated manufacturing data
     - `mock_data_source.py`: Mock implementation using mock_data.py
@@ -76,13 +77,49 @@ pip install -r requirements.txt
 
 3. **Configure the server** (optional):
 
-Edit `config.json` to change the port, host, or debug settings:
+Edit `config.json` to change server settings, app metadata, and data sources:
 
+**Single Data Source Configuration:**
+```json
+{
+    "port": 8080,
+    "host": "0.0.0.0", 
+    "debug": true,
+    "app": {
+        "title": "I3X API Prototype",
+        "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
+        "version": "0.0.1"
+    },
+    "data_source": {
+        "type": "mock",
+        "config": {}
+    }
+}
+```
+
+**Multi Data Source Configuration:**
 ```json
 {
     "port": 8080,
     "host": "0.0.0.0",
-    "debug": true
+    "debug": true, 
+    "app": {
+        "title": "I3X API Prototype",
+        "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
+        "version": "0.0.1"
+    },
+    "data_sources": {
+        "exploratory": {"type": "mock", "config": {}},
+        "values": {"type": "database", "config": {"host": "db.example.com"}},
+        "updates": {"type": "cache", "config": {"redis_url": "redis://localhost"}},
+        "subscriptions": {"type": "streaming", "config": {"broker": "kafka://localhost"}}
+    },
+    "data_source_routing": {
+        "primary": "exploratory",
+        "get_instance_by_id": "values",
+        "update_instance_values": "updates",
+        "get_all_instances": "subscriptions"
+    }
 }
 ```
 
@@ -152,11 +189,33 @@ If you encounter the error `ModuleNotFoundError: No module named 'flask'`, make 
 1. Have activated the virtual environment
 2. Have installed the dependencies with `pip install -r requirements.txt`
 
+
+If you encounter the error `TypeError: ForwardRef._evaluate() missing 1 required keyword-only argument: 'recursive_guard'` while running the pip install of fastapi (the first item in requirements.txt), downgrade Python to version 3.12.3 or below. See Github comment https://github.com/pydantic/pydantic/issues/9609#issuecomment-2155832461. The version of fastapi we are using has issues with Python 3.13.
+
 ## Advanced Usage
+
+### Data Source Architecture
+
+The server supports both single and multi-data source configurations:
+
+**Single Data Source**: Traditional approach where one data source handles all operations.
+
+**Multi-Data Source**: Advanced configuration that allows different operations to use different data sources for optimal performance:
+
+- **Exploratory operations** (browsing namespaces, object types): Use metadata-optimized source
+- **Value operations** (reading current/historical values): Use read-optimized source  
+- **Update operations** (writing values): Use write-optimized source
+- **Subscription operations** (real-time streaming): Use streaming-optimized source
+
+**Benefits of Multi-Data Source Configuration:**
+- **Performance optimization**: Route operations to specialized data sources
+- **Scalability**: Distribute load across multiple backend systems
+- **Flexibility**: Mix different data source types (databases, caches, message queues)
+- **Backward compatibility**: Single-source configuration still fully supported
 
 ### Changing the Port
 
-To run on a different port, modify the `config.json` file:
+To run on a different port, modify the `port` field in `config.json`:
 
 ```json
 {

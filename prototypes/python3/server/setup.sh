@@ -3,15 +3,14 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Create virtual environment if it doesn't exist
-if [ ! -f $SCRIPT_DIR/venv ]; then
+if [ ! -d $SCRIPT_DIR/venv ]; then
 	echo Creating virtual environment...
 	python3 -m venv venv
 fi
 
 # Activate virtual environment
 echo Activating virtual environment...
-chmod +x ./venv/bin/activate
-./venv/bin/activate
+source ./venv/bin/activate
 
 # Install requirements
 echo Install dependencies...
