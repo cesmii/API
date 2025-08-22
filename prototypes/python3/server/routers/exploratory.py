@@ -84,7 +84,9 @@ def get_related_objects(
             "typeId": i["typeId"],
             "parentId": i["parentId"],
             "hasChildren": i["hasChildren"],
-            "namespaceUri": i["namespaceUri"]
+            "namespaceUri": i["namespaceUri"],
+            "relationshipType": i.get("relationType"),
+            "relationshipTypeInverse": i.get("relationshipTypeInverse")
         } for i in related_objects]
     
     return related_objects

@@ -29,6 +29,8 @@ class ObjectInstanceMinimal(BaseModel):
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
     hasChildren: bool = Field(..., description="Boolean indicating if element has child objects")
     namespaceUri: str = Field(..., description="Namespace URI")
+    relationshipType: Optional[str] = Field(None, description="Relationship type from source to this instance")
+    relationshipTypeInverse: Optional[str] = Field(None, description="Inverse relationship type from this instance to source")
 
 # RFC 3.1.1 + 3.1.2 - Full Object Instance with Attributes
 class ObjectInstance(ObjectInstanceMinimal):
