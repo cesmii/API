@@ -79,10 +79,11 @@ def get_related_objects(
     
     if not includeMetadata:
         return [{
-            "elementId": i["elementId"],
+            "object": i["elementId"],
             "name": i["name"],
             "typeId": i["typeId"],
             "parentId": i["parentId"],
+            "subject": element_id,
             "hasChildren": i["hasChildren"],
             "namespaceUri": i["namespaceUri"],
             "relationshipType": i.get("relationType"),

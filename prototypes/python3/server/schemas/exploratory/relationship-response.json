@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "description": "Response schema for relationships endpoint",
+  "items": {
+    "type": "object",
+    "required": ["subject", "object", "relationshipType", "parentId", "hasChildren", "namespaceUri"],
+    "properties": {
+      "subject": {
+        "type": "string",
+        "description": "The element ID that the relationship originates from (from URL path)"
+      },
+      "object": {
+        "type": "string", 
+        "description": "The element ID that the relationship points to"
+      },
+      "relationshipType": {
+        "type": "string",
+        "description": "The type of relationship from subject's perspective",
+        "enum": ["ConnectedBy", "ControlledBy", "SuppliedBy", "MonitoredBy", "ConnectsTo", "Controls", "SuppliesTo", "Monitors"]
+      },
+      "relationshipTypeInverse": {
+        "type": "string",
+        "description": "The inverse relationship type from object's perspective",
+        "enum": ["ConnectedBy", "ControlledBy", "SuppliedBy", "MonitoredBy", "ConnectsTo", "Controls", "SuppliesTo", "Monitors"]
+      },
+      "name": {
+        "type": "string",
+        "description": "Human-readable name of the related object"
+      },
+      "typeId": {
+        "type": "string",
+        "description": "Type identifier of the related object"
+      },
+      "parentId": {
+        "type": ["string", "null"],
+        "description": "Required per 3.1.1: the ElementId of the parent object"
+      },
+      "hasChildren": {
+        "type": "boolean",
+        "description": "Required per 3.1.1: boolean indicating if the element is composed of one or more child objects"
+      },
+      "namespaceUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "Required per 3.1.1: URI indicating the Namespace of the object"
+      },
+      "interpolation": {
+        "type": "string",
+        "description": "Optional per 3.1.2: interpolation method if the element value is interpolated rather than stored"
+      },
+      "engUnit": {
+        "type": "string",
+        "description": "Optional per 3.1.2: engineering unit for measuring the element value (UNECE Recommendation Number 20)"
+      },
+      "fqn": {
+        "type": "string",
+        "description": "Fully Qualified Name - the complete hierarchical path identifier for the element within its namespace"
+      },
+      "attributeMetadata": {
+        "type": "object",
+        "description": "Optional per 3.1.2: Additional information about how an object attribute is stored or treated",
+        "additionalProperties": true
+      }
+    },
+    "additionalProperties": false
+  }
+}
