@@ -1,9 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable
 from models import Namespace, ObjectType, ObjectInstance
 
 class I3XDataSource(ABC):
     """Abstract interface for I3X data sources"""
+    
+    @abstractmethod
+    def start(self, update_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> None:
+        """Initialize and start the data source connection"""
+        pass
+    
+    @abstractmethod
+    def stop(self) -> None:
+        """Stop and cleanup the data source connection"""
+        pass
     
     @abstractmethod
     def get_namespaces(self) -> List[Dict[str, Any]]:

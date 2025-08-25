@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 import threading
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
@@ -10,7 +11,7 @@ from fastapi.responses import StreamingResponse
 from routers.exploratory import ns_exploratory
 from routers.values import ns_values
 from routers.updates import ns_updates
-from routers.subscriptions import ns_subscriptions, subscription_worker
+from routers.subscriptions import ns_subscriptions, subscription_worker, handle_data_source_update
 
 from data_sources.factory import DataSourceFactory
 
@@ -34,29 +35,41 @@ async def lifespan(app: FastAPI):
         # Try new multi-source configuration first
         if "data_sources" in config:
             data_source = DataSourceFactory.create_data_source(config)
-            print(f"Initialized multi-source data manager with {len(config['data_sources'])} sources")
+            source_types = [f"{name}({cfg['type']})" for name, cfg in config['data_sources'].items()]
+            print(f"Using MULTI-SOURCE configuration with {len(config['data_sources'])} sources: {', '.join(source_types)}")
         else:
             # Fall back to single source configuration
             data_source_config = config.get("data_source", {"type": "mock", "config": {}})
             data_source = DataSourceFactory.create_data_source(data_source_config)
-            print(f"Initialized single {data_source_config['type']} data source")
+            print(f"Using SINGLE-SOURCE configuration: {data_source_config['type'].upper()} data source")
     except Exception as e:
         print(f"Failed to initialize data source(s): {e}")
-        print("Falling back to single mock data source")
+        print("Falling back to MOCK data source as fallback")
         data_source = DataSourceFactory.create_data_source({"type": "mock", "config": {}})
     
     # Set the data source in app state
     app.state.data_source = data_source
     
-    # Start subscription worker thread
+    # Create callback function that passes subscriptions to the handler
+    def callback(update):
+        handle_data_source_update(update, app.state.I3X_DATA_SUBSCRIPTIONS)
+    
+    # Start the data source with the callback
+    data_source.start(callback)
+    
+    # Start subscription worker thread  
     threading.Thread(
         target=subscription_worker,
-        args=(app.state.I3X_DATA_SUBSCRIPTIONS, app.state.data_source, SUBSCRIPTION_THREAD_FLAG),
+        args=(app.state.I3X_DATA_SUBSCRIPTIONS, SUBSCRIPTION_THREAD_FLAG),
         daemon=True
     ).start()
     yield
     # Shutdown
     SUBSCRIPTION_THREAD_FLAG["running"] = False
+    
+    # Stop the data source
+    if hasattr(app.state, 'data_source'):
+        app.state.data_source.stop()
 
 app = FastAPI(
     title=app_config.get("title", "I3X API"),
