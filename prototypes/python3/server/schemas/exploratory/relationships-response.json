@@ -1,14 +1,26 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "array",
-  "description": "Response schema for instances endpoint",
+  "description": "Response schema for relationships endpoint",
   "items": {
     "type": "object",
-    "required": ["parentId", "hasChildren", "namespaceUri"],
+    "required": ["subject", "object", "relationshipType", "parentId", "hasChildren", "namespaceUri"],
     "properties": {
-      "elementId": {
+      "subject": {
+        "type": "string",
+        "description": "The element ID that the relationship originates from (from URL path)"
+      },
+      "object": {
         "type": "string", 
         "description": "The element ID that the relationship points to"
+      },
+      "relationshipType": {
+        "type": "string",
+        "description": "The type of relationship from subject's perspective"
+      },
+      "relationshipTypeInverse": {
+        "type": "string",
+        "description": "The inverse relationship type from object's perspective"
       },
       "name": {
         "type": "string",
