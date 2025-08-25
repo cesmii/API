@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 import asyncio
 import json
 import time
-import random
 
 from pydantic import BaseModel, Field, ConfigDict
 from models import CreateSubscriptionRequest, CreateSubscriptionResponse, RegisterMonitoredItemsRequest, SyncResponseItem, UnsubscribeRequest
@@ -142,60 +141,34 @@ def unsubscribe(request: Request, req: UnsubscribeRequest):
 # Subscription thread responsible creating updated for items being monitored.
 # If QoS is QoS0, it will call the handler immediately to send updates
 # if QoS is QoS2, it will store the updates in a pending dictionary to be sent on the /sync call
-def subscription_worker(I3X_DATA_SUBSCRIPTIONS, data_source, running_flag):
-    # Create a map of elementId to value for quick access
-    instances = data_source.get_all_instances()
-    instance_index = {i["elementId"]: i for i in instances}
-
-    while running_flag["running"]:
-
-        # Create random values
-        for instance in instances:
-            # Hack to skip instances with "static" in their elementId
-            if "static" not in instance or instance["static"] == False:
-                randomize_numeric_values(instance["attributes"])
-
+def handle_data_source_update(update, I3X_DATA_SUBSCRIPTIONS):
+    """Route updates from data sources to active subscriptions"""
+    try:
+        # Iterate through all active subscriptions
         for sub in I3X_DATA_SUBSCRIPTIONS:
             if not sub.monitoredItems:
                 continue
-
-            # TODO - right now metadata is a monitored item level setting?
-            #include_metadata = sub.get("includeMetadata", False)
-
-            for eid in sub.monitoredItems:
-                instance = instance_index.get(eid)
-                if not instance:
-                    continue
-
-                # Skip static instances if they are not meant to be monitored
-                if "static" in instance and instance["static"] == True:
-                    continue
-
-                update = {
-                    "elementId": instance["elementId"],
-                    "name": instance["name"],
-                    "typeId": instance["typeId"],
-                    "parentId": instance["parentId"],
-                    "hasChildren": instance["hasChildren"],
-                    "namespaceUri": instance["namespaceUri"],
-                    "value": instance["attributes"],
-                    "timestamp": instance.get("timestamp", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")) 
-                }
-
-                #if include_metadata:
-                #    update["dataType"] = "object"
-
+            
+            # Check if this update is for a monitored element
+            element_id = update.get("elementId")
+            if element_id and element_id in sub.monitoredItems:
                 if sub.qos == "QoS0":
-                    handler = sub.handler
-                    if handler:
+                    # Immediate delivery via handler
+                    if sub.handler:
                         try:
-                            handler(update)
+                            sub.handler(update)
                         except Exception as e:
                             print(f"[QoS0] Handler error: {e}")
-
                 elif sub.qos == "QoS2":
+                    # Queue for later sync
                     sub.pendingUpdates.append(update)
+    except Exception as e:
+        print(f"Error routing data source update: {e}")
 
+def subscription_worker(I3X_DATA_SUBSCRIPTIONS, running_flag):
+    """Subscription worker thread - now just keeps the thread alive for QoS0 streaming"""
+    while running_flag["running"]:
+        # Just sleep - updates now come via callback from data sources
         time.sleep(1)
 
 # Not required, but showing what information is stored for simulated subscriptions
@@ -210,26 +183,6 @@ class Subscription(BaseModel):
     streaming_response: Optional[StreamingResponse] = Field(default=None, exclude=True)
     model_config = ConfigDict(arbitrary_types_allowed=True) # Needed to allow for StreamingResponse in the model
 
-# Simulate data changes by changing numeric values in the data
-def randomize_numeric_values(obj):
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            if isinstance(v, (int, float)):
-                # Change numeric value randomly +/- up to 10%
-                variation = v * 0.1
-                new_val = v + random.uniform(-variation, variation)
-                # If original was int, convert back to int
-                obj[k] = int(new_val) if isinstance(v, int) else new_val
-            elif isinstance(v, dict) or isinstance(v, list):
-                randomize_numeric_values(v)
-    elif isinstance(obj, list):
-        for i, item in enumerate(obj):
-            if isinstance(item, (int, float)):
-                variation = item * 0.1
-                new_val = item + random.uniform(-variation, variation)
-                obj[i] = int(new_val) if isinstance(item, int) else new_val
-            elif isinstance(item, dict) or isinstance(item, list):
-                randomize_numeric_values(item)
 
 # Recursively collect an instance tree starting from root_id
 ## TODO this should probably be a utility used by exploratory/browse as well?

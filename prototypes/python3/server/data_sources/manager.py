@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Callable
 from .data_interface import I3XDataSource
 
 class DataSourceManager(I3XDataSource):
@@ -50,6 +50,24 @@ class DataSourceManager(I3XDataSource):
         
         # If all failed, raise the last exception
         raise last_exception
+    
+    def start(self, update_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> None:
+        """Initialize and start all managed data sources"""
+        for name, source in self.data_sources.items():
+            try:
+                source.start(update_callback)
+                print(f"Started data source: {name}")
+            except Exception as e:
+                print(f"Failed to start data source {name}: {e}")
+    
+    def stop(self) -> None:
+        """Stop and cleanup all managed data sources"""
+        for name, source in self.data_sources.items():
+            try:
+                source.stop()
+                print(f"Stopped data source: {name}")
+            except Exception as e:
+                print(f"Error stopping data source {name}: {e}")
     
     def get_namespaces(self) -> List[Dict[str, Any]]:
         """Return array of Namespaces registered in the CMIP"""

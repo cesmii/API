@@ -9,20 +9,11 @@
     },
     "data_sources": {
         "exploratory": {
-            "type": "mock",
-            "config": {}
-        },
-        "values": {
-            "type": "mock", 
-            "config": {}
-        },
-        "updates": {
-            "type": "mock",
-            "config": {}
-        },
-        "subscriptions": {
-            "type": "mock",
-            "config": {}
+            "type": "mqtt",
+            "config": {
+                "mqtt_endpoint": "mqtt://127.0.0.1:1885",
+                "topics": ["#"]
+            }
         }
     },
     "data_source_routing": {
@@ -31,11 +22,11 @@
         "get_object_types": "exploratory",
         "get_object_type_by_id": "exploratory",
         "get_instances": "exploratory",
-        "get_instance_by_id": "values",
+        "get_instance_by_id": "exploratory",
         "get_related_instances": "exploratory",
         "get_hierarchical_relationships": "exploratory",
         "get_non_hierarchical_relationships": "exploratory",
-        "update_instance_values": "updates",
-        "get_all_instances": "subscriptions"
+        "update_instance_values": "exploratory",
+        "get_all_instances": "exploratory"
     }
 }
