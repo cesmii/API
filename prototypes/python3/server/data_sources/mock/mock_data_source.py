@@ -24,9 +24,13 @@ class MockDataSource(I3XDataSource):
     
     def get_instances(self, type_id: Optional[str] = None) -> List[Dict[str, Any]]:
         instances = self.data['instances']
+        results = []
         if type_id:
-            instances = [i for i in instances if i['typeId'] == type_id]
-        return instances
+            for instance in instances: 
+                if instance['typeId'] == type_id:
+                    results.append(instance)
+
+        return results
     
     def get_instance_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
         for instance in self.data['instances']:

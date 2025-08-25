@@ -23,6 +23,14 @@ class ObjectType(BaseModel):
 
 # RFC 3.1.1 - Required Object Metadata (Minimal Instance)
 class ObjectInstanceMinimal(BaseModel):
+    elementId: str = Field(..., description="Unique string identifier for the element")
+    name: str = Field(..., description="Object name")
+    typeId: str = Field(..., description="ElementId of the object type")
+    parentId: Optional[str] = Field(None, description="ElementId of the parent object")
+    hasChildren: bool = Field(..., description="Boolean indicating if element has child objects")
+    namespaceUri: str = Field(..., description="Namespace URI")
+
+class ObjectLinkedByRelationshipType(BaseModel):
     subject: Optional[str] = Field(None, description="")
     relationshipType: Optional[str] = Field(None, description="Relationship type from source to this instance")
     relationshipTypeInverse: Optional[str] = Field(None, description="Inverse relationship type from this instance to source")

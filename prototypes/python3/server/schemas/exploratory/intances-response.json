@@ -16,13 +16,11 @@
       },
       "relationshipType": {
         "type": "string",
-        "description": "The type of relationship from subject's perspective",
-        "enum": ["ConnectedBy", "ControlledBy", "SuppliedBy", "MonitoredBy", "ConnectsTo", "Controls", "SuppliesTo", "Monitors"]
+        "description": "The type of relationship from subject's perspective"
       },
       "relationshipTypeInverse": {
         "type": "string",
-        "description": "The inverse relationship type from object's perspective",
-        "enum": ["ConnectedBy", "ControlledBy", "SuppliedBy", "MonitoredBy", "ConnectsTo", "Controls", "SuppliesTo", "Monitors"]
+        "description": "The inverse relationship type from object's perspective"
       },
       "name": {
         "type": "string",
@@ -45,22 +43,13 @@
         "format": "uri",
         "description": "Required per 3.1.1: URI indicating the Namespace of the object"
       },
-      "interpolation": {
-        "type": "string",
-        "description": "Optional per 3.1.2: interpolation method if the element value is interpolated rather than stored"
-      },
-      "engUnit": {
-        "type": "string",
-        "description": "Optional per 3.1.2: engineering unit for measuring the element value (UNECE Recommendation Number 20)"
-      },
       "fqn": {
         "type": "string",
         "description": "Fully Qualified Name - the complete hierarchical path identifier for the element within its namespace"
       },
-      "attributeMetadata": {
-        "type": "object",
-        "description": "Optional per 3.1.2: Additional information about how an object attribute is stored or treated",
-        "additionalProperties": true
+      "created_at": {
+        "type": "date-time",
+        "description": "Timestamp of when the instance was created in the system"
       }
     },
     "additionalProperties": false
