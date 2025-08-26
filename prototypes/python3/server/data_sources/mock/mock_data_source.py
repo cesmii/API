@@ -1,12 +1,24 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Callable
 from ..data_interface import I3XDataSource
 from .mock_data import I3X_DATA
+from .mock_updater import MockDataUpdater
 
 class MockDataSource(I3XDataSource):
     """Mock data implementation of I3XDataSource"""
     
     def __init__(self):
         self.data = I3X_DATA
+        self.updater = MockDataUpdater(self)
+        self.update_callback = None
+    
+    def start(self, update_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> None:
+        """Initialize mock data source and start background updates"""
+        self.update_callback = update_callback
+        self.updater.start(self.update_callback)
+    
+    def stop(self) -> None:
+        """Stop mock data source and cleanup background updates"""
+        self.updater.stop()
     
     def get_namespaces(self) -> List[Dict[str, Any]]:
         return self.data['namespaces']

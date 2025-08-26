@@ -9,9 +9,12 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
   - `data_interface.py`: Abstract I3XDataSource interface
   - `factory.py`: Factory pattern for creating single or multiple data sources from config
   - `manager.py`: DataSourceManager for routing operations across multiple data sources
-  - `mock/`: Mock data source implementation
+  - `mock/`: Mock data source implementation with random value generation
     - `mock_data.py`: I3X-compliant simulated manufacturing data
     - `mock_data_source.py`: Mock implementation using mock_data.py
+    - `mock_updater.py`: Background thread for generating random value updates
+  - `mqtt/`: MQTT data source implementation with real-time updates, subscribes to one or more topics on a single broker
+    - `mqtt_data_source.py`: Holds the paho client, topic cache, and all the interface handlers
 - **routers/**: API endpoint implementations organized by functionality (use dependency injection for data access)
   - `exploratory.py`: Browse equipment/sensors (RFC 4.1.x)
   - `values.py`: Read current/historical values (RFC 4.2.1.x)  
@@ -61,22 +64,49 @@ pip install -r requirements.txt
 
 3. **Configure the server** (optional):
 
-Edit `config.json` to change server settings, app metadata, and data sources:
+Edit `config.json` to change server settings and data sources:
 
-**Single Data Source Configuration:**
+**Mock Data Source (simulated data with random updates):**
 ```json
 {
     "port": 8080,
     "host": "0.0.0.0", 
     "debug": true,
-    "app": {
-        "title": "I3X API Prototype",
-        "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
-        "version": "0.0.1"
-    },
     "data_source": {
         "type": "mock",
         "config": {}
+    }
+}
+```
+
+**MQTT Data Source (real-time MQTT data):**
+```json
+{
+    "port": 8080,
+    "host": "0.0.0.0",
+    "debug": true,
+    "data_source": {
+        "type": "mqtt",
+        "config": {
+            "mqtt_endpoint": "mqtt://localhost:1883",
+            "topics": ["#"]
+        }
+    }
+}
+```
+
+**MQTT with TLS (secure connection):**
+```json
+{
+    "port": 8080,
+    "host": "0.0.0.0",
+    "debug": true,
+    "data_source": {
+        "type": "mqtt",
+        "config": {
+            "mqtt_endpoint": "mqtts://broker.example.com:8883",
+            "topics": ["sensors/#", "equipment/#"]
+        }
     }
 }
 ```
@@ -209,16 +239,23 @@ To run on a different port, modify the `port` field in `config.json`:
 }
 ```
 
-### Mock Data
+### Data Sources
 
-The server uses mock data stored in `mock_data.py` to simulate an I3X-compliant manufacturing data source. This includes:
-
+**Mock Data Source**
+The server includes a mock data source stored in `mock_data.py` that simulates an I3X-compliant manufacturing environment with:
 - Namespaces (equipment, process, quality)
-- Object Types (machines, sensors, processes)
+- Object Types (machines, sensors, processes)  
 - Object Instances (specific machines, sensors, and processes)
 - Relationship definitions (hierarchical and non-hierarchical)
+- Random value updates for real-time simulation
 
-The mock data structure follows the Industrial Information Interface eXchange (I3X) specification as defined in the RFC, providing a realistic representation of manufacturing data.
+**MQTT Data Source**
+The server supports connecting to MQTT brokers for real-time industrial data:
+- **Topic Subscription**: Subscribe to specific topics or use wildcards (`#`, `+`)
+- **Real-time Updates**: Automatic cache updates and subscription notifications
+- **TLS Support**: Secure connections with `mqtts://` URLs (accepts any certificate)
+- **Dynamic Types**: Automatically generates I3X object types from JSON message structure
+- **URL Path Safe**: Converts topic `/` to `_` for API element IDs (e.g., `sensors/temp` becomes `sensors_temp`)
 
 ### RFC 001 Compliance
 
