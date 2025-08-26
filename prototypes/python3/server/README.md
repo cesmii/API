@@ -21,6 +21,19 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
   - `updates.py`: Write operations (RFC 4.2.2.x)
   - `subscriptions.py`: Real-time data streaming (RFC 4.2.3.x)
 
+## Docker Deployment
+
+### Building and running your application
+
+#### Build:
+> docker build -t cesmii/api:dev . 
+
+#### Run:
+> docker run --rm -it -p 8080:8080 cesmii/api:dev
+
+### References
+* [Docker's Python guide](https://docs.docker.com/language/python/)
+
 ## Setting Up the Virtual Environment
 
 ### Prerequisites
