@@ -29,6 +29,8 @@ class MockDataSource(I3XDataSource):
             for instance in instances: 
                 if instance['typeId'] == type_id:
                     results.append(instance)
+        else:
+            results = instances 
 
         return results
     
