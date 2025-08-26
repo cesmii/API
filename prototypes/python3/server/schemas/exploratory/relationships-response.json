@@ -42,16 +42,8 @@
         "type": "string",
         "format": "uri",
         "description": "Required per 3.1.1: URI indicating the Namespace of the object"
-      },
-      "fqn": {
-        "type": "string",
-        "description": "Fully Qualified Name - the complete hierarchical path identifier for the element within its namespace"
-      },
-      "created_at": {
-        "type": "date-time",
-        "description": "Timestamp of when the instance was created in the system"
       }
     },
-    "additionalProperties": false
+    "additionalProperties": true 
   }
 }

@@ -79,7 +79,7 @@ def get_related_objects(
     
     if not includeMetadata:
         return [{
-            "object": i["elementId"],
+            "elementId": i["elementId"],
             "name": i["name"],
             "typeId": i["typeId"],
             "parentId": i["parentId"],
