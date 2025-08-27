@@ -20,6 +20,10 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
   - `values.py`: Read current/historical values (RFC 4.2.1.x)  
   - `updates.py`: Write operations (RFC 4.2.2.x)
   - `subscriptions.py`: Real-time data streaming (RFC 4.2.3.x)
+- **schemas/**: JSON Schema definitions for API request/response validation
+  - `exploratory/`:
+      - relationships-response.json: Schema for relationships endpoint response
+      - instances-response.json: Schema for instances endpoint response
 
 ## Docker Deployment
 
@@ -282,5 +286,4 @@ This implementation follows RFC 001 - Common API for Industrial Information Inte
 - **Subscription Methods** (RFC 4.2.3) - Real-time data publishing (not yet implemented)
 
 This implementation provides all required exploratory and value query methods as specified in the RFC, with proper metadata handling and JSON serialization as mandated by the specification.
-
 

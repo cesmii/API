@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Path, Query, HTTPException, Request, Depends
 from typing import List, Optional
-from models import Namespace, ObjectType, ObjectInstanceMinimal, ObjectInstance
+from models import Namespace, ObjectType, ObjectInstanceMinimal, ObjectLinkedByRelationshipType, ObjectInstance
 from data_sources.data_interface import I3XDataSource
 
 ns_exploratory = APIRouter(prefix="", tags=["Exploratory Methods"])
@@ -60,7 +60,7 @@ def get_instances(
             "typeId": i["typeId"],
             "parentId": i["parentId"],
             "hasChildren": i["hasChildren"],
-            "namespaceUri": i["namespaceUri"]
+            "namespaceUri": i["namespaceUri"],
         } for i in instances]
     
     return instances
@@ -73,7 +73,7 @@ def get_related_objects(
     depth: int = Query(default=0),
     includeMetadata: bool = Query(default=False),
     data_source: I3XDataSource = Depends(get_data_source)
-) -> List[ObjectInstanceMinimal] | List[ObjectInstance]:
+) -> List[ObjectLinkedByRelationshipType] | List[ObjectInstance]:
     """Return array of objects related by specified relationship type"""
     related_objects = data_source.get_related_instances(element_id, relationship_type)
     
@@ -83,8 +83,11 @@ def get_related_objects(
             "name": i["name"],
             "typeId": i["typeId"],
             "parentId": i["parentId"],
+            "subject": element_id,
             "hasChildren": i["hasChildren"],
-            "namespaceUri": i["namespaceUri"]
+            "namespaceUri": i["namespaceUri"],
+            "relationshipType": i.get("relationType"),
+            "relationshipTypeInverse": i.get("relationshipTypeInverse")
         } for i in related_objects]
     
     return related_objects

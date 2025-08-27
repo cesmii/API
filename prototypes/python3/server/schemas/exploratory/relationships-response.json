@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "description": "Response schema for relationships endpoint",
+  "items": {
+    "type": "object",
+    "required": ["subject", "object", "relationshipType", "parentId", "hasChildren", "namespaceUri"],
+    "properties": {
+      "subject": {
+        "type": "string",
+        "description": "The element ID that the relationship originates from (from URL path)"
+      },
+      "elementId": {
+        "type": "string", 
+        "description": "The element ID that the relationship points to"
+      },
+      "relationshipType": {
+        "type": "string",
+        "description": "The type of relationship from subject's perspective"
+      },
+      "relationshipTypeInverse": {
+        "type": "string",
+        "description": "The inverse relationship type from object's perspective"
+      },
+      "name": {
+        "type": "string",
+        "description": "Human-readable name of the related object"
+      },
+      "typeId": {
+        "type": "string",
+        "description": "Type identifier of the related object"
+      },
+      "parentId": {
+        "type": ["string", "null"],
+        "description": "Required per 3.1.1: the ElementId of the parent object"
+      },
+      "hasChildren": {
+        "type": "boolean",
+        "description": "Required per 3.1.1: boolean indicating if the element is composed of one or more child objects"
+      },
+      "namespaceUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "Required per 3.1.1: URI indicating the Namespace of the object"
+      }
+    },
+    "additionalProperties": true 
+  }
+}
