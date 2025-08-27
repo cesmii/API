@@ -10,7 +10,7 @@
         "type": "string",
         "description": "The element ID that the relationship originates from (from URL path)"
       },
-      "object": {
+      "elementId": {
         "type": "string", 
         "description": "The element ID that the relationship points to"
       },
