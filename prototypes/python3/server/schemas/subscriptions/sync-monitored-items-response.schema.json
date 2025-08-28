@@ -1,0 +1,35 @@
+{
+    "_comment": "RFC 4.2.3.3",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/sync-monitored-items-response.schema.json",
+    "title": "Sync Monitored Items Response",
+    "description": "Request schema for sync monitored items",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "elementId": {
+                "type": "string"
+            },
+            "value": {
+                "type": "object"
+            },
+            "timestamp": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "dataType": {
+                "type": "object"
+            },
+            "name": {
+                "type": "string"
+            },
+            "objectMetadata": {
+                "$ref": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/object-meta-data.schema.json",
+                "description": "Required metadata per section 3.1.1, optional metadata per 3.1.2 based on query parameters"
+            }
+        },
+        "required": ["elementId", "value", "timestamp", "dataType", "name", "objectMetadata"]
+    }
+}
+

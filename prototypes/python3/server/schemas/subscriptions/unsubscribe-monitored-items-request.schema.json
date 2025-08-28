@@ -1,0 +1,51 @@
+{
+    "_comment": "RFC 4.2.3.4",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/unsubscribe-monitored-items-request.schema.json",
+    "title": "Unsubscribe Monitored Items Request",
+    "description": "Request schema for unsubscribing monitored items",
+    "oneOf": [
+        {
+            "description": "Single subscription ID",
+            "type": "object",
+            "properties": {
+                "subscriptionId": {
+                    "$ref": "#/$defs/subscriptionId"
+                }
+            },
+            "required": ["subscriptionId"]
+        },
+        {
+            "description": "Multiple subscription IDs",
+            "type": "object",
+            "properties": {
+                "subscriptionIds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/subscriptionId"
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["subscriptionIds"]
+        },
+        {
+            "description": "Wildcard - unsubscribe from all subscriptions",
+            "type": "object",
+            "properties": {
+                "wildcard": {
+                    "type": "boolean",
+                    "const": true,
+                    "description": "Set to true to unsubscribe from all subscriptions"
+                }
+            },
+            "required": ["wildcard"]
+        }
+    ],
+    "$defs": {
+        "subscriptionId": {
+            "type": "string",
+            "description": "Unique identifier for a subscription"
+        }
+    }
+}

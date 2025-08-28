@@ -1,0 +1,41 @@
+{
+    "_comment": "RFC 4.2.1.2",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/updates/last-known-value-update-response.schema.json",
+    "title": "Last Known Value Update Response",
+    "description": "Response schema for last known value update",
+    "oneOf": [
+        {
+            "description": "Single update response",
+            "$ref": "#/$defs/updateResult"
+        },
+        {
+            "description": "Multiple updates response",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/updateResult"
+            }
+        }
+    ],
+    "$defs": {
+        "updateResult": {
+            "type": "object",
+            "properties": {
+                "elementId": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": ["elementId", "success"]
+        }
+    }
+}
