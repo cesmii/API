@@ -1,6 +1,45 @@
 import asyncio
 import httpx
 import json
+import jsonschema
+
+#######################################
+##### Schema Resolution Methods #######
+#######################################
+RESPONSE_TYPE_RELATIONSHIPS = "relationships"
+RESPONSE_TYPE_INSTANCES = "instances"
+SCHEMA_FOLDER = "../server/schemas/exploratory/"
+SCHEMA_RELATIONSHIPS = "relationships.json"
+SCHEMA_INSTANCES = "instances.json"
+
+def validate_response(response: object = None, response_type: str = None):
+    """
+
+    :return:
+    """
+    if response is None:
+        raise TypeError("response cannot be None")
+    if response_type is None:
+        raise TypeError("response_type cannot be None")
+
+    file_path = SCHEMA_FOLDER
+    if response_type == RESPONSE_TYPE_RELATIONSHIPS:
+        file_path += SCHEMA_RELATIONSHIPS
+    elif response_type == RESPONSE_TYPE_INSTANCES:
+        file_path += SCHEMA_INSTANCES
+    else:
+        raise TypeError("response_type " + response_type + " is not a valid response type")
+
+    try:
+        with open(file_path) as response_schema_file:
+            response_schema = json.load(response_schema_file)
+        jsonschema.validate(instance=response, schema=response_schema)
+    except FileNotFoundError:
+        print("Error: Could not validate response against schema. Schema file not found for response type " + response_type)
+    except json.JSONDecodeError:
+        print("Error: Could not validate response against schema. Schema JSON decoding failed for response type " + response_type)
+    except jsonschema.ValidationError:
+        print("Error: Validation of response against schema failed for response type " + response_type)
 
 #######################################
 ##### Test Client Helper Methods ######
@@ -26,8 +65,7 @@ def get_include_metadata():
 
     :return: True if user selected to include metadata, false otherwise
     """
-    print(f"Include Metadata? \n1: Yes\n2: No")
-    user_selection_include_metadata = get_user_selection(["1", "2"])
+    user_selection_include_metadata = input(f"Include Metadata? (1: yes, else no): ").strip()
     if user_selection_include_metadata == "1":
         return True
     else:
@@ -368,7 +406,6 @@ async def main():
         base_url = input(f"Enter the base url (or press enter to leave as default '{default_url}'): ").strip()
         if not base_url:
             base_url = default_url
-
 
         selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
 
