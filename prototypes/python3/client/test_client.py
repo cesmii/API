@@ -157,7 +157,7 @@ async def get_object_types(base_url: str = None,namespace_uri: str = None):
     params = {}
     if namespace_uri is not None:
         params["namespaceUri"] = namespace_uri
-    return await get(url)
+    return await get(url,params)
 
 async def get_relationship_types(base_url: str = None,hierarchical: bool = True):
     """get_relationship_types calls Get Relationship Types exploratory method
@@ -446,7 +446,8 @@ async def main():
                             else:
                                 raise e
                     elif user_selection == "3":
-                        print(await get_object_types(base_url))
+                        namespace_uri = input("Enter namespace URI to filter on (optional, leave blank to return all): ").strip()
+                        print(await get_object_types(base_url, namespace_uri))
                     elif user_selection == "4":
                         print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
                         user_selection_relationship_types = get_user_selection(["1","2"])
