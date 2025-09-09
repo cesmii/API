@@ -9,13 +9,14 @@ import jsonschema
 RESPONSE_TYPE_RELATIONSHIPS = "relationships"
 RESPONSE_TYPE_INSTANCES = "instances"
 SCHEMA_FOLDER = "../server/schemas/exploratory/"
-SCHEMA_RELATIONSHIPS = "relationships.json"
-SCHEMA_INSTANCES = "instances.json"
+SCHEMA_RELATIONSHIPS = "relationships-response.json"
+SCHEMA_INSTANCES = "instances-response.json"
 
 def validate_response(response: object = None, response_type: str = None):
     """
-
-    :return:
+    :param response: JSON object, the response to validate
+    :param response_type: string, type of response indicating schema to validate against
+    :return: True if response valid against schema, False otherwise
     """
     if response is None:
         raise TypeError("response cannot be None")
@@ -33,13 +34,15 @@ def validate_response(response: object = None, response_type: str = None):
     try:
         with open(file_path) as response_schema_file:
             response_schema = json.load(response_schema_file)
-        jsonschema.validate(instance=response, schema=response_schema)
+            jsonschema.validate(instance=response, schema=response_schema)
+            return True
     except FileNotFoundError:
-        print("Error: Could not validate response against schema. Schema file not found for response type " + response_type)
+        print(f"Error: Could not validate response against schema. Schema file not found for response type {response_type}")
     except json.JSONDecodeError:
-        print("Error: Could not validate response against schema. Schema JSON decoding failed for response type " + response_type)
-    except jsonschema.ValidationError:
-        print("Error: Validation of response against schema failed for response type " + response_type)
+        print(f"Error: Could not validate response against schema. Schema JSON decoding failed for response type {response_type}")
+    except jsonschema.ValidationError as e:
+        print(f"Error: Validation of response against schema failed for response type {response_type}. Error:{e.message}")
+    return False
 
 #######################################
 ##### Test Client Helper Methods ######
@@ -74,7 +77,7 @@ def get_include_metadata():
 async def get(url: str = None, params: dict = None):
     """get executes a get request against
     :param url: complete url of API method being called, up to the ?
-    :param params: params if GET request, payload if PUT/POST request. expects caller enforces expected input
+    :param params: params for GET request. expects caller enforces expected input
     :return: response from calling url with associated method and passed params
     """
     if url is None:
@@ -188,7 +191,10 @@ async def get_instances(base_url: str = None,type_id: str = None, include_metada
         params['includeMetadata'] = "true"
     else:
         params['includeMetadata'] = "false"
-    return await get(url, params)
+
+    json_response = await get(url, params=params)
+    validate_response(json_response, RESPONSE_TYPE_INSTANCES)
+    return json_response
 
 
 async def get_relationships(base_url: str = None,element_id: str=None, relationship_type: str = None, depth: int = 0, include_metadata: bool = False):
@@ -210,7 +216,10 @@ async def get_relationships(base_url: str = None,element_id: str=None, relations
     params = {'depth': depth, 'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
-    return await get(url, params)
+
+    json_response = await get(url, params=params)
+    validate_response(json_response, RESPONSE_TYPE_RELATIONSHIPS)
+    return json_response
 
 async def get_object (base_url: str = None,element_id: str=None, include_metadata: bool = False):
     """get_object calls Get Object Definition Exploratory method
@@ -222,7 +231,7 @@ async def get_object (base_url: str = None,element_id: str=None, include_metadat
         raise TypeError("base_url cannot be None")
     url = f"{base_url}/object"
     if element_id is None:
-        raise ValueError("element_id is required to run get_relationships")
+        raise ValueError("element_id is required to run get_object")
     url += f"/{element_id}"
     params = {'includeMetadata': "false"}
     if include_metadata:
