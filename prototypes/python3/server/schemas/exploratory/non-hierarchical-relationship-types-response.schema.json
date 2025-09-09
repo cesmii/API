@@ -1,0 +1,12 @@
+{
+    "_comment": "RFC 4.1.5",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/exploratory/non-hierarchical-relationship-types-response.schema.json",
+    "title": "Non-Hierarchical Relationship Types",
+    "description": "Response schema for non hierarchical relationship types endpoint",
+    "type": "array",
+    "items": {
+        "type": "string",
+        "description": "Relationships in data that are not strictly hierarchical, for example, equipment train relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships."
+    }
+}

@@ -1,0 +1,60 @@
+{
+  "_comment": "RFC 4.1.2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/exploratory/object-type-response.schema.json",
+  "title": "Object Type Response",
+  "description": "Response schema for the object type endpoint",
+  "oneOf": [
+    {
+      "description": "Single type definition response",
+      "$ref": "#/$defs/objectType"
+    },
+    {
+      "description": "Multiple type definitions response",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/objectType"
+      }
+    }
+  ],
+  "$defs": {
+    "objectType": {
+      "type": "object",
+      "properties": {
+        "elementId": {
+          "type": "string",
+          "description": "The unit identifier for the element"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the object type"
+        },
+        "namespaceUri": {
+            "type": "string",
+            "format": "uri",
+            "description": "URI indicating the Namespace of the object"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The name of the property"
+              },
+              "dataType": {
+                "type": "string",
+                "description": "The data type for the attribute"
+              },
+              "engUnit": {
+                "type": ["string", "null"],
+                "description": "A string indicating the engineering unit for measuring the element value. Where present, the definitions found in UNECE Recommendation Number 20 MUST be used."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+    "_comment": "RFC 4.2.3.1",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/create-subscription-response.schema.json",
+    "title": "Create Subscription Response",
+    "description": "Response schema for subscription creation",
+    "type": "object",
+    "properties": {
+        "subscriptionId": {
+            "type": "string",
+            "description": "Unique identifier for the subscription - required per RFC"
+        },
+        "status": {
+            "type": "string",
+            "enum": ["active", "pending", "failed"],
+            "description": "Status of the subscription creation"
+        },
+        "message": {
+            "type": "string",
+            "description": "Optional message about the subscription creation"
+        },
+        "qosLevel": {
+            "type": "integer",
+            "enum": [0, 2],
+            "description": "Confirmed QoS level for the subscription"
+        },
+        "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when subscription was created"
+        },
+        "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional expiration timestamp for the subscription"
+        },
+        "resourcesAllocated": {
+            "type": "object",
+            "description": "Information about allocated CMIP resources",
+            "properties": {
+                "bufferSize": {
+                    "type": "integer",
+                    "description": "Allocated buffer size (mainly for QoS 2)"
+                },
+                "maxMessageRate": {
+                    "type": "integer",
+                    "description": "Maximum messages per second"
+                }
+            }
+        }
+    },
+    "required": ["subscriptionId", "message"]
+}

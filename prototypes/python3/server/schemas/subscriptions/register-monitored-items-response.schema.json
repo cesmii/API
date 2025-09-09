@@ -1,0 +1,32 @@
+{
+    "_comment": "RFC 4.2.3.2",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/register-monitored-items-response.schema.json",
+    "title": "Register Monitored Items Response",
+    "description": "Response schema for monitored items registration",
+    "type": "object",
+    "properties": {
+        "detail": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "type": "array",
+                        "items": {
+                            "type": ["string", "number"]
+                        }
+                    },
+                    "msg": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "required": ["detail"]
+}
+

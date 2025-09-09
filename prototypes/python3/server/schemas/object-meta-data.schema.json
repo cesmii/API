@@ -1,0 +1,37 @@
+{
+    "_comment": "RFC 3.1.1 & 3.1.2",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/object-meta-data.schema.json",
+    "title": "Object Metadata",
+    "description": "A schema for the Object Metadata",
+    "type": "object",
+    "properties": {
+        "parentId": {
+            "type": ["string", "null"],
+            "description": "Required per 3.1.1: the ElementId of the parent object"
+        },
+        "hasChildren": {
+            "type": "boolean",
+            "description": "Required per 3.1.1: boolean indicating if the element is composed of one or more child objects"
+        },
+        "namespaceUri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Required per 3.1.1: URI indicating the Namespace of the object"
+        },
+        "interpolation": {
+            "type": "string",
+            "description": "Optional per 3.1.2: interpolation method if element value is interpolated rather than stored"
+        },
+        "engUnit": {
+            "type": "string",
+            "description": "Optional per 3.1.2: engineering unit using UNECE Recommendation Number 20"
+        },
+        "attributeMetadata": {
+            "type": "object",
+            "description": "Optional per 3.1.2: Additional information about how an object attribute is stored or treated by the underlying platform",
+            "additionalProperties": true
+        }
+    },
+    "required": ["parentId", "hasChildren", "namespaceUri"] 
+}

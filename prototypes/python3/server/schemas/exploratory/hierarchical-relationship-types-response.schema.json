@@ -1,0 +1,13 @@
+{
+    "_comment": "RFC 4.1.4",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/exploratory/hierarchical-relationship-types-response.schema.json",
+    "title": "Hierarchical Relationship Types",
+    "description": "Response schema for hierarchical Relationship types endpoint",
+    "type": "array",
+    "items": {
+        "type": "string",
+        "description": "The parent-child relationship",
+        "enum": ["HasParent", "HasChildren"]
+    }
+}

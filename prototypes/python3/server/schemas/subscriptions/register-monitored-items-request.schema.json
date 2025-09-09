@@ -1,0 +1,15 @@
+{
+    "_comment": "RFC 4.2.3.2",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/register-monitored-items-request.schema.json",
+    "title": "Register Monitored Items Request",
+    "description": "Request schema for registering monitored items to a subscription",
+    "type": "object",
+    "properties": {
+        "subscriptionId": {
+            "type": "string",
+            "description": "Subscription Id returned from Create Subscription"
+        }
+    },
+    "required": ["subscriptionId"]
+}

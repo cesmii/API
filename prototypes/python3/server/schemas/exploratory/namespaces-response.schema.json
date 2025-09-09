@@ -1,0 +1,22 @@
+{
+  "_comment": "RFC 4.1.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/exploratory/namespaces-response.schema.json",
+  "title": "Namespaces",
+  "description": "Response schema for namespaces endpoint",
+  "type": "array",
+  "items": {
+      "type": "object",
+      "properties": {
+          "uri": {
+              "type": "string",
+              "description": "Required per 4.1.1: The namespace URI"
+          },
+          "name": {
+              "type": "string",
+              "description": "The name of the namespace"
+          }
+      },
+      "required": [ "uri" ]
+  }
+}
