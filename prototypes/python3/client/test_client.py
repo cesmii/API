@@ -1,6 +1,48 @@
 import asyncio
 import httpx
 import json
+import jsonschema
+
+#######################################
+##### Schema Resolution Methods #######
+#######################################
+RESPONSE_TYPE_RELATIONSHIPS = "relationships"
+RESPONSE_TYPE_INSTANCES = "instances"
+SCHEMA_FOLDER = "../server/schemas/exploratory/"
+SCHEMA_RELATIONSHIPS = "relationships-response.json"
+SCHEMA_INSTANCES = "instances-response.json"
+
+def validate_response(response: object = None, response_type: str = None):
+    """
+    :param response: JSON object, the response to validate
+    :param response_type: string, type of response indicating schema to validate against
+    :return: True if response valid against schema, False otherwise
+    """
+    if response is None:
+        raise TypeError("response cannot be None")
+    if response_type is None:
+        raise TypeError("response_type cannot be None")
+
+    file_path = SCHEMA_FOLDER
+    if response_type == RESPONSE_TYPE_RELATIONSHIPS:
+        file_path += SCHEMA_RELATIONSHIPS
+    elif response_type == RESPONSE_TYPE_INSTANCES:
+        file_path += SCHEMA_INSTANCES
+    else:
+        raise TypeError("response_type " + response_type + " is not a valid response type")
+
+    try:
+        with open(file_path) as response_schema_file:
+            response_schema = json.load(response_schema_file)
+            jsonschema.validate(instance=response, schema=response_schema)
+            return True
+    except FileNotFoundError:
+        print(f"Error: Could not validate response against schema. Schema file not found for response type {response_type}")
+    except json.JSONDecodeError:
+        print(f"Error: Could not validate response against schema. Schema JSON decoding failed for response type {response_type}")
+    except jsonschema.ValidationError as e:
+        print(f"Error: Validation of response against schema failed for response type {response_type}. Error:{e.message}")
+    return False
 
 #######################################
 ##### Test Client Helper Methods ######
@@ -26,8 +68,7 @@ def get_include_metadata():
 
     :return: True if user selected to include metadata, false otherwise
     """
-    print(f"Include Metadata? \n1: Yes\n2: No")
-    user_selection_include_metadata = get_user_selection(["1", "2"])
+    user_selection_include_metadata = input(f"Include Metadata? (1: yes, else no): ").strip()
     if user_selection_include_metadata == "1":
         return True
     else:
@@ -36,7 +77,7 @@ def get_include_metadata():
 async def get(url: str = None, params: dict = None):
     """get executes a get request against
     :param url: complete url of API method being called, up to the ?
-    :param params: params if GET request, payload if PUT/POST request. expects caller enforces expected input
+    :param params: params for GET request. expects caller enforces expected input
     :return: response from calling url with associated method and passed params
     """
     if url is None:
@@ -116,7 +157,7 @@ async def get_object_types(base_url: str = None,namespace_uri: str = None):
     params = {}
     if namespace_uri is not None:
         params["namespaceUri"] = namespace_uri
-    return await get(url)
+    return await get(url,params)
 
 async def get_relationship_types(base_url: str = None,hierarchical: bool = True):
     """get_relationship_types calls Get Relationship Types exploratory method
@@ -150,7 +191,10 @@ async def get_instances(base_url: str = None,type_id: str = None, include_metada
         params['includeMetadata'] = "true"
     else:
         params['includeMetadata'] = "false"
-    return await get(url, params)
+
+    json_response = await get(url, params=params)
+    validate_response(json_response, RESPONSE_TYPE_INSTANCES)
+    return json_response
 
 
 async def get_relationships(base_url: str = None,element_id: str=None, relationship_type: str = None, depth: int = 0, include_metadata: bool = False):
@@ -172,7 +216,10 @@ async def get_relationships(base_url: str = None,element_id: str=None, relations
     params = {'depth': depth, 'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
-    return await get(url, params)
+
+    json_response = await get(url, params=params)
+    validate_response(json_response, RESPONSE_TYPE_RELATIONSHIPS)
+    return json_response
 
 async def get_object (base_url: str = None,element_id: str=None, include_metadata: bool = False):
     """get_object calls Get Object Definition Exploratory method
@@ -184,7 +231,7 @@ async def get_object (base_url: str = None,element_id: str=None, include_metadat
         raise TypeError("base_url cannot be None")
     url = f"{base_url}/object"
     if element_id is None:
-        raise ValueError("element_id is required to run get_relationships")
+        raise ValueError("element_id is required to run get_object")
     url += f"/{element_id}"
     params = {'includeMetadata': "false"}
     if include_metadata:
@@ -369,7 +416,6 @@ async def main():
         if not base_url:
             base_url = default_url
 
-
         selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
 
         ##### MAIN INPUT LOOP #####
@@ -400,7 +446,8 @@ async def main():
                             else:
                                 raise e
                     elif user_selection == "3":
-                        print(await get_object_types(base_url))
+                        namespace_uri = input("Enter namespace URI to filter on (optional, leave blank to return all): ").strip()
+                        print(await get_object_types(base_url, namespace_uri))
                     elif user_selection == "4":
                         print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
                         user_selection_relationship_types = get_user_selection(["1","2"])
