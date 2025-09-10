@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # Create config file if it doesn't exist
-if [ ! -d $SCRIPT_DIR/config.json ]; then
+if [ ! -e $SCRIPT_DIR/config.json ]; then
 	echo Creating default config...
 	cp config-example.json config.json
 fi

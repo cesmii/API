@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Path, Query, HTTPException, Request, Depends
 from typing import List, Optional
 from datetime import datetime, timezone
+from urllib.parse import unquote
 
 from models import LastKnownValue, HistoricalValue
 from data_sources.data_interface import I3XDataSource
@@ -19,6 +20,7 @@ def get_last_known_value(
     data_source: I3XDataSource = Depends(get_data_source)
 ):
     """Return current value for requested object by ElementId"""
+    element_id = unquote(element_id)
     instance = data_source.get_instance_by_id(element_id)
     if instance:
         result = {
@@ -49,6 +51,7 @@ def get_historical_values(
     data_source: I3XDataSource = Depends(get_data_source)
 ):
     """Return array of historical values for requested object by ElementId"""
+    element_id = unquote(element_id)
     # Mock historical data - in real implementation this would query historical store
     instance = data_source.get_instance_by_id(element_id)
     if instance:

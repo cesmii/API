@@ -11,8 +11,11 @@
         "exploratory": {
             "type": "mqtt",
             "config": {
-                "mqtt_endpoint": "mqtt://127.0.0.1:1885",
-                "topics": ["#"]
+                "mqtt_endpoint": "mqtt://127.0.0.1:1883",
+                "topics": ["#"],
+                "excluded_topics": ["$SYS", "debug/internal", "temp/*", "*/logs"],
+                "username": "mqtt_user",
+                "password": "mqtt_password"
             }
         }
     },

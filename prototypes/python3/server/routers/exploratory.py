@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Path, Query, HTTPException, Request, Depends
 from typing import List, Optional
+from urllib.parse import unquote
 from models import Namespace, ObjectType, ObjectInstanceMinimal, ObjectLinkedByRelationshipType, ObjectInstance
 from data_sources.data_interface import I3XDataSource
 
@@ -19,6 +20,7 @@ def get_namespaces(data_source: I3XDataSource = Depends(get_data_source)):
 @ns_exploratory.get("/objectType/{element_id}", response_model=ObjectType, tags=["Exploratory Methods"])
 def get_object_type_definition(element_id: str = Path(...), data_source: I3XDataSource = Depends(get_data_source)):
     """Return JSON structure defining a Type for the requested ElementId"""
+    element_id = unquote(element_id)
     obj_type = data_source.get_object_type_by_id(element_id)
     if obj_type:
         return obj_type
@@ -75,6 +77,8 @@ def get_related_objects(
     data_source: I3XDataSource = Depends(get_data_source)
 ) -> List[ObjectLinkedByRelationshipType] | List[ObjectInstance]:
     """Return array of objects related by specified relationship type"""
+    element_id = unquote(element_id)
+    relationship_type = unquote(relationship_type)
     related_objects = data_source.get_related_instances(element_id, relationship_type)
     
     if not includeMetadata:
@@ -100,6 +104,7 @@ def get_object_definition(
     data_source: I3XDataSource = Depends(get_data_source)
 ) -> ObjectInstance:
     """Return instance object by ElementId with current values"""
+    element_id = unquote(element_id)
     instance = data_source.get_instance_by_id(element_id)
     if instance:
         if not includeMetadata:
