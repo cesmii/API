@@ -1,5 +1,11 @@
 # Setup script to quickly initialize the virtual environment and run the server
 
+# Create config file if it doesn't exist
+if (-not (Test-Path -Path "config.json")) {
+    Write-Host "Creating default config..." -ForegroundColor Green
+    Copy-Item -Path "config-example.json" -Destination "config.json"
+}
+
 # Create virtual environment if it doesn't exist
 if (-not (Test-Path -Path "venv")) {
     Write-Host "Creating virtual environment..." -ForegroundColor Green

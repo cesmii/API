@@ -2,6 +2,12 @@
 # Setup script to quickly initialize the virtual environment and run the server
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+# Create config file if it doesn't exist
+if [ ! -d $SCRIPT_DIR/config.json ]; then
+	echo Creating default config...
+	cp config-example.json config.json
+fi
+
 # Create virtual environment if it doesn't exist
 if [ ! -d $SCRIPT_DIR/venv ]; then
 	echo Creating virtual environment...
