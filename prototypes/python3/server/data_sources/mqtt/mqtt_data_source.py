@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import ssl
 import threading
 from typing import List, Optional, Dict, Any, Callable
@@ -23,6 +24,9 @@ class MQTTDataSource(I3XDataSource):
         self.config = config
         self.mqtt_endpoint = config.get('mqtt_endpoint', '')
         self.topics = config.get('topics', [])
+        self.excluded_topics = config.get('excluded_topics', [])
+        self.username = config.get('username')
+        self.password = config.get('password')
         self.topic_cache = {}  # topic -> value cache
         self.cache_lock = threading.Lock()  # Thread-safe access to cache
         self.client = None
@@ -40,6 +44,11 @@ class MQTTDataSource(I3XDataSource):
         self.client.on_connect = self._on_connect
         self.client.on_message = self._on_message
         self.client.on_disconnect = self._on_disconnect
+        
+        # Set username/password if provided
+        if self.username is not None and self.password is not None:
+            self.logger.info(f"Setting MQTT authentication for user: {self.username}")
+            self.client.username_pw_set(self.username, self.password)
         
         # Parse MQTT endpoint (supports mqtt:// and mqtts:// for TLS)
         use_tls = False
@@ -102,12 +111,20 @@ class MQTTDataSource(I3XDataSource):
                 self.logger.info(f"Subscribed to {len(self.topics)} MQTT topics")
             else:
                 self.logger.warning("No topics configured for MQTT subscription")
+                
+            # Clean up any excluded topics from existing cache after successful connection
+            self._clean_excluded_topics_from_cache()
         else:
             self.logger.error(f"MQTT connection failed with code {rc}")
     
     def _on_message(self, client, userdata, msg):
         """Callback for when MQTT message is received"""
         try:
+            # Check if topic should be excluded
+            if self._is_topic_excluded(msg.topic):
+                self.logger.debug(f"Skipping excluded topic: {msg.topic}")
+                return
+                
             # Try to parse as JSON, fallback to string
             try:
                 value = json.loads(msg.payload.decode())
@@ -197,6 +214,9 @@ class MQTTDataSource(I3XDataSource):
     
     def get_object_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
         """Return JSON structure defining a Type built from MQTT topic data"""
+        # Type definitions are stored in the cache without the suffix "_TYPE" but returned in queries with the suffix
+        #   Remove it if its in the query so we get a match
+        element_id = re.sub('_TYPE', '', element_id)
         with self.cache_lock:
             topic_data = self.topic_cache.get(element_id)
             if topic_data is None:
@@ -356,3 +376,95 @@ class MQTTDataSource(I3XDataSource):
     def _topic_to_element_id(self, topic: str) -> str:
         """Convert / to _ in topic for elementId to avoid URL path issues"""
         return topic.replace('/', '_')
+    
+    def _is_topic_excluded(self, topic: str) -> bool:
+        """Check if a topic should be excluded based on excluded_topics config.
+        Supports wildcards using * character.
+        Returns True if the topic matches any exclusion pattern.
+        """
+        for excluded in self.excluded_topics:
+            if self._topic_matches_pattern(topic, excluded):
+                return True
+                
+        return False
+    
+    def _topic_matches_pattern(self, topic: str, pattern: str) -> bool:
+        """Check if a topic matches a pattern with wildcard support.
+        * matches any sequence of characters within a topic level
+        """
+        try:
+            # If no wildcards, use exact matching and hierarchical matching
+            if '*' not in pattern:
+                # Check exact match
+                if topic == pattern:
+                    return True
+                # Check if topic is a child of pattern (starts with pattern + '/')
+                if topic.startswith(pattern + '/'):
+                    return True
+                return False
+            
+            # Split both topic and pattern by '/' to handle wildcards per level
+            topic_parts = topic.split('/')
+            pattern_parts = pattern.split('/')
+            
+            # For hierarchical matching, the pattern can match if:
+            # 1. All pattern parts match the beginning of topic parts (exact match)
+            # 2. Topic has more parts than pattern (hierarchical child match)
+            
+            # Check exact match first
+            if self._match_parts_exact(topic_parts, pattern_parts):
+                return True
+                
+            # Check hierarchical match - pattern matches prefix of topic
+            if len(topic_parts) > len(pattern_parts):
+                return self._match_parts_exact(topic_parts[:len(pattern_parts)], pattern_parts)
+                
+            return False
+        except Exception as e:
+            self.logger.error(f"Error matching topic '{topic}' against pattern '{pattern}': {e}")
+            return False
+    
+    def _match_parts_exact(self, topic_parts: list, pattern_parts: list) -> bool:
+        """Match topic parts against pattern parts exactly (same number of parts)"""
+        if len(topic_parts) != len(pattern_parts):
+            return False
+            
+        for i in range(len(pattern_parts)):
+            if not self._match_single_part(topic_parts[i], pattern_parts[i]):
+                return False
+                
+        return True
+    
+    def _match_single_part(self, topic_part: str, pattern_part: str) -> bool:
+        """Match a single topic part against a pattern part with wildcard support"""
+        if pattern_part == '*':
+            return True
+            
+        if '*' not in pattern_part:
+            return topic_part == pattern_part
+            
+        # Handle wildcards within the pattern part (like "temp*data")
+        # Convert * to regex .* and escape other regex special chars
+        regex_pattern = re.escape(pattern_part).replace('\\*', '.*')
+        return re.match(f'^{regex_pattern}$', topic_part) is not None
+    
+    def _clean_excluded_topics_from_cache(self) -> None:
+        """Remove any excluded topics from the existing cache"""
+        if not self.excluded_topics:
+            return
+            
+        with self.cache_lock:
+            # Get list of element_ids to remove (can't modify dict while iterating)
+            to_remove = []
+            for element_id, topic_data in self.topic_cache.items():
+                original_topic = topic_data['topic']
+                if self._is_topic_excluded(original_topic):
+                    to_remove.append(element_id)
+            
+            # Remove excluded topics from cache
+            for element_id in to_remove:
+                self.logger.info(f"Removing excluded topic from cache: {self.topic_cache[element_id]['topic']}")
+                del self.topic_cache[element_id]
+                
+            if to_remove:
+                self.logger.info(f"Cleaned {len(to_remove)} excluded topics from cache")

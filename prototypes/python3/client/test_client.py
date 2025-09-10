@@ -47,6 +47,16 @@ def validate_response(response: object = None, response_type: str = None):
 #######################################
 ##### Test Client Helper Methods ######
 #######################################
+def pretty_print_json(data):
+    """Pretty prints JSON data if it's valid JSON, otherwise prints as-is"""
+    try:
+        if isinstance(data, (dict, list)):
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+        else:
+            print(data)
+    except (TypeError, ValueError):
+        print(data)
+
 def get_user_selection(valid_selections: list[str] = None):
     """Gets user to select item from list of valid selections
 
@@ -370,7 +380,7 @@ async def register(base_url: str = None,subscription_id: str = None, element_ids
                         for update_received in data:
                             if update_received == 'message' and len(data) == 1:
                                 return data # this is QoS2, return message to user
-                            print(update_received)
+                            pretty_print_json(update_received)
                             # TODO: current state will run until program is killed externally. Add some threaded keyboard interrupt?
                     except Exception as e:
                         print(f"Failed to decode JSON line: {line}, error: {e}")
@@ -435,11 +445,11 @@ async def main():
                     elif user_selection == "0":
                         break
                     elif user_selection == "1":
-                        print(await get_namespaces(base_url))
+                        pretty_print_json(await get_namespaces(base_url))
                     elif user_selection == "2":
                         object_type = input("Enter Object Type: ").strip()
                         try:
-                            print(await get_object_type(base_url, object_type))
+                            pretty_print_json(await get_object_type(base_url, object_type))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Object type {object_type} not found")
@@ -447,15 +457,17 @@ async def main():
                                 raise e
                     elif user_selection == "3":
                         namespace_uri = input("Enter namespace URI to filter on (optional, leave blank to return all): ").strip()
-                        print(await get_object_types(base_url, namespace_uri))
+                        if not namespace_uri:
+                            namespace_uri = None
+                        pretty_print_json(await get_object_types(base_url, namespace_uri))
                     elif user_selection == "4":
                         print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
                         user_selection_relationship_types = get_user_selection(["1","2"])
-                        print(await get_relationship_types(base_url,(user_selection_relationship_types == "1")))
+                        pretty_print_json(await get_relationship_types(base_url,(user_selection_relationship_types == "1")))
                     elif user_selection == "5":
                         type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
                         try:
-                            print(await get_instances(base_url,type_id,get_include_metadata()))
+                            pretty_print_json(await get_instances(base_url,type_id,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Type ID {type_id} not found")
@@ -476,11 +488,11 @@ async def main():
                                 print(f"ElementID '{element_id}' or Relationship Type '{relationship_type}' not found")
                             else:
                                 raise e
-                        print(await get_relationships(base_url,element_id,relationship_type,query_depth,get_include_metadata()))
+                        pretty_print_json(await get_relationships(base_url,element_id,relationship_type,query_depth,get_include_metadata()))
                     elif user_selection == "7":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
-                            print(await get_object(base_url,element_id,get_include_metadata()))
+                            pretty_print_json(await get_object(base_url,element_id,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -500,7 +512,7 @@ async def main():
                     elif user_selection == "1":
                         element_id = input("Enter ElementID (required): ").strip()
                         try:
-                            print(await get_value(base_url, element_id, get_include_metadata()))
+                            pretty_print_json(await get_value(base_url, element_id, get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -515,7 +527,7 @@ async def main():
                         if not end_time:
                             end_time = None
                         try:
-                            print(await get_history(base_url, element_id,start_time,end_time,get_include_metadata()))
+                            pretty_print_json(await get_history(base_url, element_id,start_time,end_time,get_include_metadata()))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"ElementID '{element_id}' not found")
@@ -557,7 +569,7 @@ async def main():
                                 break
 
                         if element_ids != [] and values != []:
-                            print(await update(base_url, element_ids,values,timestamps))
+                            pretty_print_json(await update(base_url, element_ids,values,timestamps))
                     print("\n")
 
             ##### SUBSCRIPTION METHODS #####
@@ -573,7 +585,7 @@ async def main():
                         print("Choose Subscription Type:\n0: QoS0\n2: QoS2")
                         user_selection = get_user_selection(["0","2"])
                         qos = "QoS" + user_selection
-                        print(await subscribe(base_url,qos))
+                        pretty_print_json(await subscribe(base_url,qos))
                     elif user_selection == "2":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         element_ids = []
@@ -590,14 +602,14 @@ async def main():
                             print(f"Max depth entered - '{max_depth}' - is invalid. must be an integer, defaulting to 0.")
                             max_depth = 0
                         try:
-                            print(await register(base_url,subscription_id,element_ids,get_include_metadata(),max_depth))
+                            pretty_print_json(await register(base_url,subscription_id,element_ids,get_include_metadata(),max_depth))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Subscription ID '{subscription_id}' or element in '{element_ids}' not found")
                     elif user_selection == "3":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         try:
-                            print(await sync(base_url, subscription_id))
+                            pretty_print_json(await sync(base_url, subscription_id))
                         except Exception as e:
                             if str(e).startswith("Client error '404 Not Found' for url"):
                                 print(f"Subscription ID '{subscription_id}' not found")
@@ -609,7 +621,7 @@ async def main():
                             another = input("Enter another Subscription ID? (1: yes, else no): ").strip()
                             if another != "1":
                                 break
-                        print(await unsubscribe(base_url,subscription_ids))
+                        pretty_print_json(await unsubscribe(base_url,subscription_ids))
 
     except Exception as e:
         print(f"an exception occurred: {e}")
