@@ -9,14 +9,20 @@
     },
     "data_sources": {
         "exploratory": {
-            "type": "mqtt",
-            "config": {
-                "mqtt_endpoint": "mqtt://127.0.0.1:1883",
-                "topics": ["#"],
-                "excluded_topics": ["$SYS", "debug/internal", "temp/*", "*/logs"],
-                "username": "mqtt_user",
-                "password": "mqtt_password"
-            }
+            "type": "mock",
+            "config": {}
+        },
+        "values": {
+            "type": "mock", 
+            "config": {}
+        },
+        "updates": {
+            "type": "mock",
+            "config": {}
+        },
+        "subscriptions": {
+            "type": "mock",
+            "config": {}
         }
     },
     "data_source_routing": {
@@ -25,11 +31,11 @@
         "get_object_types": "exploratory",
         "get_object_type_by_id": "exploratory",
         "get_instances": "exploratory",
-        "get_instance_by_id": "exploratory",
+        "get_instance_by_id": "values",
         "get_related_instances": "exploratory",
         "get_hierarchical_relationships": "exploratory",
         "get_non_hierarchical_relationships": "exploratory",
-        "update_instance_values": "exploratory",
-        "get_all_instances": "exploratory"
+        "update_instance_values": "updates",
+        "get_all_instances": "subscriptions"
     }
 }
