@@ -18,7 +18,7 @@ Please note we have a charter and code of conduct, please follow it in all your 
 
 ## Code Quality Standards
 
-1. This is an all volunteer effort, we are not expecting perfection -- we are expecting functional code.
+1. This is an all volunteer effort, we are not expecting perfection -- we *are* expecting functional code.
 2. Most of us are using AI-assisted development to save time. This is acceptable and even encouraged, as long as it remains aligned.
 3. Other members of your organization may contribute to your Pull Request, but we ask that only one individual acts as representative for each organization.
 4. Regardless of who, or how, code is generated, Pull Requests that do not compile, or that crash at run-time, including crashes to other functionality as a result of your changes, will be rejected.
