@@ -26,9 +26,8 @@ Please note we have a charter and code of conduct, please follow it in all your 
 
 ## Charter
 
-Please review the [working group charter](Working Group Charter.md) and ensure you can agree to its conditions.
-If you are a part of an organization, your participation in this project commits your organization to the
-charter as well.
+Please review the [Working Group Charter](https://github.com/cesmii/API/blob/main/Working%20Group%20Charter.md) and ensure you can agree to its conditions.
+If you are a part of an organization, your participation in this project commits your organization to the Charter as well.
 
 ## Code of Conduct
 
