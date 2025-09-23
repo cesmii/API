@@ -259,73 +259,140 @@ class MQTTDataSource(I3XDataSource):
     def get_instance_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
         """Return instance object by ElementId (topic)"""
         self.logger.info(f"Looking up instance by ID: {element_id}")
-        
+
         with self.cache_lock:
             self.logger.info(f"Available topics in cache: {list(self.topic_cache.keys())}")
             topic_data = self.topic_cache.get(element_id)
-            
+
             if topic_data is None:
                 self.logger.warning(f"No data found for topic: {element_id}")
                 return None
-            
+
             self.logger.info(f"Found data for topic '{element_id}': {topic_data}")
-            
-            # Extract name from last part of original topic path
-            original_topic = topic_data['topic']
-            name = self._get_name_from_topic(original_topic)
-            
-            instance = {
-                "elementId": element_id,
-                "name": name,
-                "typeId": "",  # Empty for now
-                "parentId": "",  # Empty for now  
-                "hasChildren": False,
-                "namespaceUri": self.MQTT_NAMESPACE_URI,
-                "attributes": topic_data['value'],
-                "timestamp": topic_data['timestamp']
-            }
-            
+
+            instance = self._build_instance(element_id, topic_data)
+
             self.logger.info(f"Returning instance: {instance}")
             return instance
     
-    def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
-        """Return array of objects related by specified relationship type - placeholder"""
-        return []
-    
     def get_hierarchical_relationships(self) -> List[str]:
-        """Return hierarchical relationship types - placeholder"""
-        return []
+        return ["HasChildren", "HasParent"]
     
     def get_non_hierarchical_relationships(self) -> List[str]:
-        """Return non-hierarchical relationship types - placeholder"""
+        """MQTT does not have non-hierarchical relationships"""
+        return []
+
+    def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
+        """MQTT does not have non-hierarchical relationships, return empty"""
+        if relationship_type.lower() == "haschildren":
+            """Return direct child topics for the given parent element_id"""
+            children = []
+
+            # Convert element_id back to topic path format
+            parent_topic = element_id.replace('_', '/')
+
+            with self.cache_lock:
+                for cached_element_id, topic_data in self.topic_cache.items():
+                    original_topic = topic_data['topic']
+
+                    # Check if this topic is a direct child of the parent
+                    # Child must start with parent path followed by '/'
+                    if original_topic.startswith(parent_topic + '/'):
+                        # Get the remaining path after the parent
+                        remaining_path = original_topic[len(parent_topic) + 1:]
+
+                        # Direct child means no more '/' separators in remaining path
+                        if '/' not in remaining_path:
+                            instance = self._build_instance(cached_element_id, topic_data)
+                            children.append(instance)
+
+            return children
+        elif relationship_type.lower() == "hasparent":
+            """Return the direct parent topic for the given child element_id"""
+            with self.cache_lock:
+                topic_data = self.topic_cache.get(element_id)
+                if topic_data is None:
+                    return []
+
+                original_topic = topic_data['topic']
+                if '/' not in original_topic:
+                    return []  # No parent if no '/' in topic
+
+                # Get parent topic by removing last segment
+                parent_topic = '/'.join(original_topic.split('/')[:-1])
+                parent_element_id = self._topic_to_element_id(parent_topic)
+
+                # Check if parent exists in cache
+                if parent_element_id in self.topic_cache:
+                    parent_topic_data = self.topic_cache[parent_element_id]
+                    parent_instance = self._build_instance(parent_element_id, parent_topic_data)
+                    return [parent_instance]
+
+            return []
+
+        # Other relationship types not supported
         return []
     
     def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
-        """Update values for specified element IDs - placeholder"""
-        return []
+        """Update values for specified element IDs by publishing to MQTT topics"""
+        if not self.is_connected or self.client is None:
+            self.logger.error("MQTT client is not connected, cannot publish updates")
+            return []
+
+        if len(element_ids) != len(values):
+            self.logger.error(f"Mismatch between element_ids ({len(element_ids)}) and values ({len(values)})")
+            return []
+
+        results = []
+
+        for element_id, value in zip(element_ids, values):
+            try:
+                # Convert element_id back to topic path
+                topic = element_id.replace('_', '/')
+
+                # Serialize value to JSON if it's not already a string
+                if isinstance(value, str):
+                    payload = value
+                else:
+                    payload = json.dumps(value)
+
+                # Publish to MQTT topic
+                result = self.client.publish(topic, payload)
+
+                if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                    self.logger.info(f"Successfully published to topic '{topic}': {payload}")
+                    results.append({
+                        "elementId": element_id,
+                        "success": True,
+                        "message": "Published successfully"
+                    })
+                else:
+                    self.logger.error(f"Failed to publish to topic '{topic}', error code: {result.rc}")
+                    results.append({
+                        "elementId": element_id,
+                        "success": False,
+                        "message": f"Publish failed with error code {result.rc}"
+                    })
+
+            except Exception as e:
+                self.logger.error(f"Error publishing to element_id '{element_id}': {e}")
+                results.append({
+                    "elementId": element_id,
+                    "success": False,
+                    "message": f"Exception: {str(e)}"
+                })
+
+        return results
     
     def get_all_instances(self) -> List[Dict[str, Any]]:
         """Return all instances from MQTT topics"""
         instances = []
-        
+
         with self.cache_lock:
             for element_id, topic_data in self.topic_cache.items():
-                # Extract name from last part of original topic path
-                original_topic = topic_data['topic']
-                name = self._get_name_from_topic(original_topic)
-                
-                instance = {
-                    "elementId": element_id,
-                    "name": name,
-                    "typeId": "",  # Empty for now
-                    "parentId": "",  # Empty for now  
-                    "hasChildren": False,
-                    "namespaceUri": self.MQTT_NAMESPACE_URI,
-                    "attributes": topic_data['value'],
-                    "timestamp": topic_data['timestamp']
-                }
+                instance = self._build_instance(element_id, topic_data)
                 instances.append(instance)
-        
+
         return instances
     
 
@@ -468,3 +535,19 @@ class MQTTDataSource(I3XDataSource):
                 
             if to_remove:
                 self.logger.info(f"Cleaned {len(to_remove)} excluded topics from cache")
+
+    def _build_instance(self, element_id: str, topic_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Helper method to build an instance object from element_id and topic_data"""
+        original_topic = topic_data['topic']
+        name = self._get_name_from_topic(original_topic)
+
+        return {
+            "elementId": element_id,
+            "name": name,
+            "typeId": "",  # Empty for now
+            "parentId": "",  # Empty for now
+            "hasChildren": False,
+            "namespaceUri": self.MQTT_NAMESPACE_URI,
+            "attributes": topic_data['value'],
+            "timestamp": topic_data['timestamp']
+        }
