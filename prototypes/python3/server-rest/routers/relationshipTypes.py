@@ -10,7 +10,7 @@ def get_data_source(request: Request) -> I3XDataSource:
     """Dependency to inject data source"""
     return request.app.state.data_source
 
-@relTypes.get("/relationshipTypes", response_model=Union[List[str], Dict[str, List[str]]])
+@relTypes.get("/relationshiptypes", response_model=Union[List[str], Dict[str, List[str]]])
 def get_relationships(
     fech_rel_type: str = Query(default="all", description="Type of relationships to fetch: all, hierarchical, or non-hierarchical"),
     data_source: I3XDataSource = Depends(get_data_source)

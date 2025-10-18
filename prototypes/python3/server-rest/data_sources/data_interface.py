@@ -19,7 +19,7 @@ class I3XDataSource(ABC):
     def get_namespaces(self) -> List[Dict[str, Any]]:
         """Return array of Namespaces registered in the CMIP"""
         pass
-    
+
     @abstractmethod
     def get_object_types(self, namespace_uri: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return array of Type definitions, optionally filtered by NamespaceURI"""

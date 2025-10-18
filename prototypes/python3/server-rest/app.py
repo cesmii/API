@@ -9,10 +9,9 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
 from routers.namespaces import ns
-from routers.objectTypes import objTypes
+from routers.objectTypes import objectTypes
 from routers.relationshipTypes import relTypes
-from routers.instances import instances
-from routers.bulkOperations import bulk_ops
+from routers.objects import objects
 from routers.subscriptions import subs, subscription_worker, handle_data_source_update
 
 
@@ -86,10 +85,9 @@ app.state.I3X_DATA_SUBSCRIPTIONS = []  # List[Subscription]
 
 # Include namespaces
 app.include_router(ns)
-app.include_router(objTypes)
+app.include_router(objectTypes)
 app.include_router(relTypes)
-app.include_router(instances)
-app.include_router(bulk_ops)
+app.include_router(objects)
 app.include_router(subs)
 
 

@@ -32,7 +32,7 @@ def get_data_source(request: Request) -> I3XDataSource:
     return request.app.state.data_source
 
 # RFC ?.?.?.? - Get current Subscriptions
-@subs.get("/subscriptions", response_model=GetSubscriptionsResponse)
+@subs.get("/subscriptions", response_model=GetSubscriptionsResponse, tags=["Subscriptions"])
 def get_subscriptions(request: Request):
     subscriptions = request.app.state.I3X_DATA_SUBSCRIPTIONS
     subscription_ids = []
@@ -51,7 +51,7 @@ def get_subscriptions(request: Request):
     )
 
 # RFC ?.?.?.? - Get current Subscriptions
-@subs.get("/subscriptions/{subscription_id}", response_model=Subscription)
+@subs.get("/subscriptions/{subscription_id}", response_model=Subscription, tags=["Subscriptions"])
 def get_subscription_by_id(request: Request, subscription_id: str = Path(...)):
     subscriptions = request.app.state.I3X_DATA_SUBSCRIPTIONS
     
@@ -73,7 +73,7 @@ def get_subscription_by_id(request: Request, subscription_id: str = Path(...)):
     )
 
 # RFC 4.2.3.1 - Create Subscription
-@subs.post("/subscriptions", response_model=CreateSubscriptionResponse)
+@subs.post("/subscriptions", response_model=CreateSubscriptionResponse, tags=["Subscriptions"])
 def create_subscription(request: Request, subscription: CreateSubscriptionRequest):
     """Register a client for a new subscription with specified QoS"""
     
@@ -95,9 +95,8 @@ def create_subscription(request: Request, subscription: CreateSubscriptionReques
         message="Subscription created successfully"
     )
 
-
 # RFC 4.2.3.2 - Register Monitored Items
-@subs.post("/subscriptions/{subscription_id}/register")
+@subs.post("/subscriptions/{subscription_id}/instances", tags=["Subscriptions"])
 async def register_monitored_items(request: Request, subscription_id: str, req: RegisterMonitoredItemsRequest):
     sub = next((s for s in request.app.state.I3X_DATA_SUBSCRIPTIONS if str(s.subscriptionId) == str(subscription_id)), None)
     if not sub:
@@ -153,7 +152,7 @@ async def register_monitored_items(request: Request, subscription_id: str, req: 
         return {"message": "Monitored items registered (QoS2). Use /sync to poll for changes."}
 
 # RFC 4.2.3.3 Sync
-@subs.post("/subscriptions/{subscription_id}/sync", response_model=List[SyncResponseItem])
+@subs.post("/subscriptions/{subscription_id}/AckAndGetNew", response_model=List[SyncResponseItem], tags=["Subscriptions"])
 def sync_qos2(request: Request, subscription_id: str):
     """Sync changes for a QoS 2 subscription"""
 
@@ -170,7 +169,7 @@ def sync_qos2(request: Request, subscription_id: str):
     return response
 
 # 4.2.3.4 Unsubscribe by SubscriptionId
-@subs.delete("/subscriptions/{subscription_id}")
+@subs.delete("/subscriptions/{subscription_id}", tags=["Subscriptions"])
 def delete_subscription(request: Request, subscription_id: str):
     removed = []
     not_found = []
@@ -187,6 +186,39 @@ def delete_subscription(request: Request, subscription_id: str):
         "unsubscribed": removed,
         "not_found": not_found
     }
+
+@subs.delete("/subscriptions/{subscription_id}/instances", tags=["Subscriptions"])
+def delete_subscription_instances(
+    request: Request, 
+    subscription_id: str = Path(...)
+):
+    """Delete all instances associated with the subscription ID"""
+    raise HTTPException(
+        status_code=501, 
+        detail="Operation not implemented"
+    )
+
+@subs.post("/subscriptions/{subscriptionID}/instances")
+def create_subscription_instances(
+    request: Request, 
+    subscriptionID: str = Path(...)
+):
+    """Create instances associated with the subscription ID"""
+    raise HTTPException(
+        status_code=501, 
+        detail="Operation not implemented"
+    )
+
+@subs.post("/subscriptions/{subscriptionID}/stream")
+def create_subscription_stream(
+    request: Request, 
+    subscriptionID: str = Path(...)
+):
+    """Create stream for the subscription ID"""
+    raise HTTPException(
+        status_code=501, 
+        detail="Operation not implemented"
+    )
 
 # Subscription thread responsible creating updated for items being monitored.
 # If QoS is QoS0, it will call the handler immediately to send updates
