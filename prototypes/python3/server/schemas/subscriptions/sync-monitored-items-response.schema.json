@@ -1,35 +1,54 @@
 {
-    "_comment": "RFC 4.2.3.3",
+    "_comment": "RFC 4.2.3.3 - POST /subscriptions/{subscription_id}/AckAndGetNew response",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/subscriptions/sync-monitored-items-response.schema.json",
-    "title": "Sync Monitored Items Response",
-    "description": "Request schema for sync monitored items",
+    "title": "Sync Monitored Items Response (QoS2)",
+    "description": "Response schema for POST /subscriptions/{subscription_id}/AckAndGetNew endpoint (QoS2 polling)",
     "type": "array",
     "items": {
         "type": "object",
         "properties": {
             "elementId": {
-                "type": "string"
+                "type": "string",
+                "description": "Unique string identifier for the element"
             },
             "value": {
-                "type": "object"
+                "type": "object",
+                "description": "Current attribute values",
+                "additionalProperties": true
             },
             "timestamp": {
                 "type": "string",
-                "format": "date-time"
+                "format": "date-time",
+                "description": "ISO 8601 timestamp"
             },
             "dataType": {
-                "type": "object"
+                "type": "string",
+                "description": "Data type (default: 'object')"
             },
             "name": {
-                "type": "string"
+                "type": "string",
+                "description": "Object name"
             },
-            "objectMetadata": {
-                "$ref": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/object-meta-data.schema.json",
-                "description": "Required metadata per section 3.1.1, optional metadata per 3.1.2 based on query parameters"
+            "typeId": {
+                "type": "string",
+                "description": "ElementId of the object type"
+            },
+            "parentId": {
+                "type": ["string", "null"],
+                "description": "ElementId of the parent object"
+            },
+            "hasChildren": {
+                "type": "boolean",
+                "description": "Boolean indicating if element has child objects"
+            },
+            "namespaceUri": {
+                "type": "string",
+                "format": "uri",
+                "description": "Namespace URI"
             }
         },
-        "required": ["elementId", "value", "timestamp", "dataType", "name", "objectMetadata"]
+        "required": ["elementId", "value", "timestamp", "dataType", "name", "typeId", "hasChildren", "namespaceUri"]
     }
 }
 

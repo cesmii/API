@@ -41,7 +41,7 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
 ## Setting Up the Virtual Environment
 
 ### Prerequisites
-- Python 3.7 or higher
+- Python 3 versions between 3.7 and 3.12 have been tested to work (pydantic has a known issue with > 3.13)
 - pip
 
 ### Setup Instructions

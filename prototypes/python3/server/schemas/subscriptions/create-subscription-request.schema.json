@@ -7,9 +7,9 @@
     "type": "object",
     "properties": {
         "qos": {
-            "type": "integer",
-            "enum": [0, 2],
-            "description": "Quality of Service level - 0: At Most Once, 2: Exactly Once"
+            "type": "string",
+            "enum": ["QoS0", "QoS2"],
+            "description": "Quality of Service level - QoS0: Fire and Forget (streaming), QoS2: Guaranteed Delivery (polling)"
         }
     },
     "required": ["qos"]
