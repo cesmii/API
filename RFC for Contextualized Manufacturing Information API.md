@@ -72,7 +72,8 @@ The reader will observe that the API requires the underlying platform to support
 
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20](https://unece.org/trade/documents/2021/06/uncefact-rec20-0) MUST be used.
-- Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
+- Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, a CMIP may omit this metadata field.
+- Property or Attribute Metadata: Additional metadata related to the object as required by an implementation. Granting that existing contextual information platforms may already have defined metadata, or have an option for users to create ad-hoc metadata, this additional "property bag" MAY optionally be implemented to contain this metadata. This kind of metadata SHOULD be minimal, as Relationships are more easily mappable to a Knowledge Graph, and thus provide for richer contextual information.
 
 ### 3.2 Object Relationships
 
@@ -282,3 +283,4 @@ Implementations of this API MUST be able to return Historical Value responses wi
 ## 6. Acknowledgements
 
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+
