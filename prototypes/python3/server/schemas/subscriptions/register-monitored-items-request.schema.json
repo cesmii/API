@@ -6,10 +6,23 @@
     "description": "Request schema for registering monitored items to a subscription",
     "type": "object",
     "properties": {
-        "subscriptionId": {
-            "type": "string",
-            "description": "Subscription Id returned from Create Subscription"
+        "elementIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Array of element IDs to monitor"
+        },
+        "includeMetadata": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to include metadata in subscription updates"
+        },
+        "maxDepth": {
+            "type": "integer",
+            "default": 0,
+            "description": "Maximum depth for tree traversal (0 means no limit)"
         }
     },
-    "required": ["subscriptionId"]
+    "required": ["elementIds"]
 }

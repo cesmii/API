@@ -8,10 +8,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 
-from routers.exploratory import ns_exploratory
-from routers.values import ns_values
-from routers.updates import ns_updates
-from routers.subscriptions import ns_subscriptions, subscription_worker, handle_data_source_update
+from routers.namespaces import ns
+from routers.objectTypes import objectTypes
+from routers.relationshipTypes import relTypes
+from routers.objects import objects
+from routers.subscriptions import subs, subscription_worker, handle_data_source_update
+
 
 from data_sources.factory import DataSourceFactory
 
@@ -82,10 +84,11 @@ app = FastAPI(
 app.state.I3X_DATA_SUBSCRIPTIONS = []  # List[Subscription]
 
 # Include namespaces
-app.include_router(ns_exploratory)
-app.include_router(ns_values)
-app.include_router(ns_updates)
-app.include_router(ns_subscriptions)
+app.include_router(ns)
+app.include_router(objectTypes)
+app.include_router(relTypes)
+app.include_router(objects)
+app.include_router(subs)
 
 
 if __name__ == '__main__':

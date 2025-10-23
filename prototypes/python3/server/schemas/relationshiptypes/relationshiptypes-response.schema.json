@@ -1,0 +1,58 @@
+{
+  "_comment": "RFC 4.1.4 & 4.1.5 - Consolidated relationship types endpoint",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/relationshiptypes/relationshiptypes-response.schema.json",
+  "title": "Relationship Types Response",
+  "description": "Response schema for /relationshiptypes endpoint. Returns different structures based on fech_rel_type parameter",
+  "oneOf": [
+    {
+      "description": "Response when fech_rel_type=hierarchical",
+      "type": "object",
+      "properties": {
+        "hierarchical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of hierarchical relationship type names"
+        }
+      },
+      "required": ["hierarchical"]
+    },
+    {
+      "description": "Response when fech_rel_type=non-hierarchical",
+      "type": "object",
+      "properties": {
+        "non-hierarchical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of non-hierarchical relationship type names"
+        }
+      },
+      "required": ["non-hierarchical"]
+    },
+    {
+      "description": "Response when fech_rel_type=all (default)",
+      "type": "object",
+      "properties": {
+        "hierarchical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of hierarchical relationship type names"
+        },
+        "non-hierarchical": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Array of non-hierarchical relationship type names"
+        }
+      },
+      "required": ["hierarchical", "non-hierarchical"]
+    }
+  ]
+}

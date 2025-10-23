@@ -118,3 +118,11 @@ class SyncResponseItem(BaseModel):
 
 class UnsubscribeRequest(BaseModel):
     subscriptionIds: List[str]
+
+class SubscriptionSummary(BaseModel):
+    subscriptionId: int
+    qos: str
+    created: str
+    
+class GetSubscriptionsResponse(BaseModel):
+    subscriptionIds: List[SubscriptionSummary]
