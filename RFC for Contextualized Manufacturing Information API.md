@@ -109,19 +109,16 @@ This Query MUST return an array of Type definitions registered in the contextual
 
 The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
 
-#### 4.1.4 Relationship Types - Hierarchical
+#### 4.1.4 Relationship Types
 
-This Query MUST return the relationship types HasChildren, HasParent. MAY return additional hierarchical relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+This Query MUST return the relationship types HasChildren, HasParent. MAY return additional relationship types, including non-hierarchal types. These relationship types names SHALL be treated as keywords for follow-up queries. 
 
-#### 4.1.5 Relationship Types - Non-Hierarchical
 
-This Query MAY return any graph-style relationship types the contextualized manufacturing information platform supports, excluding the HierarchicalRelationshipTypes. These relationship type names SHALL be treated as keywords for follow-up queries.
-
-#### 4.1.6 Instances of an Object Type
+#### 4.1.5 Instances of an Object Type
 
 This Query MUST return an array of instance objects that are of the requested Type's ElementId. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
-#### 4.1.7 Objects linked by Relationship Type
+#### 4.1.6 Objects linked by Relationship Type
 
 This Query MUST return an array of objects related to the requested ElementId by the Type name of relationship specified in the query. Implementations MAY support a timestamp as a query parameter, which would allow for the exploration of historical relationships. 
 
@@ -129,7 +126,7 @@ Each element in the returned object array MUST include the metadata indicated in
 
 If the Query specifies an optional query parameter, an implementation MAY support following relationships to the specified depth - with the caveat that implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation, and recursively send follow-up requests to continue exploring the relationship hierarchy. If the depth parameter is omited, the depth SHALL be interpreted as zero. 
 
-#### 4.1.8 Object Definition
+#### 4.1.7 Object Definition
 
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition the instance object derives from, and including the current value, if present, of any attribute. The returned value payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 

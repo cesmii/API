@@ -276,7 +276,7 @@ class MQTTDataSource(I3XDataSource):
             return instance
     
     def get_relationship_types(self) -> List[str]:
-        return ["HasChildren", "HasParent"]s
+        return ["HasChildren", "HasParent"]
 
     def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
         """MQTT does not have non-hierarchical relationships, return empty"""
