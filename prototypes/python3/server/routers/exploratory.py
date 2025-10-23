@@ -32,17 +32,11 @@ def get_object_types(namespaceUri: Optional[str] = Query(default=None), data_sou
     """Return array of Type definitions, optionally filtered by NamespaceURI"""
     return data_source.get_object_types(namespaceUri)
 
-# RFC 4.1.4 - Relationship Types - Hierarchical
-@ns_exploratory.get("/relationshipTypes/hierarchical", response_model=List[str])
-def get_hierarchical_relationship_types(data_source: I3XDataSource = Depends(get_data_source)):
-    """Return hierarchical relationship types"""
-    return data_source.get_hierarchical_relationships()
-
-# RFC 4.1.5 - Relationship Types - Non-Hierarchical
-@ns_exploratory.get("/relationshipTypes/nonHierarchical", response_model=List[str])
-def get_non_hierarchical_relationship_types(data_source: I3XDataSource = Depends(get_data_source)):
-    """Return non-hierarchical relationship types"""
-    return data_source.get_non_hierarchical_relationships()
+# RFC 4.1.4 - Relationship Types
+@ns_exploratory.get("/relationshipTypes", response_model=List[str])
+def get_relationship_types(data_source: I3XDataSource = Depends(get_data_source)):
+    """Return relationship types"""
+    return data_source.get_relationship_types()
 
 # RFC 4.1.6 - Instances of an Object Type
 @ns_exploratory.get("/instances")

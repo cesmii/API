@@ -99,15 +99,10 @@ class DataSourceManager(I3XDataSource):
         source = self._get_source_for_operation("get_related_instances")
         return source.get_related_instances(element_id, relationship_type)
     
-    def get_hierarchical_relationships(self) -> List[str]:
-        """Return hierarchical relationship types"""
-        source = self._get_source_for_operation("get_hierarchical_relationships")
-        return source.get_hierarchical_relationships()
-    
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        """Return non-hierarchical relationship types"""
-        source = self._get_source_for_operation("get_non_hierarchical_relationships")
-        return source.get_non_hierarchical_relationships()
+    def get_relationship_types(self) -> List[str]:
+        """Return relationship types"""
+        source = self._get_source_for_operation("get_relationship_types")
+        return source.get_relationship_types()
     
     def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
         """Update values for specified element IDs"""

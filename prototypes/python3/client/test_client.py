@@ -169,19 +169,14 @@ async def get_object_types(base_url: str = None,namespace_uri: str = None):
         params["namespaceUri"] = namespace_uri
     return await get(url,params)
 
-async def get_relationship_types(base_url: str = None,hierarchical: bool = True):
+async def get_relationship_types(base_url: str = None):
     """get_relationship_types calls Get Relationship Types exploratory method
     :param base_url: base URL of API method being called
-    :param hierarchical: boolean, if true get hierarchical relationships, non-hierarchical if false
     :return: relationship types arr
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
     url = f"{base_url}/relationshipTypes"
-    if hierarchical:
-        url += "/hierarchical"
-    else:
-        url += "/nonHierarchical"
     return await get(url)
 
 async def get_instances(base_url: str = None,type_id: str = None, include_metadata: bool = False):
@@ -461,9 +456,7 @@ async def main():
                             namespace_uri = None
                         pretty_print_json(await get_object_types(base_url, namespace_uri))
                     elif user_selection == "4":
-                        print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
-                        user_selection_relationship_types = get_user_selection(["1","2"])
-                        pretty_print_json(await get_relationship_types(base_url,(user_selection_relationship_types == "1")))
+                        pretty_print_json(await get_relationship_types(base_url))
                     elif user_selection == "5":
                         type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
                         try:

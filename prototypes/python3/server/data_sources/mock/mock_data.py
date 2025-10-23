@@ -330,11 +330,8 @@ I3X_DATA = {
         }
     ],
     "relationships": {
-        "hierarchical": {
             "HasParent": "HasChildren",
-            "HasChildren": "HasParent"
-        },
-        "nonHierarchical": {
+            "HasChildren": "HasParent",
             "Monitors": "MonitoredBy",
             "Controls": "ControlledBy",
             "ConnectsTo": "ConnectedBy",
@@ -343,6 +340,5 @@ I3X_DATA = {
             "ControlledBy": "Controls", 
             "ConnectedBy": "ConnectsTo",
             "SuppliedBy": "SuppliesTo"
-        }
     },
 }

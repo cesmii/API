@@ -123,11 +123,8 @@ class MockDataSource(I3XDataSource):
         
         return related_objects
     
-    def get_hierarchical_relationships(self) -> List[str]:
-        return list(self.data['relationships']['hierarchical'].keys())
-    
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        return list(self.data['relationships']['nonHierarchical'].keys())
+    def get_relationship_types(self) -> List[str]:
+        return list(self.data['relationships'].keys())
     
     def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
         from datetime import datetime, timezone

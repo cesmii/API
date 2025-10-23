@@ -275,12 +275,8 @@ class MQTTDataSource(I3XDataSource):
             self.logger.info(f"Returning instance: {instance}")
             return instance
     
-    def get_hierarchical_relationships(self) -> List[str]:
-        return ["HasChildren", "HasParent"]
-    
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        """MQTT does not have non-hierarchical relationships"""
-        return []
+    def get_relationship_types(self) -> List[str]:
+        return ["HasChildren", "HasParent"]s
 
     def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
         """MQTT does not have non-hierarchical relationships, return empty"""
