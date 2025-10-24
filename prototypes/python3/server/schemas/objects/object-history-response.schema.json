@@ -1,0 +1,45 @@
+{
+  "_comment": "RFC 4.2.1.2 - GET /objects/{objectId}/history response",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/objects/object-history-response.schema.json",
+  "title": "Object Historical Values Response",
+  "description": "Response schema for GET /objects/{objectId}/history endpoint. Returns array of historical values",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "elementId": {
+        "type": "string",
+        "description": "Unique string identifier for the element"
+      },
+      "value": {
+        "type": "object",
+        "description": "Historical attribute values",
+        "additionalProperties": true
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time",
+        "description": "ISO 8601 timestamp when data was recorded"
+      },
+      "parentId": {
+        "type": ["string", "null"],
+        "description": "ElementId of the parent object"
+      },
+      "hasChildren": {
+        "type": "boolean",
+        "description": "Boolean indicating if element has child objects"
+      },
+      "namespaceUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "Namespace URI"
+      },
+      "dataType": {
+        "type": "string",
+        "description": "Data type (when includeMetadata=true)"
+      }
+    },
+    "required": ["elementId", "value", "timestamp", "hasChildren", "namespaceUri"]
+  }
+}

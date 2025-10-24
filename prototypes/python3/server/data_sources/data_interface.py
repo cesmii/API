@@ -19,7 +19,7 @@ class I3XDataSource(ABC):
     def get_namespaces(self) -> List[Dict[str, Any]]:
         """Return array of Namespaces registered in the CMIP"""
         pass
-    
+
     @abstractmethod
     def get_object_types(self, namespace_uri: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return array of Type definitions, optionally filtered by NamespaceURI"""
@@ -46,13 +46,8 @@ class I3XDataSource(ABC):
         pass
     
     @abstractmethod
-    def get_hierarchical_relationships(self) -> List[str]:
-        """Return hierarchical relationship types"""
-        pass
-    
-    @abstractmethod
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        """Return non-hierarchical relationship types"""
+    def get_relationship_types(self) -> List[str]:
+        """Return relationship types"""
         pass
     
     @abstractmethod

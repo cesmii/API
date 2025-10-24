@@ -68,43 +68,16 @@ class MockDataSource(I3XDataSource):
         else:
             related_objects = self._process_non_hierarchical_relations(element_id, relationship_type.lower())
         
-        # Add relationship type metadata to each related object
-        relationship_type_proper = self._get_proper_case_relationship(relationship_type)
-        relationship_type_inverse = self._get_inverse_relationship(relationship_type_proper)
-        
+        # Add relationship type metadata
         for obj in related_objects:
-            obj['relationType'] = relationship_type_proper
-            obj['relationshipTypeInverse'] = relationship_type_inverse
+            obj['relationType'] = relationship_type
         
         return related_objects
-    
-    def _get_proper_case_relationship(self, relationship_type: str) -> str:
-        """Get the proper case relationship type from the data"""
-        # Check hierarchical relationships
-        for rel_type in self.data['relationships']['hierarchical'].keys():
-            if rel_type.lower() == relationship_type.lower():
-                return rel_type
-        
-        # Check non-hierarchical relationships
-        for rel_type in self.data['relationships']['nonHierarchical'].keys():
-            if rel_type.lower() == relationship_type.lower():
-                return rel_type
-        
-        # Fallback to title case
-        return relationship_type.title()
-    
-    def _get_inverse_relationship(self, relationship_type: str) -> str:
-        """Get the inverse relationship type"""
-        # Check hierarchical relationships
-        if relationship_type in self.data['relationships']['hierarchical']:
-            return self.data['relationships']['hierarchical'][relationship_type]
-        
-        # Check non-hierarchical relationships
-        if relationship_type in self.data['relationships']['nonHierarchical']:
-            return self.data['relationships']['nonHierarchical'][relationship_type]
-        
-        # Fallback
-        return relationship_type
+
+    def get_relationship_types(self) -> List[str]:
+        """Return relationship types"""
+        return list(self.data['relationship_types'])
+
     
     def _process_non_hierarchical_relations(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
         """Dynamically determine relationships based on instance metadata and semantic patterns"""
@@ -122,13 +95,7 @@ class MockDataSource(I3XDataSource):
             related_objects = [i for i in self.data['instances'] if i['elementId'] in related_ids]
         
         return related_objects
-    
-    def get_hierarchical_relationships(self) -> List[str]:
-        return list(self.data['relationships']['hierarchical'].keys())
-    
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        return list(self.data['relationships']['nonHierarchical'].keys())
-    
+       
     def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
         from datetime import datetime, timezone
         

@@ -4,47 +4,6 @@ import json
 import jsonschema
 
 #######################################
-##### Schema Resolution Methods #######
-#######################################
-RESPONSE_TYPE_RELATIONSHIPS = "relationships"
-RESPONSE_TYPE_INSTANCES = "instances"
-SCHEMA_FOLDER = "../server/schemas/exploratory/"
-SCHEMA_RELATIONSHIPS = "relationships-response.json"
-SCHEMA_INSTANCES = "instances-response.json"
-
-def validate_response(response: object = None, response_type: str = None):
-    """
-    :param response: JSON object, the response to validate
-    :param response_type: string, type of response indicating schema to validate against
-    :return: True if response valid against schema, False otherwise
-    """
-    if response is None:
-        raise TypeError("response cannot be None")
-    if response_type is None:
-        raise TypeError("response_type cannot be None")
-
-    file_path = SCHEMA_FOLDER
-    if response_type == RESPONSE_TYPE_RELATIONSHIPS:
-        file_path += SCHEMA_RELATIONSHIPS
-    elif response_type == RESPONSE_TYPE_INSTANCES:
-        file_path += SCHEMA_INSTANCES
-    else:
-        raise TypeError("response_type " + response_type + " is not a valid response type")
-
-    try:
-        with open(file_path) as response_schema_file:
-            response_schema = json.load(response_schema_file)
-            jsonschema.validate(instance=response, schema=response_schema)
-            return True
-    except FileNotFoundError:
-        print(f"Error: Could not validate response against schema. Schema file not found for response type {response_type}")
-    except json.JSONDecodeError:
-        print(f"Error: Could not validate response against schema. Schema JSON decoding failed for response type {response_type}")
-    except jsonschema.ValidationError as e:
-        print(f"Error: Validation of response against schema failed for response type {response_type}. Error:{e.message}")
-    return False
-
-#######################################
 ##### Test Client Helper Methods ######
 #######################################
 def pretty_print_json(data):
@@ -131,6 +90,16 @@ async def post(url: str = None, payload: dict = None):
         response.raise_for_status()
         return response.json()
 
+
+async def delete(url: str = None):
+    if url is None:
+        raise TypeError("url cannot be None")
+
+    async with httpx.AsyncClient() as client:
+        response = await client.delete(url)
+        response.raise_for_status()
+        return response.json()
+
 #######################################
 ######## Exploratory Methods ##########
 #######################################
@@ -152,7 +121,7 @@ async def get_object_type(base_url: str = None,element_id: str = None):
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise TypeError("element_id cannot be None")
-    url = f"{base_url}/objectType/{element_id}"
+    url = f"{base_url}/objecttypes/{element_id}"
     return await get(url)
 
 async def get_object_types(base_url: str = None,namespace_uri: str = None):
@@ -163,25 +132,20 @@ async def get_object_types(base_url: str = None,namespace_uri: str = None):
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/objectTypes"
+    url = f"{base_url}/objecttypes"
     params = {}
     if namespace_uri is not None:
         params["namespaceUri"] = namespace_uri
     return await get(url,params)
 
-async def get_relationship_types(base_url: str = None,hierarchical: bool = True):
+async def get_relationship_types(base_url: str = None):
     """get_relationship_types calls Get Relationship Types exploratory method
     :param base_url: base URL of API method being called
-    :param hierarchical: boolean, if true get hierarchical relationships, non-hierarchical if false
     :return: relationship types arr
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/relationshipTypes"
-    if hierarchical:
-        url += "/hierarchical"
-    else:
-        url += "/nonHierarchical"
+    url = f"{base_url}/relationshiptypes"
     return await get(url)
 
 async def get_instances(base_url: str = None,type_id: str = None, include_metadata: bool = False):
@@ -193,7 +157,7 @@ async def get_instances(base_url: str = None,type_id: str = None, include_metada
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/instances"
+    url = f"{base_url}/objects"
     params = {}
     if type_id is not None:
         params["typeId"] = type_id
@@ -203,7 +167,6 @@ async def get_instances(base_url: str = None,type_id: str = None, include_metada
         params['includeMetadata'] = "false"
 
     json_response = await get(url, params=params)
-    validate_response(json_response, RESPONSE_TYPE_INSTANCES)
     return json_response
 
 
@@ -217,18 +180,17 @@ async def get_relationships(base_url: str = None,element_id: str=None, relations
     :return: relationships dict"""
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/relationships"
+    url = f"{base_url}/objects"
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
     if relationship_type is None:
         raise ValueError("relationship_type is required to run get_relationships")
-    url += f"/{element_id}/{relationship_type}"
+    url += f"/{element_id}/related?relationshiptype={relationship_type}"
     params = {'depth': depth, 'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
 
     json_response = await get(url, params=params)
-    validate_response(json_response, RESPONSE_TYPE_RELATIONSHIPS)
     return json_response
 
 async def get_object (base_url: str = None,element_id: str=None, include_metadata: bool = False):
@@ -239,10 +201,10 @@ async def get_object (base_url: str = None,element_id: str=None, include_metadat
     :return: object dict"""
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/object"
+    url = f"{base_url}/objects"
     if element_id is None:
         raise ValueError("element_id is required to run get_object")
-    url += f"/{element_id}"
+    url += f"/{element_id}/definition"
     params = {'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
@@ -261,7 +223,7 @@ async def get_value(base_url: str = None,element_id: str = None, include_metadat
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{base_url}/value/{element_id}"
+    url = f"{base_url}/objects/{element_id}"
     params = {'includeMetadata': "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
@@ -279,7 +241,7 @@ async def get_history(base_url: str = None,element_id: str = None, start_time: s
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{base_url}/history/{element_id}"
+    url = f"{base_url}/objects/{element_id}/history"
     params = {include_metadata: "false"}
     if include_metadata:
         params['includeMetadata'] = "true"
@@ -304,7 +266,7 @@ async def update(base_url: str = None,element_ids: list[str] = None,values: list
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/update"
+    url = f"{base_url}/objects"
     if element_ids is None or element_ids == []:
         raise ValueError("element_ids is required to run update")
     if values is None or values == []:
@@ -320,7 +282,7 @@ async def update(base_url: str = None,element_ids: list[str] = None,values: list
                 "value": value,
                 "timestamp": timestamp
             })
-        url += "/historical"
+        url += "/history"
         payload = updates
     else:
         payload = {
@@ -341,7 +303,7 @@ async def subscribe(base_url: str = None,qos: str = None):
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    url = f"{base_url}/subscribe"
+    url = f"{base_url}/subscriptions"
     return await post(url, {"qos": qos})
 
 async def register(base_url: str = None,subscription_id: str = None, element_ids: list[str] = None, include_metadata: bool = False, max_depth: int = 0):
@@ -367,7 +329,7 @@ async def register(base_url: str = None,subscription_id: str = None, element_ids
         "includeMetadata": include_metadata,
     }
 
-    url = f"{base_url}/subscribe/{subscription_id}/register"
+    url = f"{base_url}/subscriptions/{subscription_id}/objects"
 
     async with httpx.AsyncClient(timeout=None) as client:
         async with client.stream("POST", url, json=payload) as response:
@@ -398,10 +360,10 @@ async def sync(base_url: str = None,subscription_id: str = None):
         raise TypeError("base_url cannot be None")
     if subscription_id is None:
         raise ValueError("subscription_id is required to run sync")
-    url = f"{base_url}/subscribe/{subscription_id}/sync"
+    url = f"{base_url}/subscriptions/{subscription_id}/sync"
     return await post(url)
 
-async def unsubscribe(base_url: str = None,subscription_ids: list[str] = None):
+async def unsubscribe(base_url: str = None,subscription_id: str = None):
     """
     unsubscribe calls Unsubscribe Elements API method
     :param base_url: base URL of API method being called
@@ -410,10 +372,10 @@ async def unsubscribe(base_url: str = None,subscription_ids: list[str] = None):
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    if subscription_ids is None or subscription_ids == []:
-        raise ValueError("subscription_ids is required to run unsubscribe")
-    url = f"{base_url}/unsubscribe"
-    return await post(url,{"subscriptionIds": subscription_ids})
+    if subscription_id is None:
+        raise ValueError("subscription_id is required to run unsubscribe")
+    url = f"{base_url}/subscriptions/{subscription_id}"
+    return await delete(url)
 
 #######################################
 ########## Client Functions ###########
@@ -447,7 +409,7 @@ async def main():
                     elif user_selection == "1":
                         pretty_print_json(await get_namespaces(base_url))
                     elif user_selection == "2":
-                        object_type = input("Enter Object Type: ").strip()
+                        object_type = input("Enter Object Type's Element ID: ").strip()
                         try:
                             pretty_print_json(await get_object_type(base_url, object_type))
                         except Exception as e:
@@ -461,9 +423,7 @@ async def main():
                             namespace_uri = None
                         pretty_print_json(await get_object_types(base_url, namespace_uri))
                     elif user_selection == "4":
-                        print(f"Select Relationship Type\n1: Hierarchical\n2: Non-Hierarchical\n")
-                        user_selection_relationship_types = get_user_selection(["1","2"])
-                        pretty_print_json(await get_relationship_types(base_url,(user_selection_relationship_types == "1")))
+                        pretty_print_json(await get_relationship_types(base_url))
                     elif user_selection == "5":
                         type_id = input("Enter Type ElementID (leave blank to return all instance objects): ").strip()
                         try:
@@ -615,13 +575,8 @@ async def main():
                                 print(f"Subscription ID '{subscription_id}' not found")
                     elif user_selection == "4":
                         subscription_ids = []
-                        while True:
-                            subscription_id = input("Enter Subscription ID to unsubscribe from: ").strip()
-                            subscription_ids.append(subscription_id)
-                            another = input("Enter another Subscription ID? (1: yes, else no): ").strip()
-                            if another != "1":
-                                break
-                        pretty_print_json(await unsubscribe(base_url,subscription_ids))
+                        subscription_id = input("Enter Subscription ID to unsubscribe from: ").strip()
+                        pretty_print_json(await unsubscribe(base_url,subscription_id))
 
     except Exception as e:
         print(f"an exception occurred: {e}")

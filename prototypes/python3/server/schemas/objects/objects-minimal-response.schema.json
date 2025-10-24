@@ -1,0 +1,39 @@
+{
+  "_comment": "RFC 4.1.6 - GET /objects response when includeMetadata=false",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/cesmii/API/blob/prototypes/prototypes/python3/server/schemas/objects/objects-minimal-response.schema.json",
+  "title": "Objects List Response (Minimal)",
+  "description": "Response schema for GET /objects endpoint with includeMetadata=false (default). Returns minimal required metadata per RFC 3.1.1",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "elementId": {
+        "type": "string",
+        "description": "Unique string identifier for the element"
+      },
+      "name": {
+        "type": "string",
+        "description": "Object name"
+      },
+      "typeId": {
+        "type": "string",
+        "description": "ElementId of the object type"
+      },
+      "parentId": {
+        "type": ["string", "null"],
+        "description": "ElementId of the parent object"
+      },
+      "hasChildren": {
+        "type": "boolean",
+        "description": "Boolean indicating if element has child objects"
+      },
+      "namespaceUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "Namespace URI"
+      }
+    },
+    "required": ["elementId", "name", "typeId", "hasChildren", "namespaceUri"]
+  }
+}
