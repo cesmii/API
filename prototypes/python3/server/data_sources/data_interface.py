@@ -46,13 +46,8 @@ class I3XDataSource(ABC):
         pass
     
     @abstractmethod
-    def get_hierarchical_relationships(self) -> List[str]:
-        """Return hierarchical relationship types"""
-        pass
-    
-    @abstractmethod
-    def get_non_hierarchical_relationships(self) -> List[str]:
-        """Return non-hierarchical relationship types"""
+    def get_relationship_types(self) -> List[str]:
+        """Return relationship types"""
         pass
     
     @abstractmethod

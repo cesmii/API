@@ -32,9 +32,8 @@
         "get_object_type_by_id": "exploratory",
         "get_instances": "exploratory",
         "get_instance_by_id": "values",
+        "get_relationship_types": "exploratory",
         "get_related_instances": "exploratory",
-        "get_hierarchical_relationships": "exploratory",
-        "get_non_hierarchical_relationships": "exploratory",
         "update_instance_values": "updates",
         "get_all_instances": "subscriptions"
     }

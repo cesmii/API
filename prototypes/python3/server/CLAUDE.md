@@ -98,7 +98,7 @@ This is a FastAPI-based I3X (Industrial Information Interface eXchange) API serv
 ### Adding New Data Sources
 1. Create a new subfolder in `data_sources/` (e.g., `data_sources/database/`)
 2. Implement the `I3XDataSource` interface from `data_interface.py`
-   - Required methods: `start()`, `stop()`, `get_namespaces()`, `get_object_types()`, `get_object_type_by_id()`, `get_instances()`, `get_instance_by_id()`, `get_related_instances()`, `get_hierarchical_relationships()`, `get_non_hierarchical_relationships()`, `update_instance_values()`, `get_all_instances()`
+   - Required methods: `start()`, `stop()`, `get_namespaces()`, `get_object_types()`, `get_object_type_by_id()`, `get_instances()`, `get_instance_by_id()`, `get_related_instances()`, `get_relationship_types`, `update_instance_values()`, `get_all_instances()`
    - Call `update_callback` when values change to trigger subscription notifications
 3. Update `DataSourceFactory._create_single_source()` in `factory.py` to import and handle the new type
 4. Add the type name to `DataSourceFactory.get_supported_types()`

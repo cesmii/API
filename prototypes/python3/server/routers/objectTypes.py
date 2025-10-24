@@ -11,14 +11,14 @@ def get_data_source(request: Request) -> I3XDataSource:
     return request.app.state.data_source
 
 # RFC 4.1.2 - Object Type Definition
-@objectTypes.get("/objecttypes/{typeId}", response_model=ObjectType, tags=["Object Types"])
-def get_object_type_definition(typeId: str = Path(...), data_source: I3XDataSource = Depends(get_data_source)):
+@objectTypes.get("/objecttypes/{elementId}", response_model=ObjectType, tags=["Object Types"])
+def get_object_type_definition(elementId: str = Path(...), data_source: I3XDataSource = Depends(get_data_source)):
     """Return JSON structure defining a Type for the requested ElementId"""
-    objType_id = unquote(objType_id)
-    obj_type = data_source.get_object_type_by_id(objType_id)
+    elementId = unquote(elementId)
+    obj_type = data_source.get_object_type_by_id(elementId)
     if obj_type:
         return obj_type
-    raise HTTPException(status_code=404, detail=f"Object type '{objType_id}' not found")
+    raise HTTPException(status_code=404, detail=f"Object type '{elementId}' not found")
 
 # RFC 4.1.3 - Object Types
 @objectTypes.get("/objecttypes", response_model=List[ObjectType], tags=["Object Types"])

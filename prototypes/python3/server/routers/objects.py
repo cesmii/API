@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Path, Query, HTTPException, Request, Depends
+from fastapi import APIRouter, Path, Query, HTTPException, Request, Body, Depends
 from typing import List, Optional
 from urllib.parse import unquote
-from models import ObjectInstanceMinimal, ObjectInstance, HistoricalValue
+from models import ObjectInstanceMinimal, ObjectInstance, HistoricalValue, UpdateResult, UpdateRequest, HistoricalUpdateResult, HistoricalValueUpdate
 from data_sources.data_interface import I3XDataSource
 from datetime import datetime, timezone
 
@@ -11,7 +11,17 @@ def get_data_source(request: Request) -> I3XDataSource:
     """Dependency to inject data source"""
     return request.app.state.data_source
 
-# RFC 4.1.6 - Instances of an Object Type
+# RFC 4.1.4 - Relationship Types
+# Return all the relationship types supported by the data source
+@objects.get("/relationshiptypes", tags=["Objects"]) 
+def get_relationship_types(
+    data_source: I3XDataSource = Depends(get_data_source)
+) -> List[str]:
+    """Return array of relationship types supported by the data source"""
+    return data_source.get_relationship_types()
+
+# RFC 4.1.5 - Instances of an Object Type
+# Return all objects with a given typeId
 @objects.get("/objects", tags=["Objects"])
 def get_objects(
     typeId: Optional[str] = Query(default=None),
@@ -34,18 +44,31 @@ def get_objects(
     
     return instances
 
-@objects.get("/objects/{objectId}", tags=["Objects"])
+
+# 4.1.6 Objects linked by Relationship Type
+# Return all the relationship types supported by the data source
+@objects.get("/objects/{elementId}/related", tags=["Objects"])
+def get_related_objects(
+    elementId: str = Path(...),
+    relationshiptype: Optional[str] = Query(default=None),
+    data_source: I3XDataSource = Depends(get_data_source)
+):
+    """Return array of related objects for the requested ElementId"""
+    elementId = unquote(elementId)
+    related_objects = data_source.get_related_instances(elementId, relationshiptype)
+    return related_objects
+
+# RFC 4.1.7 - Object Definition
+# Return an object given it's elementId
+@objects.get("/objects/{elementId}/definition", tags=["Objects"])
 def get_objects_by_id(
-    objectId: str = Path(...),
+    elementId: str = Path(...),
     includeMetadata: bool = Query(default=False),
     data_source: I3XDataSource = Depends(get_data_source)
 ) -> ObjectInstanceMinimal | ObjectInstance:
     """Return an instance by its ElementId"""
-    i = data_source.get_instance_by_id(objectId)
-    
-    # Print the content of variable 'i' to the console
-    print(f"Content of 'i': {i}")
-    
+    i = data_source.get_instance_by_id(elementId)
+        
     # Check if instance was found, return 404 if not
     if not i:
         raise HTTPException(
@@ -66,45 +89,57 @@ def get_objects_by_id(
     
     return i
 
-# New route: Get related objects by relationship type
-@objects.get("/objects/{objectID}/related", tags=["Objects"])
-def get_related_objects(
-    objectId: str = Path(...),
-    relationshiptype: Optional[str] = Query(default=None, alias="relationshiptype"),
+
+# RFC 4.2.1.1 - [GET] Object Element LastKnown Value
+@objects.get("/objects/{elementId}", tags=["Objects"])
+def get_last_known_value(
+    elementId: str = Path(...),
+    includeMetadata: bool = Query(default=False),
     data_source: I3XDataSource = Depends(get_data_source)
 ):
-    """Return related instances for a given instance and relationship type"""
-    raise HTTPException(
-        status_code=501, 
-        detail="Operation not implemented"
-    )
+    """Return current value for requested object by ElementId"""
+    elementId = unquote(elementId)
+    instance = data_source.get_instance_by_id(elementId)
+    if instance:
+        result = {
+            "elementId": instance["elementId"],
+            "value": instance["attributes"],
+            "parentId": instance["parentId"],
+            "hasChildren": instance["hasChildren"],
+            "namespaceUri": instance["namespaceUri"]
+        }
+        
+        if includeMetadata:
+            result.update({
+                "dataType": "object",
+                "timestamp": instance.get("timestamp", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+            })
+        
+        return result
+    
+    raise HTTPException(status_code=404, detail=f"Element '{element_id}' not found")
 
-# New route: Get instance definition with metadata
-@objects.get("/objects/{objectID}/definition", tags=["Objects"])
-def get_object_definition(
-    objectID: str = Path(...),
-    includeMetadata: Optional[str] = Query(default=None),
-    data_source: I3XDataSource = Depends(get_data_source)
-):
-    """Return instance definition with optional metadata inclusion"""
-    raise HTTPException(
-        status_code=501, 
-        detail="Operation not implemented"
-    )
+# 4.2.2.1 [UPDATE] Object Element LastKnownValue
+@objects.put("/objects", tags=["Objects"])
+def update_object(update: UpdateRequest = Body(...), data_source: I3XDataSource = Depends(get_data_source)):
+    if len(update.elementIds) != len(update.values):
+        raise HTTPException(status_code=400, detail="elementIds and values arrays must be of the same length")
+    
+    return data_source.update_instance_values(update.elementIds, update.values)
 
-# RFC 4.2.1.2 - Object Element HistoricalValue
-@objects.get("/objects/{objectId}/history", response_model=List[HistoricalValue], tags=["Objects"])
-def get_historical_values_by_objectId(
-    objectId: str = Path(...),
+# RFC 4.2.1.2 - [GET] Object Element HistoricalValue
+@objects.get("/objects/{elementId}/history", response_model=List[HistoricalValue], tags=["Objects"])
+def get_historical_values(
+    elementId: str = Path(...),
     startTime: Optional[str] = Query(default=None),
     endTime: Optional[str] = Query(default=None),
     includeMetadata: bool = Query(default=False),
     data_source: I3XDataSource = Depends(get_data_source)
 ):
     """Return array of historical values for requested object by ElementId"""
-    objectId = unquote(objectId)
+    elementId = unquote(elementId)
     # Mock historical data - in real implementation this would query historical store
-    instance = data_source.get_instance_by_id(objectId)
+    instance = data_source.get_instance_by_id(elementId)
     if instance:
         # Return mock historical data
         historical_values = [{
@@ -124,35 +159,9 @@ def get_historical_values_by_objectId(
     
     raise HTTPException(status_code=404, detail=f"Element '{objectId}' not found")
 
-# RFC 4.2.1.1 - Object Element LastKnown Value
-@objects.put("/objects/{objectID}", tags=["Objects"])
-def update_object(
-    objectID: str = Path(...),
-    data_source: I3XDataSource = Depends(get_data_source)
-):
-    """Modify the specified object resource"""
-    raise HTTPException(
-        status_code=501, 
-        detail="Operation not implemented"
-    )
-
-# RFC 4.2.1.1 - Object Element LastKnown Value in Bulk
-@objects.put("/objects", tags=["Objects"])
-def update_objects_bulk(
-    data_source: I3XDataSource = Depends(get_data_source)
-):
-    """Modify a list of instances in bulk"""
-    raise HTTPException(
-        status_code=501, 
-        detail="Operation not implemented"
-    )
-
-# RFC 4.2.2.2 - Object Element HistoricalValue update
-@objects.put("/objects/{objectID}/history", tags=["Objects"])
-def update_object_history(
-    objectID: str = Path(...),
-    data_source: I3XDataSource = Depends(get_data_source)
-):
+# RFC 4.2.2.2 - [UPDATE] Object Element HistoricalValue
+@objects.put("/objects/history", tags=["Objects"])
+def update_object_history(data_source: I3XDataSource = Depends(get_data_source)):
     """Modify the history of a specific instance resource"""
     raise HTTPException(
         status_code=501, 

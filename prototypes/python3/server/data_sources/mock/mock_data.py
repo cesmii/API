@@ -329,20 +329,16 @@ I3X_DATA = {
             "timestamp": "2025-07-07T10:15:30Z"
         }
     ],
-    "relationships": {
-        "hierarchical": {
-            "HasParent": "HasChildren",
-            "HasChildren": "HasParent"
-        },
-        "nonHierarchical": {
-            "Monitors": "MonitoredBy",
-            "Controls": "ControlledBy",
-            "ConnectsTo": "ConnectedBy",
-            "SuppliesTo": "SuppliedBy",
-            "MonitoredBy": "Monitors",
-            "ControlledBy": "Controls", 
-            "ConnectedBy": "ConnectsTo",
-            "SuppliedBy": "SuppliesTo"
-        }
-    },
+    "relationship_types": {
+        "HasParent": "HasChildren",
+        "HasChildren": "HasParent",
+        "Monitors": "MonitoredBy",
+        "Controls": "ControlledBy",
+        "ConnectsTo": "ConnectedBy",
+        "SuppliesTo": "SuppliedBy",
+        "MonitoredBy": "Monitors",
+        "ControlledBy": "Controls", 
+        "ConnectedBy": "ConnectsTo",
+        "SuppliedBy": "SuppliesTo",
+    }
 }
