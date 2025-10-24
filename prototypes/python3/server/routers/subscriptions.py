@@ -41,23 +41,23 @@ def create_subscription(request: Request, subscription: CreateSubscriptionReques
         raise HTTPException(status_code=400, detail="Unsupported QoS level. Only QoS0 and QoS2 are supported.")
 
     # For now make the subscription ID a simple index to make manual testing easy, but should be a UUID
-    subscription_id = str(len(request.app.state.I3X_DATA_SUBSCRIPTIONS))
+    subscriptionId = str(len(request.app.state.I3X_DATA_SUBSCRIPTIONS))
     new_sub = Subscription(
-        subscriptionId=subscription_id,
+        subscriptionId=subscriptionId,
         qos=subscription.qos,
         created=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     )
     request.app.state.I3X_DATA_SUBSCRIPTIONS.append(new_sub)
 
     return CreateSubscriptionResponse(
-        subscriptionId=subscription_id,
+        subscriptionId=subscriptionId,
         message="Subscription created successfully"
     )
 
 # RFC 4.2.3.2 - Register Monitored Items
-@subs.post("/subscriptions/{subscription_id}/objects", tags=["Subscriptions"])
-async def register_monitored_items(request: Request, subscription_id: str, req: RegisterMonitoredItemsRequest):
-    sub = next((s for s in request.app.state.I3X_DATA_SUBSCRIPTIONS if str(s.subscriptionId) == str(subscription_id)), None)
+@subs.post("/subscriptions/{subscriptionId}/objects", tags=["Subscriptions"])
+async def register_monitored_items(request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest):
+    sub = next((s for s in request.app.state.I3X_DATA_SUBSCRIPTIONS if str(s.subscriptionId) == str(subscriptionId)), None)
     if not sub:
         raise HTTPException(status_code=404, detail="Subscription not found")
 
@@ -111,12 +111,12 @@ async def register_monitored_items(request: Request, subscription_id: str, req: 
         return {"message": "Monitored items registered (QoS2). Use /sync to poll for changes."}
 
 # RFC 4.2.3.3 Sync
-@subs.post("/subscriptions/{subscription_id}/sync", response_model=List[SyncResponseItem], tags=["Subscriptions"])
-def sync_qos2(request: Request, subscription_id: str):
+@subs.post("/subscriptions/{subscriptionId}/sync", response_model=List[SyncResponseItem], tags=["Subscriptions"])
+def sync_qos2(request: Request, subscriptionId: str):
     """Sync changes for a QoS 2 subscription"""
 
     # Locate the subscription
-    sub = next((s for s in request.app.state.I3X_DATA_SUBSCRIPTIONS if str(s.subscriptionId) == str(subscription_id)), None)
+    sub = next((s for s in request.app.state.I3X_DATA_SUBSCRIPTIONS if str(s.subscriptionId) == str(subscriptionId)), None)
     if not sub:
         raise HTTPException(status_code=404, detail="Subscription not found")
 
