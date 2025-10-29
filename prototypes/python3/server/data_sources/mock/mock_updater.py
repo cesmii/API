@@ -7,50 +7,56 @@ from typing import List, Optional, Dict, Any, Callable
 
 class MockDataUpdater:
     """Handles random value generation for mock data source to simulate real-time updates"""
-    
+
     def __init__(self, data_source):
         self.data_source = data_source
         self.running = False
         self.thread = None
         self.update_callback = None
-        
+
     def start(self, update_callback: Optional[Callable] = None):
         """Start the background thread that generates random updates"""
         if self.running:
             return
-        
+
         self.update_callback = update_callback
         self.running = True
         self.thread = threading.Thread(target=self._update_loop, daemon=True)
         self.thread.start()
-        
+
     def stop(self):
         """Stop the background update thread"""
         self.running = False
         if self.thread:
             self.thread.join()
-            
+
     def _update_loop(self):
         """Main loop that generates random updates"""
         while self.running:
             # Get all instances from the data source
             instances = self.data_source.get_all_instances()
-            
+
             # Generate random updates for non-static instances
-            for instance in instances:
+            """for instance in instances:
                 # Skip instances with "static" flag set to True
                 if instance.get("static", False):
                     continue
-                    
+
                 # Randomize numeric values in the attributes
-                old_attributes = instance["attributes"].copy() if isinstance(instance["attributes"], dict) else instance["attributes"]
-                self.randomize_numeric_values(instance["attributes"])
-                
+                old_attributes = (
+                    instance["values"].copy()
+                    if isinstance(instance["values"], dict)
+                    else instance["values"]
+                )
+                # self.randomize_numeric_values(instance["values"])
+
                 # Update timestamp
-                instance["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-                
+                instance["timestamp"] = datetime.now(timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
+
                 # If callback is provided, notify about the update
-                if self.update_callback and old_attributes != instance["attributes"]:
+                if self.update_callback and old_attributes != instance["values"]:
                     update = {
                         "elementId": instance["elementId"],
                         "name": instance["name"],
@@ -58,13 +64,13 @@ class MockDataUpdater:
                         "parentId": instance["parentId"],
                         "hasChildren": instance["hasChildren"],
                         "namespaceUri": instance["namespaceUri"],
-                        "value": instance["attributes"],
-                        "timestamp": instance["timestamp"]
+                        "value": instance["values"],
+                        "timestamp": instance["timestamp"],
                     }
                     self.update_callback(update)
-            
+            """
             time.sleep(1)  # Update every second
-    
+
     def randomize_numeric_values(self, obj):
         """Simulate data changes by changing numeric values in the data"""
         if isinstance(obj, dict):
