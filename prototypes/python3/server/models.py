@@ -26,8 +26,9 @@ class ObjectType(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the type")
     name: str = Field(..., description="Type name")
     namespaceUri: str = Field(..., description="Namespace URI")
-    schema: JSONResponse = Field(..., description="Schema")
-    # attributes: List[ObjectTypeAttribute] = Field(..., description="Type attributes")
+    schema: Dict[str, Any] = Field(
+        ..., description="JSON Schema definition for this object type"
+    )
 
 
 # RFC 3.1.1 - Required Object Metadata (Minimal Instance)

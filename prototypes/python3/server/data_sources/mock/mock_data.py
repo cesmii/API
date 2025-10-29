@@ -748,7 +748,7 @@ I3X_DATA = {
             },
         },
         {
-            "elementId": "",
+            "elementId": "measurement-type",
             "name": "Measurement",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
