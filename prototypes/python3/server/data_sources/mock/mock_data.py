@@ -1606,7 +1606,7 @@ I3X_DATA = {
         },
         {
             "elementId": "tank-201",
-            "name": "tank-102",
+            "name": "tank-201",
             "typeId": "work-unit-type",
             "hasChildren": True,
             "namespaceUri": "https://isa.org/isa95",
