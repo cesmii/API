@@ -37,38 +37,55 @@ class MockDataUpdater:
             instances = self.data_source.get_all_instances()
 
             # Generate random updates for non-static instances
-            """for instance in instances:
+            for instance in instances:
                 # Skip instances with "static" flag set to True
                 if instance.get("static", False):
                     continue
 
-                # Randomize numeric values in the attributes
-                old_attributes = (
-                    instance["values"].copy()
-                    if isinstance(instance["values"], dict)
-                    else instance["values"]
-                )
-                # self.randomize_numeric_values(instance["values"])
+                # Check if instance has a Values array
+                values_array = instance.get("Values")
+                if (
+                    not values_array
+                    or not isinstance(values_array, list)
+                    or len(values_array) == 0
+                ):
+                    continue
 
-                # Update timestamp
-                instance["timestamp"] = datetime.now(timezone.utc).strftime(
+                # Get the most recent value (first element in array)
+                current_value = values_array[0]
+
+                # Make a copy to detect changes
+                old_value = (
+                    current_value.copy()
+                    if isinstance(current_value, dict)
+                    else current_value
+                )
+
+                # Randomize numeric values in the current value
+                self.randomize_numeric_values(current_value)
+
+                # Update timestamp (check for both "Timestamp" and "timestamp")
+                timestamp_key = (
+                    "Timestamp" if "Timestamp" in current_value else "timestamp"
+                )
+                current_value[timestamp_key] = datetime.now(timezone.utc).strftime(
                     "%Y-%m-%dT%H:%M:%SZ"
                 )
 
                 # If callback is provided, notify about the update
-                if self.update_callback and old_attributes != instance["values"]:
+                if self.update_callback and old_value != current_value:
                     update = {
                         "elementId": instance["elementId"],
-                        "name": instance["name"],
-                        "typeId": instance["typeId"],
-                        "parentId": instance["parentId"],
-                        "hasChildren": instance["hasChildren"],
-                        "namespaceUri": instance["namespaceUri"],
-                        "value": instance["values"],
-                        "timestamp": instance["timestamp"],
+                        "name": instance.get("name", ""),
+                        "typeId": instance.get("typeId", ""),
+                        "parentId": instance.get("parentId"),
+                        "hasChildren": instance.get("hasChildren", False),
+                        "namespaceUri": instance.get("namespaceUri", ""),
+                        "value": current_value,
+                        "timestamp": current_value[timestamp_key],
                     }
                     self.update_callback(update)
-            """
+
             time.sleep(1)  # Update every second
 
     def randomize_numeric_values(self, obj):
