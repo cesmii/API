@@ -877,7 +877,6 @@ I3X_DATA = {
             "relationships": {
                 "HasChildren": ["cesmii-plant-1"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "cesmii-plant-1",
@@ -889,7 +888,6 @@ I3X_DATA = {
                 "HasParent": ["cesmii-enterprise"],
                 "HasChildren": ["cesmii-plant-1-utilities"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "cesmii-plant-1-utilities",
@@ -901,7 +899,6 @@ I3X_DATA = {
                 "HasParent": ["cesmii-plant-1"],
                 "HasChildren": ["cesmii-plant-1-utilities-water-system"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "cesmii-plant-1-utilities-water-system",
@@ -913,7 +910,6 @@ I3X_DATA = {
                 "HasParent": ["cesmii-plant-1-utilities"],
                 "HasChildren": ["cesmii-plant-1-utilities-water-system-pump-station"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "cesmii-plant-1-utilities-water-system-pump-station",
@@ -925,7 +921,6 @@ I3X_DATA = {
                 "HasParent": ["cesmii-plant-1-utilities-water-system"],
                 "HasChildren": ["cesmii-plant-1-utilities-water-system-pump-101"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "cesmii-plant-1-utilities-water-system-pump-101",
@@ -944,7 +939,6 @@ I3X_DATA = {
                 ],
                 "SuppliesTo": ["tank-201"],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-state",
@@ -1014,7 +1008,6 @@ I3X_DATA = {
                     },
                 },
             ],
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-alert",
@@ -1117,7 +1110,6 @@ I3X_DATA = {
                     },
                 },
             ],
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-product",
@@ -1127,45 +1119,44 @@ I3X_DATA = {
             "hasChildren": False,
             "relationships": {
                 "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
-                "Values": [
-                    {
-                        "timestamp": "2025-10-29T18:27:55.457173+00:00",
-                        "id": 1,
-                        "name": "Cooling Water",
-                        "description": "Process cooling water for heat exchange systems",
-                        "idealCycleTime": 3600,
-                        "tolerance": 0.05,
-                        "unit": "m\u00b3/h",
-                        "family": {
-                            "id": 1,
-                            "name": "Utilities",
-                            "description": "Utility products and services",
-                        },
-                        "metadata": {
-                            "source": "product-management",
-                            "uri": "product://cooling-water",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "specifications": {
-                                    "temperature": "15-25\u00b0C",
-                                    "pressure": "3-8 bar",
-                                    "quality": "Process Grade",
-                                    "chlorinated": True,
-                                },
-                                "regulatoryCompliance": [
-                                    "ISO 14001",
-                                    "Water Quality Standards",
-                                ],
-                            },
-                        },
-                    }
-                ],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:27:55.457173+00:00",
+                    "id": 1,
+                    "name": "Cooling Water",
+                    "description": "Process cooling water for heat exchange systems",
+                    "idealCycleTime": 3600,
+                    "tolerance": 0.05,
+                    "unit": "m\u00b3/h",
+                    "family": {
+                        "id": 1,
+                        "name": "Utilities",
+                        "description": "Utility products and services",
+                    },
+                    "metadata": {
+                        "source": "product-management",
+                        "uri": "product://cooling-water",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "specifications": {
+                                "temperature": "15-25\u00b0C",
+                                "pressure": "3-8 bar",
+                                "quality": "Process Grade",
+                                "chlorinated": True,
+                            },
+                            "regulatoryCompliance": [
+                                "ISO 14001",
+                                "Water Quality Standards",
+                            ],
+                        },
+                    },
+                }
+            ],
         },
         {
             "elementId": "pump-101-production",
@@ -1238,7 +1229,6 @@ I3X_DATA = {
                     },
                 }
             ],
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-measurements",
@@ -1254,7 +1244,6 @@ I3X_DATA = {
                     "pump-101-measurements-oil-analysis",
                 ],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-bearing-temperature",
@@ -1359,7 +1348,6 @@ I3X_DATA = {
                     },
                 },
             ],
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "pump-101-vibration-analysis",
@@ -1474,148 +1462,147 @@ I3X_DATA = {
             "hasChildren": False,
             "relationships": {
                 "HasParent": ["pump-101-measurements"],
-                "Values": [
-                    {
-                        "timestamp": "2025-10-29T18:35:42.019884+00:00",
-                        "type": {
-                            "id": 3,
-                            "name": "Oil Analysis",
-                            "description": "Oil quality measurement",
-                        },
-                        "value": 12.41,
-                        "unit": "mg/kg",
-                        "target": 8.0,
-                        "tolerance": 1.2,
-                        "inTolerance": False,
-                        "metadata": {
-                            "source": "precision-maintenance",
-                            "uri": "maintenance://pump-101/oil-analysis",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "technician": "Jane Doe",
-                                "measurementMethod": "Infrared Thermography",
-                                "equipmentUsed": "Fluke 1507",
-                                "measurementDate": "2025-10-29T18:35:42.019891+00:00",
-                                "nextMeasurementDue": "2024-06-15",
-                                "trend": "Deteriorating",
-                                "measurementLocation": "Oil Reservoir",
-                            },
-                        },
-                        "product": {
-                            "id": 1,
-                            "name": "Cooling Water",
-                            "description": "Process cooling water",
-                            "family": {
-                                "id": 1,
-                                "name": "Utilities",
-                                "description": "Utility products and services",
-                            },
-                        },
-                        "productionContext": {
-                            "batchId": "MAINT-2024-852",
-                            "processStep": "Precision Maintenance",
-                            "demand": "Emergency",
-                        },
-                    },
-                    {
-                        "timestamp": "2025-10-28T18:35:42.019884+00:00",
-                        "type": {
-                            "id": 3,
-                            "name": "Oil Analysis",
-                            "description": "Oil quality measurement",
-                        },
-                        "value": 9.35,
-                        "unit": "mg/kg",
-                        "target": 8.0,
-                        "tolerance": 1.2,
-                        "inTolerance": False,
-                        "metadata": {
-                            "source": "precision-maintenance",
-                            "uri": "maintenance://pump-101/oil-analysis",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "technician": "Jane Doe",
-                                "measurementMethod": "Infrared Thermography",
-                                "equipmentUsed": "Fluke 1507",
-                                "measurementDate": "2025-10-29T18:35:42.019891+00:00",
-                                "nextMeasurementDue": "2024-06-15",
-                                "trend": "Deteriorating",
-                                "measurementLocation": "Oil Reservoir",
-                            },
-                        },
-                        "product": {
-                            "id": 1,
-                            "name": "Cooling Water",
-                            "description": "Process cooling water",
-                            "family": {
-                                "id": 1,
-                                "name": "Utilities",
-                                "description": "Utility products and services",
-                            },
-                        },
-                        "productionContext": {
-                            "batchId": "MAINT-2024-852",
-                            "processStep": "Precision Maintenance",
-                            "demand": "Emergency",
-                        },
-                    },
-                    {
-                        "timestamp": "2025-10-27T18:35:42.019884+00:00",
-                        "type": {
-                            "id": 3,
-                            "name": "Oil Analysis",
-                            "description": "Oil quality measurement",
-                        },
-                        "value": 11.77,
-                        "unit": "mg/kg",
-                        "target": 8.0,
-                        "tolerance": 1.2,
-                        "inTolerance": False,
-                        "metadata": {
-                            "source": "precision-maintenance",
-                            "uri": "maintenance://pump-101/oil-analysis",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "technician": "Jane Doe",
-                                "measurementMethod": "Infrared Thermography",
-                                "equipmentUsed": "Fluke 1507",
-                                "measurementDate": "2025-10-29T18:35:42.019891+00:00",
-                                "nextMeasurementDue": "2024-06-15",
-                                "trend": "Deteriorating",
-                                "measurementLocation": "Oil Reservoir",
-                            },
-                        },
-                        "product": {
-                            "id": 1,
-                            "name": "Cooling Water",
-                            "description": "Process cooling water",
-                            "family": {
-                                "id": 1,
-                                "name": "Utilities",
-                                "description": "Utility products and services",
-                            },
-                        },
-                        "productionContext": {
-                            "batchId": "MAINT-2024-852",
-                            "processStep": "Precision Maintenance",
-                            "demand": "Emergency",
-                        },
-                    },
-                ],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 12.41,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 9.35,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-27T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 11.77,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+            ],
         },
         {
             "elementId": "tank-201",
@@ -1629,7 +1616,6 @@ I3X_DATA = {
                 "SuppliedBy": "pump-101",
                 "MonitoredBy": "sensor-001",
             },
-            "timestamp": "2025-10-29T10:15:30Z",
         },
         {
             "elementId": "tank-201-state",
@@ -1639,257 +1625,255 @@ I3X_DATA = {
             "hasChildren": False,
             "relationships": {
                 "HasParent": ["tank-201"],
-                "Values": [
-                    {
-                        "timestamp": "2025-10-29T18:42:41.516253+00:00",
-                        "description": "Tank is maintenance",
-                        "color": "#800080",
-                        "type": {
-                            "id": 5,
-                            "name": "Maintenance",
-                            "description": "Tank under maintenance",
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:42:41.516253+00:00",
+                    "description": "Tank is maintenance",
+                    "color": "#800080",
+                    "type": {
+                        "id": 5,
+                        "name": "Maintenance",
+                        "description": "Tank under maintenance",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
                         },
-                        "metadata": {
-                            "source": "plc-controller",
-                            "uri": "opc://plc1/DB1.DBW10",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "previousState": {
+                        "previousState": {
+                            "id": 2,
+                            "name": "Full",
+                            "description": "Tank is full",
+                            "color": "#228B22",
+                            "type": {
                                 "id": 2,
                                 "name": "Full",
                                 "description": "Tank is full",
-                                "color": "#228B22",
-                                "type": {
-                                    "id": 2,
-                                    "name": "Full",
-                                    "description": "Tank is full",
-                                },
                             },
-                            "additionalInfo": {
-                                "runTime": 562,
-                                "lastFillTime": "2025-10-29T18:42:41.516272+00:00",
-                                "mode": "MANUAL",
-                                "operator": "Eva Green",
-                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 562,
+                            "lastFillTime": "2025-10-29T18:42:41.516272+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Eva Green",
                         },
                     },
-                    {
-                        "timestamp": "2025-10-28T18:43:01.789262+00:00",
-                        "description": "Tank is filling",
-                        "color": "#00BFFF",
-                        "type": {
-                            "id": 1,
-                            "name": "Filling",
-                            "description": "Tank is being filled",
+                },
+                {
+                    "timestamp": "2025-10-28T18:43:01.789262+00:00",
+                    "description": "Tank is filling",
+                    "color": "#00BFFF",
+                    "type": {
+                        "id": 1,
+                        "name": "Filling",
+                        "description": "Tank is being filled",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
                         },
-                        "metadata": {
-                            "source": "plc-controller",
-                            "uri": "opc://plc1/DB1.DBW10",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "previousState": {
+                        "previousState": {
+                            "id": 3,
+                            "name": "Emptying",
+                            "description": "Tank is being emptied",
+                            "color": "#FFD700",
+                            "type": {
                                 "id": 3,
                                 "name": "Emptying",
                                 "description": "Tank is being emptied",
-                                "color": "#FFD700",
-                                "type": {
-                                    "id": 3,
-                                    "name": "Emptying",
-                                    "description": "Tank is being emptied",
-                                },
                             },
-                            "additionalInfo": {
-                                "runTime": 2669,
-                                "lastFillTime": "2025-10-29T18:43:01.789282+00:00",
-                                "mode": "MANUAL",
-                                "operator": "Tom Lee",
-                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 2669,
+                            "lastFillTime": "2025-10-29T18:43:01.789282+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Tom Lee",
                         },
                     },
-                    {
-                        "timestamp": "2025-10-27T18:43:27.125067+00:00",
-                        "description": "Tank is filling",
-                        "color": "#00BFFF",
-                        "type": {
-                            "id": 1,
-                            "name": "Filling",
-                            "description": "Tank is being filled",
+                },
+                {
+                    "timestamp": "2025-10-27T18:43:27.125067+00:00",
+                    "description": "Tank is filling",
+                    "color": "#00BFFF",
+                    "type": {
+                        "id": 1,
+                        "name": "Filling",
+                        "description": "Tank is being filled",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
                         },
-                        "metadata": {
-                            "source": "plc-controller",
-                            "uri": "opc://plc1/DB1.DBW10",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "previousState": {
+                        "previousState": {
+                            "id": 5,
+                            "name": "Maintenance",
+                            "description": "Tank under maintenance",
+                            "color": "#800080",
+                            "type": {
                                 "id": 5,
                                 "name": "Maintenance",
                                 "description": "Tank under maintenance",
-                                "color": "#800080",
-                                "type": {
-                                    "id": 5,
-                                    "name": "Maintenance",
-                                    "description": "Tank under maintenance",
-                                },
                             },
-                            "additionalInfo": {
-                                "runTime": 664,
-                                "lastFillTime": "2025-10-29T18:43:27.125086+00:00",
-                                "mode": "AUTO",
-                                "operator": "Alice Brown",
-                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 664,
+                            "lastFillTime": "2025-10-29T18:43:27.125086+00:00",
+                            "mode": "AUTO",
+                            "operator": "Alice Brown",
                         },
                     },
-                    {
-                        "timestamp": "2025-10-26T18:43:42.345524+00:00",
-                        "description": "Tank is low level",
-                        "color": "#FF4500",
-                        "type": {
-                            "id": 4,
-                            "name": "Low Level",
-                            "description": "Tank water level is low",
+                },
+                {
+                    "timestamp": "2025-10-26T18:43:42.345524+00:00",
+                    "description": "Tank is low level",
+                    "color": "#FF4500",
+                    "type": {
+                        "id": 4,
+                        "name": "Low Level",
+                        "description": "Tank water level is low",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
                         },
-                        "metadata": {
-                            "source": "plc-controller",
-                            "uri": "opc://plc1/DB1.DBW10",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "previousState": {
+                        "previousState": {
+                            "id": 3,
+                            "name": "Emptying",
+                            "description": "Tank is being emptied",
+                            "color": "#FFD700",
+                            "type": {
                                 "id": 3,
                                 "name": "Emptying",
                                 "description": "Tank is being emptied",
-                                "color": "#FFD700",
-                                "type": {
-                                    "id": 3,
-                                    "name": "Emptying",
-                                    "description": "Tank is being emptied",
-                                },
-                            },
-                            "additionalInfo": {
-                                "runTime": 1948,
-                                "lastFillTime": "2025-10-29T18:43:42.345542+00:00",
-                                "mode": "MANUAL",
-                                "operator": "Eva Green",
                             },
                         },
+                        "additionalInfo": {
+                            "runTime": 1948,
+                            "lastFillTime": "2025-10-29T18:43:42.345542+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Eva Green",
+                        },
                     },
-                ],
-            },
-            "timestamp": "2025-10-29T10:15:30Z",
+                },
+            ],
         },
         {
-            "elementId": "pump-101-alert",
-            "name": "pump-101 Alert",
+            "elementId": "tank-201-alert",
+            "name": "tank-201 Alert",
             "typeId": "alert-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
             "relationships": {
                 "HasParent": ["tank-201"],
-                "Values": [
-                    {
-                        "timestamp": "2025-10-29T18:44:17.833121+00:00",
-                        "severity": 2,
-                        "code": "LEVEL_LOW",
-                        "message": "Tank water level below minimum threshold",
-                        "metadata": {
-                            "source": "monitoring-system",
-                            "uri": "opc://plc1/DB1.DBD44",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "acknowledgment": {
-                                "acknowledged": False,
-                                "acknowledgedBy": None,
-                                "acknowledgedAt": None,
-                            },
-                            "additionalInfo": {
-                                "waterLevel": 3.84,
-                                "minThreshold": 1.0,
-                                "maxThreshold": 5.0,
-                                "sensorLocation": "Tank Center",
-                                "trend": "Falling",
-                                "timeInAlarm": 4,
-                                "recommendedAction": "Schedule maintenance",
-                                "priority": "Critical",
-                            },
-                        },
-                    },
-                    {
-                        "timestamp": "2025-10-28T18:44:38.104100+00:00",
-                        "severity": 3,
-                        "code": "QUALITY_ALARM",
-                        "message": "Water quality exceeds alarm threshold",
-                        "metadata": {
-                            "source": "monitoring-system",
-                            "uri": "opc://plc1/DB1.DBD44",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "acknowledgment": {
-                                "acknowledged": True,
-                                "acknowledgedBy": "Tom Lee",
-                                "acknowledgedAt": "2025-10-29T18:44:38.104091+00:00",
-                            },
-                            "additionalInfo": {
-                                "waterLevel": 3.74,
-                                "minThreshold": 1.0,
-                                "maxThreshold": 5.0,
-                                "sensorLocation": "Tank Center",
-                                "trend": "Rising",
-                                "timeInAlarm": 8,
-                                "recommendedAction": "Monitor",
-                                "priority": "Low",
-                            },
-                        },
-                    },
-                    {
-                        "timestamp": "2025-10-29T18:44:53.320437+00:00",
-                        "severity": 3,
-                        "code": "LEVEL_HIGH",
-                        "message": "Tank water level exceeds maximum threshold",
-                        "metadata": {
-                            "source": "monitoring-system",
-                            "uri": "opc://plc1/DB1.DBD44",
-                            "asset": {
-                                "id": 201,
-                                "name": "Tank-201",
-                                "description": "Raw water storage tank for process supply",
-                            },
-                            "acknowledgment": {
-                                "acknowledged": False,
-                                "acknowledgedBy": None,
-                                "acknowledgedAt": None,
-                            },
-                            "additionalInfo": {
-                                "waterLevel": 3.78,
-                                "minThreshold": 1.0,
-                                "maxThreshold": 5.0,
-                                "sensorLocation": "Tank Center",
-                                "trend": "Stable",
-                                "timeInAlarm": 5,
-                                "recommendedAction": "Check sensors",
-                                "priority": "High",
-                            },
-                        },
-                    },
-                ],
             },
-            "timestamp": "2025-10-29T10:15:30Z",
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:44:17.833121+00:00",
+                    "severity": 2,
+                    "code": "LEVEL_LOW",
+                    "message": "Tank water level below minimum threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.84,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Falling",
+                            "timeInAlarm": 4,
+                            "recommendedAction": "Schedule maintenance",
+                            "priority": "Critical",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:44:38.104100+00:00",
+                    "severity": 3,
+                    "code": "QUALITY_ALARM",
+                    "message": "Water quality exceeds alarm threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": True,
+                            "acknowledgedBy": "Tom Lee",
+                            "acknowledgedAt": "2025-10-29T18:44:38.104091+00:00",
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.74,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Rising",
+                            "timeInAlarm": 8,
+                            "recommendedAction": "Monitor",
+                            "priority": "Low",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-29T18:44:53.320437+00:00",
+                    "severity": 3,
+                    "code": "LEVEL_HIGH",
+                    "message": "Tank water level exceeds maximum threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.78,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Stable",
+                            "timeInAlarm": 5,
+                            "recommendedAction": "Check sensors",
+                            "priority": "High",
+                        },
+                    },
+                },
+            ],
         },
         {
             "elementId": "sensor-001",
@@ -1898,14 +1882,37 @@ I3X_DATA = {
             "parentId": "cesmii-plant-1-utilities-water-system",
             "hasChildren": False,
             "namespaceUri": "https://thinkiq.com/equipment",
-            "Values": {
-                "value": 65.4,
-                "engUnit": "CEL",
-                "status": "active",
-                "calibrationDate": "2025-01-15",
-            },
             "relationships": {"Monitors": ["tank-201"]},
-            "timestamp": "2025-07-07T10:15:30Z",
+            "Values": [
+                {
+                    "Value": 65.4,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-29T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
+                },
+                {
+                    "Value": 67.1,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-28T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
+                },
+                {
+                    "Value": 54.9,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-27T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
+                },
+                {
+                    "Value": 68.2,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-26T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
+                },
+            ],
         },
     ],
     "relationshipTypes": [

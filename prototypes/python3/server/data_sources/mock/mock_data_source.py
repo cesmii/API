@@ -1,140 +1,274 @@
+from datetime import datetime
 from typing import List, Optional, Dict, Any, Callable
 from ..data_interface import I3XDataSource
 from .mock_data import I3X_DATA
 from .mock_updater import MockDataUpdater
 
+
 class MockDataSource(I3XDataSource):
     """Mock data implementation of I3XDataSource"""
-    
+
     def __init__(self):
         self.data = I3X_DATA
         self.updater = MockDataUpdater(self)
         self.update_callback = None
-    
-    def start(self, update_callback: Optional[Callable[[Dict[str, Any]], None]] = None) -> None:
+
+    def start(
+        self, update_callback: Optional[Callable[[Dict[str, Any]], None]] = None
+    ) -> None:
         """Initialize mock data source and start background updates"""
         self.update_callback = update_callback
         self.updater.start(self.update_callback)
-    
+
     def stop(self) -> None:
         """Stop mock data source and cleanup background updates"""
         self.updater.stop()
-    
+
     def get_namespaces(self) -> List[Dict[str, Any]]:
-        return self.data['namespaces']
-    
-    def get_object_types(self, namespace_uri: Optional[str] = None) -> List[Dict[str, Any]]:
+        return self.data["namespaces"]
+
+    def get_object_types(
+        self, namespace_uri: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         if namespace_uri:
-            return [t for t in self.data['objectTypes'] if t['namespaceUri'] == namespace_uri]
-        return self.data['objectTypes']
-    
+            return [
+                t
+                for t in self.data["objectTypes"]
+                if t["namespaceUri"] == namespace_uri
+            ]
+        return self.data["objectTypes"]
+
     def get_object_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
-        for obj_type in self.data['objectTypes']:
-            if obj_type['elementId'] == element_id:
+        for obj_type in self.data["objectTypes"]:
+            if obj_type["elementId"] == element_id:
                 return obj_type
         return None
-    
+
+    def get_relationship_types(
+        self, namespace_uri: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        if namespace_uri:
+            return [
+                t
+                for t in self.data["relationshipTypes"]
+                if t["namespaceUri"] == namespace_uri
+            ]
+        return self.data["relationshipTypes"]
+
     def get_instances(self, type_id: Optional[str] = None) -> List[Dict[str, Any]]:
-        instances = self.data['instances']
+        instances = self.data["instances"]
         results = []
         if type_id:
-            for instance in instances: 
-                if instance['typeId'] == type_id:
+            for instance in instances:
+                if instance["typeId"] == type_id:
                     results.append(instance)
         else:
-            results = instances 
+            results = instances
 
-        return results
-    
-    def get_instance_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
-        for instance in self.data['instances']:
-            if instance['elementId'] == element_id:
-                return instance
-        return None
-    
-    def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
-        related_objects = []
-        
-        # Handle hierarchical relationships
-        if relationship_type.lower() == "haschildren":
-            related_objects = [i for i in self.data['instances'] if i.get('parentId') == element_id]
-        elif relationship_type.lower() == "hasparent":
-            for instance in self.data['instances']:
-                if instance['elementId'] == element_id and instance.get('parentId'):
-                    parent = next((i for i in self.data['instances'] if i['elementId'] == instance['parentId']), None)
-                    if parent:
-                        related_objects = [parent]
-        # Handle non-hierarchical relationships dynamically
+        # Filter out Values member from each instance before returning (unique to mock data)
+        filtered_results = []
+        for instance in results:
+            filtered_instance = {k: v for k, v in instance.items() if k != "Values"}
+            filtered_results.append(filtered_instance)
+
+        return filtered_results
+
+    def get_instance_values_by_id(
+        self,
+        element_id: str,
+        startTime: Optional[str] = None,
+        endTime: Optional[str] = None,
+    ):
+        instance_with_values = self.get_instance_by_id(element_id, values=True)
+
+        if not instance_with_values:
+            return None
+
+        # Get the Values array
+        values_array = instance_with_values.get("Values")
+
+        # If no Values or Values is not a list, return as is
+        if not values_array or not isinstance(values_array, list):
+            return instance_with_values
+
+        # Filter based on time range
+        if startTime and endTime:
+            # Parse time strings to datetime objects for comparison
+            start_dt = datetime.fromisoformat(startTime.replace("Z", "+00:00"))
+            end_dt = datetime.fromisoformat(endTime.replace("Z", "+00:00"))
+
+            # Filter Values array to only include items within time range
+            filtered_values = []
+            for value_item in values_array:
+                # Check for both "timestamp" and "Timestamp" (case-insensitive)
+                timestamp_key = None
+                for key in ["timestamp", "Timestamp"]:
+                    if key in value_item:
+                        timestamp_key = key
+                        break
+
+                if timestamp_key:
+                    value_dt = datetime.fromisoformat(
+                        value_item[timestamp_key].replace("Z", "+00:00")
+                    )
+                    if start_dt <= value_dt <= end_dt:
+                        filtered_values.append(value_item)
+
+            instance_with_values["Values"] = filtered_values
         else:
-            related_objects = self._process_non_hierarchical_relations(element_id, relationship_type.lower())
-        
-        # Add relationship type metadata
-        for obj in related_objects:
-            obj['relationType'] = relationship_type
-        
-        return related_objects
+            # No time range specified - return only the most recent value based on timestamp
+            most_recent = None
+            most_recent_dt = None
 
-    def get_relationship_types(self) -> List[str]:
-        """Return relationship types"""
-        return list(self.data['relationship_types'])
+            for value_item in values_array:
+                # Check for both "timestamp" and "Timestamp" (case-insensitive)
+                timestamp_key = None
+                for key in ["timestamp", "Timestamp"]:
+                    if key in value_item:
+                        timestamp_key = key
+                        break
 
-    
-    def _process_non_hierarchical_relations(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
-        """Dynamically determine relationships based on instance metadata and semantic patterns"""
+                if timestamp_key:
+                    value_dt = datetime.fromisoformat(
+                        value_item[timestamp_key].replace("Z", "+00:00")
+                    )
+                    if most_recent_dt is None or value_dt > most_recent_dt:
+                        most_recent_dt = value_dt
+                        most_recent = value_item
+
+            if most_recent:
+                instance_with_values["Values"] = [most_recent]
+            else:
+                instance_with_values["Values"] = []
+
+        return instance_with_values
+
+    def get_instance_by_id(
+        self, element_id: str, values: bool = False
+    ) -> Optional[Dict[str, Any]]:
+        for instance in self.data["instances"]:
+            if instance["elementId"] == element_id:
+                if values:
+                    # Return instance with Values included
+                    return instance
+                else:
+                    # Filter out Values member from each instance before returning (unique to mock data)
+                    filtered_instance = {
+                        k: v for k, v in instance.items() if k != "Values"
+                    }
+                    return filtered_instance
+        return None
+
+    def get_related_instances(
+        self, element_id: str, relationship_type: str
+    ) -> List[Dict[str, Any]]:
         related_objects = []
-        source_instance = self.get_instance_by_id(element_id)
-        
+
+        # Get the source instance directly from data (not filtered) to preserve relationships
+        source_instance = None
+        for instance in self.data["instances"]:
+            if instance["elementId"] == element_id:
+                source_instance = instance
+                break
+
         if not source_instance:
             return related_objects
-        
+
         # Check if instance has explicit relationship metadata
-        relationships_metadata = source_instance.get('relationships', {})
-        if relationship_type in relationships_metadata:
+        relationships_metadata = source_instance.get("relationships", {})
+
+        # Look for the relationship type (case-insensitive match)
+        matching_key = None
+        for key in relationships_metadata.keys():
+            if key.lower() == relationship_type.lower():
+                matching_key = key
+                break
+
+        if matching_key:
             # Return instances based on explicit relationship declarations
-            related_ids = relationships_metadata[relationship_type]
-            related_objects = [i for i in self.data['instances'] if i['elementId'] in related_ids]
-        
-        return related_objects
-       
-    def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
+            related_ids = relationships_metadata[matching_key]
+            if isinstance(related_ids, list):
+                # Get instances directly from data for list of IDs
+                related_objects = [
+                    i for i in self.data["instances"] if i["elementId"] in related_ids
+                ]
+            else:
+                # Handle single ID case - get directly from data
+                for instance in self.data["instances"]:
+                    if instance["elementId"] == related_ids:
+                        related_objects = [instance]
+                        break
+        # Fallback: Handle non-hierarchical relationships dynamically
+        else:
+            related_objects = self._process_non_hierarchical_relations(
+                element_id, relationship_type.lower()
+            )
+
+        # Filter out Values member from each instance before returning (unique to mock data)
+        filtered_results = []
+        for instance in related_objects:
+            filtered_instance = {k: v for k, v in instance.items() if k != "Values"}
+            filtered_results.append(filtered_instance)
+
+        return filtered_results
+
+    def _process_non_hierarchical_relations(
+        self, element_id: str, relationship_type: str
+    ) -> List[Dict[str, Any]]:
+        """Fallback for dynamically determining relationships not found in metadata"""
+        # This method can be extended in the future for semantic pattern matching
+        # For now, return empty list since relationships should be explicit
+        return []
+
+    def update_instance_values(
+        self, element_ids: List[str], values: List[Any]
+    ) -> List[Dict[str, Any]]:
         from datetime import datetime, timezone
-        
+
         results = []
         for element_id, value in zip(element_ids, values):
             instance = self.get_instance_by_id(element_id)
             if not instance:
-                results.append({
-                    "elementId": element_id,
-                    "success": False,
-                    "message": "Element not found"
-                })
+                results.append(
+                    {
+                        "elementId": element_id,
+                        "success": False,
+                        "message": "Element not found",
+                    }
+                )
                 continue
-            
+
             try:
                 # Validate the write schema matches the instance schema
                 value_schema = self._get_schema(value)
-                instance_schema = self._get_schema(instance['attributes'])
+                instance_schema = self._get_schema(instance["attributes"])
 
                 if value_schema != instance_schema:
                     raise Exception("Value schema does not match instance schema")
 
-                instance['attributes'] = value
-                instance['timestamp'] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-                
-                results.append({
-                    "elementId": element_id,
-                    "success": True,
-                    "message": "Updated successfully"
-                })
+                instance["attributes"] = value
+                instance["timestamp"] = datetime.now(timezone.utc).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
+
+                results.append(
+                    {
+                        "elementId": element_id,
+                        "success": True,
+                        "message": "Updated successfully",
+                    }
+                )
             except Exception as e:
-                results.append({
-                    "elementId": element_id,
-                    "success": False,
-                    "message": f"Update failed: {str(e)}"
-                })
-        
+                results.append(
+                    {
+                        "elementId": element_id,
+                        "success": False,
+                        "message": f"Update failed: {str(e)}",
+                    }
+                )
+
         return results
-    
+
     def _get_schema(self, obj):
         """Helper to get the schema for dictionaries"""
         if isinstance(obj, dict):
@@ -145,6 +279,6 @@ class MockDataSource(I3XDataSource):
             return [self._get_schema(obj[0])]
         else:
             return type(obj).__name__
-    
+
     def get_all_instances(self) -> List[Dict[str, Any]]:
-        return self.data['instances']
+        return self.data["instances"]

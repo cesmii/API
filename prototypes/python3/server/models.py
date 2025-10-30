@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any, Union, Callable
@@ -14,13 +13,6 @@ class Namespace(BaseModel):
     name: str = Field(..., description="Namespace name")
 
 
-# Object Type Attribute Model
-class ObjectTypeAttribute(BaseModel):
-    name: str = Field(..., description="Attribute name")
-    dataType: str = Field(..., description="JavaScript primitive data type")
-    engUnit: Optional[str] = Field(None, description="Engineering unit (UNECE Rec 20)")
-
-
 # RFC 4.1.2/4.1.3 - Object Type Model
 class ObjectType(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the type")
@@ -28,6 +20,24 @@ class ObjectType(BaseModel):
     namespaceUri: str = Field(..., description="Namespace URI")
     schema: Dict[str, Any] = Field(
         ..., description="JSON Schema definition for this object type"
+    )
+
+
+# RFC 4.1.4/4.1.5 - Relationship Type Model
+class RelationshipTypeDirection(BaseModel):
+    Subject: str = Field(..., description="Subject relationship name")
+    Target: str = Field(..., description="Target relationship name")
+    Cardinality: str = Field(..., description="Cardinality of the relationship")
+
+
+class RelationshipType(BaseModel):
+    elementId: str = Field(
+        ..., description="Unique string identifier for the relationship type"
+    )
+    name: str = Field(..., description="Relationship type name")
+    namespaceUri: str = Field(..., description="Namespace URI")
+    directions: List[RelationshipTypeDirection] = Field(
+        ..., description="Relationship directions and cardinality"
     )
 
 
@@ -63,8 +73,9 @@ class ObjectLinkedByRelationshipType(BaseModel):
 
 # RFC 3.1.1 + 3.1.2 - Full Object Instance with Attributes
 class ObjectInstance(ObjectInstanceMinimal):
-    attributes: Dict[str, Any] = Field(..., description="Object attribute values")
-    timestamp: Optional[str] = Field(None, description="ISO 8601 timestamp")
+    relationships: Optional[Dict[str, Any]] = Field(
+        None, description="Relationships to other objects"
+    )
 
 
 # RFC 4.2.1.1 - Last Known Value Response
@@ -87,7 +98,10 @@ class LastKnownValue(BaseModel):
 # RFC 4.2.1.2 - Historical Value Response
 class HistoricalValue(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the element")
-    value: Dict[str, Any] = Field(..., description="Historical attribute values")
+    value: Union[Dict[str, Any], List[Dict[str, Any]]] = Field(
+        ...,
+        description="Historical attribute values (can be a dict or array of objects)",
+    )
     timestamp: str = Field(..., description="ISO 8601 timestamp when data was recorded")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
     hasChildren: bool = Field(

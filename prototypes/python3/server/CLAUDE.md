@@ -45,7 +45,7 @@ This is a FastAPI-based I3X (Industrial Information Interface eXchange) API serv
     - `mqtt_data_source.py`: Paho MQTT client, topic cache, and interface handlers (subscribes to one or more topics on a single broker)
 - **routers/**: API endpoint implementations organized by functionality (use dependency injection for data access)
   - `namespaces.py`: Namespace operations (RFC 4.1.1)
-  - `objectTypes.py`: Object type definitions and queries (RFC 4.1.2-4.1.3)
+  - `types.py`: Type definitions and queries (RFC 4.1.2-4.1.3)
   - `objects.py`: Object instance queries (RFC 4.1.6-4.1.8)
   - `relationshipTypes.py`: Relationship type queries (RFC 4.1.4-4.1.5)
   - `subscriptions.py`: Real-time data streaming with QoS0/QoS2 support (RFC 4.2.3.x)
@@ -81,7 +81,7 @@ This is a FastAPI-based I3X (Industrial Information Interface eXchange) API serv
   "data_source_routing": {
     "primary": "exploratory",
     "get_namespaces": "exploratory",
-    "get_object_types": "exploratory", 
+    "get_object_types": "exploratory",
     "get_instance_by_id": "values",
     "update_instance_values": "updates",
     "get_all_instances": "subscriptions"
