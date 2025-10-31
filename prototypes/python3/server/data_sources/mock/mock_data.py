@@ -871,7 +871,6 @@ I3X_DATA = {
         {
             "elementId": "cesmii",
             "name": "CESMII",
-            "description": "CESMII enterprise",
             "typeId": "enterprise-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -883,7 +882,6 @@ I3X_DATA = {
         {
             "elementId": "cesmii-plant1",
             "name": "Plant 1",
-            "description": "CESMII Plant 1",
             "typeId": "site-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
