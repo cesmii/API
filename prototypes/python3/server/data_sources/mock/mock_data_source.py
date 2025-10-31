@@ -55,6 +55,13 @@ class MockDataSource(I3XDataSource):
             ]
         return self.data["relationshipTypes"]
 
+
+    def get_relationship_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
+        for obj_type in self.data["relationshipTypes"]:
+            if obj_type["elementId"] == element_id:
+                return obj_type
+        return None
+
     def get_instances(self, type_id: Optional[str] = None) -> List[Dict[str, Any]]:
         instances = self.data["instances"]
         results = []
@@ -68,7 +75,7 @@ class MockDataSource(I3XDataSource):
         # Filter out Values member from each instance before returning (unique to mock data)
         filtered_results = []
         for instance in results:
-            filtered_instance = {k: v for k, v in instance.items() if k != "Values"}
+            filtered_instance = {k: v for k, v in instance.items() if k != "values"}
             filtered_results.append(filtered_instance)
 
         return filtered_results
@@ -79,17 +86,19 @@ class MockDataSource(I3XDataSource):
         startTime: Optional[str] = None,
         endTime: Optional[str] = None,
     ):
-        instance_with_values = self.get_instance_by_id(element_id, values=True)
+        instance = self.get_instance_by_id(element_id, values=True)
 
-        if not instance_with_values:
+        if not instance:
             return None
 
         # Get the Values array
-        values_array = instance_with_values.get("Values")
+        values_array = instance.get("values")
 
         # If no Values or Values is not a list, return as is
         if not values_array or not isinstance(values_array, list):
-            return instance_with_values
+            return None
+
+        returned_value = None
 
         # Filter based on time range
         if startTime and endTime:
@@ -114,7 +123,7 @@ class MockDataSource(I3XDataSource):
                     if start_dt <= value_dt <= end_dt:
                         filtered_values.append(value_item)
 
-            instance_with_values["Values"] = filtered_values
+            returned_value = filtered_values
         else:
             # No time range specified - return only the most recent value based on timestamp
             most_recent = None
@@ -136,12 +145,9 @@ class MockDataSource(I3XDataSource):
                         most_recent_dt = value_dt
                         most_recent = value_item
 
-            if most_recent:
-                instance_with_values["Values"] = [most_recent]
-            else:
-                instance_with_values["Values"] = []
+            returned_value = most_recent
 
-        return instance_with_values
+        return returned_value
 
     def get_instance_by_id(
         self, element_id: str, values: bool = False
@@ -154,7 +160,7 @@ class MockDataSource(I3XDataSource):
                 else:
                     # Filter out Values member from each instance before returning (unique to mock data)
                     filtered_instance = {
-                        k: v for k, v in instance.items() if k != "Values"
+                        k: v for k, v in instance.items() if k != "values"
                     }
                     return filtered_instance
         return None
@@ -207,7 +213,7 @@ class MockDataSource(I3XDataSource):
         # Filter out Values member from each instance before returning (unique to mock data)
         filtered_results = []
         for instance in related_objects:
-            filtered_instance = {k: v for k, v in instance.items() if k != "Values"}
+            filtered_instance = {k: v for k, v in instance.items() if k != "values"}
             filtered_results.append(filtered_instance)
 
         return filtered_results
@@ -220,14 +226,18 @@ class MockDataSource(I3XDataSource):
         # For now, return empty list since relationships should be explicit
         return []
 
-    def update_instance_values(
-        self, element_ids: List[str], values: List[Any]
-    ) -> List[Dict[str, Any]]:
+    def update_instance_value(
+        self, element_id: str, value: Any
+    ) -> Dict[str, Any]:
         from datetime import datetime, timezone
+
+        # Note this is a hack for now as the code below can handle multiple updates but for now we just want one
+        element_ids = [element_id]
+        values = [value]
 
         results = []
         for element_id, value in zip(element_ids, values):
-            instance = self.get_instance_by_id(element_id)
+            instance = self.get_instance_by_id(element_id, values=True)
             if not instance:
                 results.append(
                     {
@@ -241,12 +251,15 @@ class MockDataSource(I3XDataSource):
             try:
                 # Validate the write schema matches the instance schema
                 value_schema = self._get_schema(value)
-                instance_schema = self._get_schema(instance["attributes"])
+                instance_schema = self._get_schema(instance["values"][0])
+
+                print(f"Value schema: {value_schema}")
+                print(f"Instance schema: {instance_schema}")
 
                 if value_schema != instance_schema:
                     raise Exception("Value schema does not match instance schema")
 
-                instance["attributes"] = value
+                instance["values"][0] = value
                 instance["timestamp"] = datetime.now(timezone.utc).strftime(
                     "%Y-%m-%dT%H:%M:%SZ"
                 )
@@ -267,7 +280,7 @@ class MockDataSource(I3XDataSource):
                     }
                 )
 
-        return results
+        return results[0]
 
     def _get_schema(self, obj):
         """Helper to get the schema for dictionaries"""

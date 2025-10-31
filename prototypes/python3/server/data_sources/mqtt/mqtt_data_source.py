@@ -278,6 +278,15 @@ class MQTTDataSource(I3XDataSource):
     def get_relationship_types(self) -> List[str]:
         return ["HasChildren", "HasParent"]
 
+    # TODO - need to fix this to return proper types
+    def get_relationship_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
+        if element_id.lower() == "haschildren":
+            return "HasChildren"
+        elif element_id.lower() == "hasparent":
+            return "HasParent"
+        else:
+            return None
+
     def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
         """MQTT does not have non-hierarchical relationships, return empty"""
         if relationship_type.lower() == "haschildren":
@@ -328,8 +337,8 @@ class MQTTDataSource(I3XDataSource):
 
         # Other relationship types not supported
         return []
-    
-    def update_instance_values(self, element_ids: List[str], values: List[Any]) -> List[Dict[str, Any]]:
+
+    def update_instance_value(self, element_id: str, value: Any) -> Dict[str, Any]:
         """Update values for specified element IDs by publishing to MQTT topics"""
         if not self.is_connected or self.client is None:
             self.logger.error("MQTT client is not connected, cannot publish updates")

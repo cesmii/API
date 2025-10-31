@@ -36,10 +36,13 @@ class I3XDataSource(ABC):
         pass
 
     @abstractmethod
-    def get_relationship_types(
-        self, namespace_uri: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    def get_relationship_types(self, namespace_uri: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return relationship types"""
+        pass
+
+    @abstractmethod
+    def get_relationship_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
+        """Return relationship type by ElementId"""
         pass
 
     @abstractmethod
@@ -70,8 +73,8 @@ class I3XDataSource(ABC):
         pass
 
     @abstractmethod
-    def update_instance_values(
-        self, element_ids: List[str], values: List[Any]
+    def update_instance_value(
+        self, element_id: str, value: Any
     ) -> List[Dict[str, Any]]:
         """Update values for specified element IDs"""
         pass

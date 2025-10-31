@@ -148,7 +148,7 @@ Edit `config.json` to change server settings and data sources:
     "data_source_routing": {
         "primary": "exploratory",
         "get_instance_by_id": "values",
-        "update_instance_values": "updates",
+        "update_instance_value": "updates",
         "get_all_instances": "subscriptions"
     }
 }

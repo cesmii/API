@@ -104,6 +104,11 @@ class DataSourceManager(I3XDataSource):
         source = self._get_source_for_operation("get_relationship_types")
         return source.get_relationship_types(namespace_uri)
 
+    def get_relationship_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
+        """Return JSON structure defining a Type for the requested ElementId"""
+        source = self._get_source_for_operation("get_relationship_type_by_id")
+        return source.get_relationship_type_by_id(element_id)
+
     def get_instances(self, type_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return array of instance objects, optionally filtered by Type ElementId"""
         source = self._get_source_for_operation("get_instances")
@@ -121,12 +126,12 @@ class DataSourceManager(I3XDataSource):
         source = self._get_source_for_operation("get_related_instances")
         return source.get_related_instances(element_id, relationship_type)
 
-    def update_instance_values(
-        self, element_ids: List[str], values: List[Any]
+    def update_instance_value(
+        self, element_id: str, value: Any
     ) -> List[Dict[str, Any]]:
         """Update values for specified element IDs"""
-        source = self._get_source_for_operation("update_instance_values")
-        return source.update_instance_values(element_ids, values)
+        source = self._get_source_for_operation("update_instance_value")
+        return source.update_instance_value(element_id, value)
 
     def get_all_instances(self) -> List[Dict[str, Any]]:
         """Return all instances (used by subscription worker)"""

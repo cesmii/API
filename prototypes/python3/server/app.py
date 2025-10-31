@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from routers.namespaces import ns
 from routers.typeDefinitions import typeDefinitions
-from routers.objects import objects
+from routers.objects import explore, query, update
 from routers.subscriptions import subs, subscription_worker, handle_data_source_update
 from data_sources.factory import DataSourceFactory
 
@@ -97,7 +97,9 @@ app.state.I3X_DATA_SUBSCRIPTIONS = []  # List[Subscription]
 # Include namespaces
 app.include_router(ns)
 app.include_router(typeDefinitions)
-app.include_router(objects)
+app.include_router(explore)
+app.include_router(query)
+app.include_router(update)
 app.include_router(subs)
 
 

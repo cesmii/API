@@ -16,7 +16,7 @@ def get_data_source(request: Request) -> I3XDataSource:
 # RFC 4.1.1 - Namespaces
 @ns.get("/namespaces", response_model=List[Namespace], tags=["Namespaces"])
 def get_namespaces(data_source: I3XDataSource = Depends(get_data_source)):
-    """Return array of Namespaces registered in the CMIP"""
+    """Get all Namespaces"""
     return data_source.get_namespaces()
 
 from fastapi import HTTPException, status  
