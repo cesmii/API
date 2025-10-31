@@ -2,6 +2,7 @@ import asyncio
 import httpx
 import json
 import jsonschema
+from typing import Any
 
 
 #######################################
@@ -166,7 +167,20 @@ async def get_relationship_types(base_url: str = None, namespace_uri: str = None
     return await get(url, params)
 
 
-async def get_instances(
+async def get_relationship_type(base_url: str = None, element_id: str = None):
+    """get_relationship_type calls Get Relationship Type (RFC 4.1.4)
+    :param base_url: base URL of API method being called
+    :return: relationship type dict
+    """
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    if element_id is None:
+        raise TypeError("element_id cannot be None")
+    url = f"{base_url}/relationshiptypes/{element_id}"
+    return await get(url)
+
+
+async def get_objects(
     base_url: str = None, type_id: str = None, include_metadata: bool = False
 ):
     """get_instances calls Get Instances of an Object Type (RFC 4.1.5)
@@ -227,7 +241,7 @@ async def get_object(
     url = f"{base_url}/objects"
     if element_id is None:
         raise ValueError("element_id is required to run get_object")
-    url += f"/{element_id}/definition"
+    url += f"/{element_id}"
     params = {"includeMetadata": "false"}
     if include_metadata:
         params["includeMetadata"] = "true"
@@ -249,7 +263,7 @@ async def get_value(
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{base_url}/objects/{element_id}"
+    url = f"{base_url}/objects/{element_id}/value"
     params = {"includeMetadata": "false"}
     if include_metadata:
         params["includeMetadata"] = "true"
@@ -289,7 +303,25 @@ async def get_history(
 #######################################
 ########### Update Methods ############
 #######################################
-async def update(
+async def update_objects_current_value(
+    base_url: str = None,
+    element_id: str = None,
+    value: Any = None,
+    timestamp: str = None,
+):
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    url = f"{base_url}/objects"
+    if element_id is None:
+        raise ValueError("element_id is required to run update")
+    if value is None:
+        raise ValueError("value is required to run update")
+
+    url += f"/{element_id}/value"
+    payload = value
+    return await put(url, payload)
+
+async def update_object_history(
     base_url: str = None,
     element_ids: list[str] = None,
     values: list[str] = None,
@@ -312,20 +344,18 @@ async def update(
         raise ValueError("values is required to run update")
     if len(element_ids) != len(values):
         raise ValueError("element_ids and values must have same length")
+    if timestamps is None or len(timestamps) != len(values):
+        raise ValueError("timestamps must have same length as values")
 
-    if timestamps is not None and timestamps != [] and len(timestamps) == len(values):
-        updates = []
-        for element_id, value, timestamp in zip(element_ids, values, timestamps):
-            updates.append(
-                {"elementId": element_id, "value": value, "timestamp": timestamp}
-            )
-        url += "/history"
-        payload = updates
-    else:
-        payload = {
-            "elementIds": element_ids,
-            "values": values,
-        }
+   
+    updates = []
+    for element_id, value, timestamp in zip(element_ids, values, timestamps):
+        updates.append(
+            {"elementId": element_id, "value": value, "timestamp": timestamp}
+        )
+    url += "/history"
+    payload = updates
+   
     return await put(url, payload)
 
 
@@ -450,9 +480,21 @@ async def main():
             ##### EXPLORATORY METHODS #####
             elif user_selection == "1":
                 while True:
-                    print(
-                        f"Exploratory Methods\n0: Back\n1: Get Namespaces\n2: Get Object Type Definition\n3: Get Object Types\n4: Get Relationship Types\n5: Get Instances\n6: Get Related Objects\n7: Get Object Definition\nX: Quit\n"
+                    menu_text = (
+                        "Exploratory Methods\n"
+                        "0: Back\n"
+                        "1: Get Namespaces\n"
+                        "2: Get Object Types\n"
+                        "3: Get Object Type\n"
+                        "4: Get Objects\n"
+                        "5: Get Object\n"
+                        "6: Get Relationship Types\n"
+                        "7: Get Relationship Type\n"
+                        "8: Get Related Objects\n"
+                        "X: Quit\n"
                     )
+                    print(menu_text)
+
                     user_selection = get_user_selection(
                         ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "X"]
                     )
@@ -463,6 +505,15 @@ async def main():
                     elif user_selection == "1":
                         pretty_print_json(await get_namespaces(base_url))
                     elif user_selection == "2":
+                        namespace_uri = input(
+                            "Enter namespace URI to filter on (optional, leave blank to return all): "
+                        ).strip()
+                        if not namespace_uri:
+                            namespace_uri = None
+                        pretty_print_json(
+                            await get_object_types(base_url, namespace_uri)
+                        )
+                    elif user_selection == "3":
                         object_type = input("Enter Object Type's Element ID: ").strip()
                         try:
                             pretty_print_json(
@@ -475,29 +526,13 @@ async def main():
                                 print(f"Object type {object_type} not found")
                             else:
                                 raise e
-                    elif user_selection == "3":
-                        namespace_uri = input(
-                            "Enter namespace URI to filter on (optional, leave blank to return all): "
-                        ).strip()
-                        if not namespace_uri:
-                            namespace_uri = None
-                        pretty_print_json(
-                            await get_object_types(base_url, namespace_uri)
-                        )
                     elif user_selection == "4":
-                        namespace_uri = input(
-                            "Enter namespace URI to filter on (optional, leave blank to return all): "
-                        ).strip()
-                        if not namespace_uri:
-                            namespace_uri = None
-                        pretty_print_json(await get_relationship_types(base_url, namespace_uri))
-                    elif user_selection == "5":
                         type_id = input(
                             "Enter Type ElementID (leave blank to return all instance objects): "
                         ).strip()
                         try:
                             pretty_print_json(
-                                await get_instances(
+                                await get_objects(
                                     base_url, type_id, get_include_metadata()
                                 )
                             )
@@ -508,7 +543,46 @@ async def main():
                                 print(f"Type ID {type_id} not found")
                             else:
                                 raise e
+                    elif user_selection == "5":
+                        element_id = input("Enter ElementID (required): ").strip()
+                        try:
+                            pretty_print_json(
+                                await get_object(
+                                    base_url, element_id, get_include_metadata()
+                                )
+                            )
+                        except Exception as e:
+                            if str(e).startswith(
+                                "Client error '404 Not Found' for url"
+                            ):
+                                print(f"ElementID '{element_id}' not found")
+                            else:
+                                raise e
                     elif user_selection == "6":
+                        namespace_uri = input(
+                            "Enter namespace URI to filter on (optional, leave blank to return all): "
+                        ).strip()
+                        if not namespace_uri:
+                            namespace_uri = None
+                        pretty_print_json(await get_relationship_types(base_url, namespace_uri))
+                    elif user_selection == "7":
+                        type_id = input(
+                            "Enter RelationshipType ElementID (leave blank to return all objects): "
+                        ).strip()
+                        try:
+                            pretty_print_json(
+                                await get_relationship_type(
+                                    base_url, type_id
+                                )
+                            )
+                        except Exception as e:
+                            if str(e).startswith(
+                                "Client error '404 Not Found' for url"
+                            ):
+                                print(f"RelationshipType ID {type_id} not found")
+                            else:
+                                raise e
+                    elif user_selection == "8":
                         element_id = input("Enter ElementID (required): ").strip()
                         relationship_type = input(
                             "Enter Relationship Type (required, see 'Get Relationship Types'): "
@@ -528,21 +602,6 @@ async def main():
                                 print(
                                     f"ElementID '{element_id}' or Relationship Type '{relationship_type}' not found"
                                 )
-                            else:
-                                raise e
-                    elif user_selection == "7":
-                        element_id = input("Enter ElementID (required): ").strip()
-                        try:
-                            pretty_print_json(
-                                await get_object(
-                                    base_url, element_id, get_include_metadata()
-                                )
-                            )
-                        except Exception as e:
-                            if str(e).startswith(
-                                "Client error '404 Not Found' for url"
-                            ):
-                                print(f"ElementID '{element_id}' not found")
                             else:
                                 raise e
                     print("\n")
@@ -603,38 +662,32 @@ async def main():
             ##### UPDATE METHODS #####
             elif user_selection == "3":
                 while True:
-                    print(f"Update Methods\n0: Back\n1: Update Elements\nX: Quit\n")
-                    user_selection = get_user_selection(["0", "1", "X"])
+                    menu_text = (
+                        "Update Methods\n"
+                        "0: Back\n"
+                        "1: Update Object\n"
+                        "2: Update Object History (not implemented)\n"
+                        "X: Quit\n"
+                    )
+                    print(menu_text)
+
+                    user_selection = get_user_selection(["0", "1", "2", "X"])
                     if user_selection.upper() == "X":
                         exit()
                     elif user_selection == "0":
                         break
                     elif user_selection == "1":
-                        element_ids = []
-                        values = []
-                        while True:
-                            element_id = input("Enter Element ID to update: ").strip()
-                            value = input(
-                                f"Enter new value for Element ID '{element_id}': "
-                            ).strip()
-                            try:
-                                element_ids.append(element_id)
-                                values.append(json.loads(value))
-                            except ValueError:
-                                print(
-                                    f"Unable to parse value '{value}' as JSON, not adding element id/value to update."
-                                )
-
-                            another = input(
-                                "Enter another value? (1: yes, else no): "
-                            ).strip()
-                            if another != "1":
-                                break
-
-                        if element_ids != [] and values != []:
+                        element_id = input("Enter ElementID of the Object to update: ").strip()
+                        value = input(
+                            f"Enter the value: "
+                        ).strip()
+                          
+                        if element_id and value:
                             pretty_print_json(
-                                await update(base_url, element_ids, values, None)
+                                await update_objects_current_value(base_url, element_id, json.loads(value), None)
                             )
+                    elif user_selection == "2":
+                        print("Update Object History is not implemented in this test client.")
                     print("\n")
 
             ##### SUBSCRIPTION METHODS #####

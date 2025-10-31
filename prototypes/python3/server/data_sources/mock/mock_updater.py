@@ -43,7 +43,7 @@ class MockDataUpdater:
                     continue
 
                 # Check if instance has a Values array
-                values_array = instance.get("Values")
+                values_array = instance.get("values")
                 if (
                     not values_array
                     or not isinstance(values_array, list)

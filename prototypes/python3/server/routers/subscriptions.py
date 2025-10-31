@@ -28,7 +28,7 @@ class Subscription(BaseModel):
     )  # Needed to allow for StreamingResponse in the model
 
 
-subs = APIRouter(prefix="", tags=["Subscriptions"])
+subs = APIRouter(prefix="", tags=["Subscribe"])
 
 
 def get_data_source(request: Request) -> I3XDataSource:
@@ -37,9 +37,7 @@ def get_data_source(request: Request) -> I3XDataSource:
 
 
 # RFC 4.2.3.1 - Create Subscription
-@subs.post(
-    "/subscriptions", response_model=CreateSubscriptionResponse, tags=["Subscriptions"]
-)
+@subs.post("/subscriptions", response_model=CreateSubscriptionResponse)
 def create_subscription(request: Request, subscription: CreateSubscriptionRequest):
     """Register a client for a new subscription with specified QoS"""
 
@@ -65,7 +63,7 @@ def create_subscription(request: Request, subscription: CreateSubscriptionReques
 
 
 # RFC 4.2.3.2 - Register Monitored Items
-@subs.post("/subscriptions/{subscriptionId}/objects", tags=["Subscriptions"])
+@subs.post("/subscriptions/{subscriptionId}/objects")
 async def register_monitored_items(
     request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
 ):
@@ -141,8 +139,7 @@ async def register_monitored_items(
 # RFC 4.2.3.3 Sync
 @subs.post(
     "/subscriptions/{subscriptionId}/sync",
-    response_model=List[SyncResponseItem],
-    tags=["Subscriptions"],
+    response_model=List[SyncResponseItem]
 )
 def sync_qos2(request: Request, subscriptionId: str):
     """Sync changes for a QoS 2 subscription"""
@@ -170,7 +167,7 @@ def sync_qos2(request: Request, subscriptionId: str):
 
 
 # 4.2.3.4 Unsubscribe by SubscriptionId
-@subs.delete("/subscriptions/{subscriptionId}", tags=["Subscriptions"])
+@subs.delete("/subscriptions/{subscriptionId}")
 def delete_subscription(request: Request, subscriptionId: str):
     removed = []
     not_found = []

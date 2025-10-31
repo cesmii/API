@@ -34,7 +34,7 @@
         "get_instance_by_id": "values",
         "get_relationship_types": "exploratory",
         "get_related_instances": "exploratory",
-        "update_instance_values": "updates",
+        "update_instance_value": "updates",
         "get_all_instances": "subscriptions"
     }
 }

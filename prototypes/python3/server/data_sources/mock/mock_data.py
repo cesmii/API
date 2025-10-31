@@ -951,7 +951,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:20:44.779036+00:00",
                     "description": "Pump is in maintenance",
@@ -1020,7 +1020,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:24:50.802109+00:00",
                     "severity": 3,
@@ -1122,7 +1122,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:27:55.457173+00:00",
                     "id": 1,
@@ -1169,7 +1169,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:29:53.368598+00:00",
                     "start_ts": "2025-10-29T18:29:53.368607+00:00",
@@ -1256,7 +1256,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["pump-101-measurements"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-28T18:32:47.673157+00:00",
                     "type": {
@@ -1360,7 +1360,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["pump-101-measurements"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:34:55.885390+00:00",
                     "type": {
@@ -1465,7 +1465,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["pump-101-measurements"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:35:42.019884+00:00",
                     "type": {
@@ -1628,7 +1628,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["tank-201"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:42:41.516253+00:00",
                     "description": "Tank is maintenance",
@@ -1784,7 +1784,7 @@ I3X_DATA = {
             "relationships": {
                 "HasParent": ["tank-201"],
             },
-            "Values": [
+            "values": [
                 {
                     "timestamp": "2025-10-29T18:44:17.833121+00:00",
                     "severity": 2,
@@ -1885,7 +1885,7 @@ I3X_DATA = {
             "hasChildren": False,
             "namespaceUri": "https://thinkiq.com/equipment",
             "relationships": {"Monitors": ["tank-201"]},
-            "Values": [
+            "values": [
                 {
                     "Value": 65.4,
                     "Quality": "GOOD",
