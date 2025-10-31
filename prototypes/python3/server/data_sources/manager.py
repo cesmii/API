@@ -102,7 +102,7 @@ class DataSourceManager(I3XDataSource):
     ) -> List[Dict[str, Any]]:
         """Return array relationship types"""
         source = self._get_source_for_operation("get_relationship_types")
-        return source.get_relationship_types()
+        return source.get_relationship_types(namespace_uri)
 
     def get_instances(self, type_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return array of instance objects, optionally filtered by Type ElementId"""

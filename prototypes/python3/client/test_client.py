@@ -152,7 +152,7 @@ async def get_object_types(base_url: str = None, namespace_uri: str = None):
     return await get(url, params)
 
 
-async def get_relationship_types(base_url: str = None):
+async def get_relationship_types(base_url: str = None, namespace_uri: str = None):
     """get_relationship_types calls Get Relationship Types (RFC 4.1.4)
     :param base_url: base URL of API method being called
     :return: relationship types arr
@@ -160,7 +160,10 @@ async def get_relationship_types(base_url: str = None):
     if base_url is None:
         raise TypeError("base_url cannot be None")
     url = f"{base_url}/relationshiptypes"
-    return await get(url)
+    params = {}
+    if namespace_uri is not None:
+        params["namespaceUri"] = namespace_uri
+    return await get(url, params)
 
 
 async def get_instances(
@@ -482,7 +485,12 @@ async def main():
                             await get_object_types(base_url, namespace_uri)
                         )
                     elif user_selection == "4":
-                        pretty_print_json(await get_relationship_types(base_url))
+                        namespace_uri = input(
+                            "Enter namespace URI to filter on (optional, leave blank to return all): "
+                        ).strip()
+                        if not namespace_uri:
+                            namespace_uri = None
+                        pretty_print_json(await get_relationship_types(base_url, namespace_uri))
                     elif user_selection == "5":
                         type_id = input(
                             "Enter Type ElementID (leave blank to return all instance objects): "
