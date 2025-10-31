@@ -3,342 +3,2039 @@ from datetime import datetime
 # I3X API compliant mock data - Industrial Information Interface eXchange (RFC 001)
 I3X_DATA = {
     "namespaces": [
-        {"uri": "http://i3x.org/mfg/equipment", "name": "Equipment"},
-        {"uri": "http://i3x.org/mfg/process", "name": "Process"},
-        {"uri": "http://i3x.org/mfg/quality", "name": "Quality"}
+        {"uri": "https://cesmii.org/i3x", "name": "I3X"},
+        {"uri": "https://isa.org/isa95", "name": "ISA95"},
+        {"uri": "https://abelara.com/equipment", "name": "Abelara Equipment"},
+        {"uri": "https://thinkiq.com/equipment", "name": "ThinkIQ Equipment"},
+        {
+            "uri": "http://opcfoundation.org/UA/Machinery",
+            "name": "OPC UA for Machinery",
+        },
     ],
     "objectTypes": [
         {
-            "elementId": "machine-type-001",
-            "name": "CNCMachine",
-            "namespaceUri": "http://i3x.org/mfg/equipment",
-            "attributes": [
-                {"name": "serialNumber", "dataType": "string"},
-                {"name": "model", "dataType": "string"},
-                {"name": "status", "dataType": "string"},
-                {"name": "temperature", "dataType": "object", "engUnit": "CEL"},
-                {"name": "powerConsumption", "dataType": "object", "engUnit": "KWH"}
-            ]
+            "elementId": "enterprise-type",
+            "name": "Enterprise",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {"site": {"type": "array", "items": {}}},
+                "required": ["site"],
+            },
         },
         {
-            "elementId": "sensor-type-001",
-            "name": "TemperatureSensor",
-            "namespaceUri": "http://i3x.org/mfg/equipment",
-            "attributes": [
-                {"name": "value", "dataType": "number", "engUnit": "CEL"},
-                {"name": "status", "dataType": "string"},
-                {"name": "calibrationDate", "dataType": "string"}
-            ]
+            "elementId": "site-type",
+            "name": "Site",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {"area": {"type": "array", "items": {}}},
+                "required": ["area"],
+            },
         },
         {
-            "elementId": "process-type-001",
-            "name": "ManufacturingProcess",
-            "namespaceUri": "http://i3x.org/mfg/process",
-            "attributes": [
-                {"name": "name", "dataType": "string"},
-                {"name": "status", "dataType": "string"},
-                {"name": "startTime", "dataType": "string"},
-                {"name": "endTime", "dataType": "string"},
-                {"name": "efficiency", "dataType": "number"}
-            ]
-        }
+            "elementId": "area-type",
+            "name": "Area",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {"work-center": {"type": "array", "items": {}}},
+                "required": ["work-center"],
+            },
+        },
+        {
+            "elementId": "work-center-type",
+            "name": "Work-Center",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {"work-unit": {"type": "array", "items": {}}},
+                "required": ["work-unit"],
+            },
+        },
+        {
+            "elementId": "work-unit-type",
+            "name": "Work-Unit",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+            },
+        },
+        {
+            "elementId": "state-type",
+            "name": "State",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "description": {"type": "string"},
+                    "color": {"type": "string"},
+                    "type": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "previousState": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                    "color": {"type": "string"},
+                                    "type": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "name": {"type": "string"},
+                                            "description": {"type": "string"},
+                                        },
+                                        "required": ["id", "name", "description"],
+                                    },
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "description",
+                                    "color",
+                                    "type",
+                                ],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "runTime": {"type": "integer"},
+                                    "lastFillTime": {"type": "string"},
+                                    "mode": {"type": "string"},
+                                    "operator": {"type": "string"},
+                                },
+                                "required": [
+                                    "runTime",
+                                    "lastFillTime",
+                                    "mode",
+                                    "operator",
+                                ],
+                            },
+                        },
+                        "required": [
+                            "source",
+                            "uri",
+                            "asset",
+                            "previousState",
+                            "additionalInfo",
+                        ],
+                    },
+                },
+                "required": ["timestamp", "description", "color", "type", "metadata"],
+            },
+        },
+        {
+            "elementId": "alert-type",
+            "name": "Alert",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "severity": {"type": "integer"},
+                    "code": {"type": "string"},
+                    "message": {"type": "string"},
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "acknowledgment": {
+                                "type": "object",
+                                "properties": {
+                                    "acknowledged": {"type": "boolean"},
+                                    "acknowledgedBy": {"type": "null"},
+                                    "acknowledgedAt": {"type": "null"},
+                                },
+                                "required": [
+                                    "acknowledged",
+                                    "acknowledgedBy",
+                                    "acknowledgedAt",
+                                ],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "temperature": {"type": "number"},
+                                    "warningThreshold": {"type": "number"},
+                                    "alarmThreshold": {"type": "number"},
+                                    "sensorLocation": {"type": "string"},
+                                    "trend": {"type": "string"},
+                                    "timeInAlarm": {"type": "integer"},
+                                    "recommendedAction": {"type": "string"},
+                                    "priority": {"type": "string"},
+                                },
+                                "required": [
+                                    "temperature",
+                                    "warningThreshold",
+                                    "alarmThreshold",
+                                    "sensorLocation",
+                                    "trend",
+                                    "timeInAlarm",
+                                    "recommendedAction",
+                                    "priority",
+                                ],
+                            },
+                        },
+                        "required": [
+                            "source",
+                            "uri",
+                            "asset",
+                            "acknowledgment",
+                            "additionalInfo",
+                        ],
+                    },
+                },
+                "required": ["timestamp", "severity", "code", "message", "metadata"],
+            },
+        },
+        {
+            "elementId": "product-type",
+            "name": "Product",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "description": {"type": "string"},
+                    "idealCycleTime": {"type": "integer"},
+                    "tolerance": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "family": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "specifications": {
+                                        "type": "object",
+                                        "properties": {
+                                            "temperature": {"type": "string"},
+                                            "pressure": {"type": "string"},
+                                            "quality": {"type": "string"},
+                                            "chlorinated": {"type": "boolean"},
+                                        },
+                                        "required": [
+                                            "temperature",
+                                            "pressure",
+                                            "quality",
+                                            "chlorinated",
+                                        ],
+                                    },
+                                    "regulatoryCompliance": {
+                                        "type": "array",
+                                        "items": [
+                                            {"type": "string"},
+                                            {"type": "string"},
+                                        ],
+                                    },
+                                },
+                                "required": ["specifications", "regulatoryCompliance"],
+                            },
+                        },
+                        "required": ["source", "uri", "asset", "additionalInfo"],
+                    },
+                },
+                "required": [
+                    "timestamp",
+                    "id",
+                    "name",
+                    "description",
+                    "idealCycleTime",
+                    "tolerance",
+                    "unit",
+                    "family",
+                    "metadata",
+                ],
+            },
+        },
+        {
+            "elementId": "production-type",
+            "name": "Production",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "start_ts": {"type": "string"},
+                    "end_ts": {"type": "null"},
+                    "counts": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "name": {"type": "string"},
+                                            "description": {"type": "string"},
+                                            "unit": {"type": "string"},
+                                        },
+                                        "required": [
+                                            "id",
+                                            "name",
+                                            "description",
+                                            "unit",
+                                        ],
+                                    },
+                                    "quantity": {"type": "integer"},
+                                    "timestamp": {"type": "string"},
+                                },
+                                "required": ["type", "quantity", "timestamp"],
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "name": {"type": "string"},
+                                            "description": {"type": "string"},
+                                            "unit": {"type": "string"},
+                                        },
+                                        "required": [
+                                            "id",
+                                            "name",
+                                            "description",
+                                            "unit",
+                                        ],
+                                    },
+                                    "quantity": {"type": "number"},
+                                    "timestamp": {"type": "string"},
+                                },
+                                "required": ["type", "quantity", "timestamp"],
+                            },
+                        ],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "product": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                    "idealCycleTime": {"type": "integer"},
+                                    "tolerance": {"type": "number"},
+                                    "unit": {"type": "string"},
+                                    "family": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {"type": "integer"},
+                                            "name": {"type": "string"},
+                                            "description": {"type": "string"},
+                                        },
+                                        "required": ["id", "name", "description"],
+                                    },
+                                },
+                                "required": [
+                                    "id",
+                                    "name",
+                                    "description",
+                                    "idealCycleTime",
+                                    "tolerance",
+                                    "unit",
+                                    "family",
+                                ],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "shift": {"type": "string"},
+                                    "operator": {"type": "string"},
+                                    "demandLevel": {"type": "string"},
+                                    "systemEfficiency": {"type": "number"},
+                                    "energyConsumption": {"type": "number"},
+                                    "qualityScore": {"type": "number"},
+                                    "plannedProduction": {"type": "integer"},
+                                    "actualProduction": {"type": "integer"},
+                                    "efficiency": {"type": "number"},
+                                },
+                                "required": [
+                                    "shift",
+                                    "operator",
+                                    "demandLevel",
+                                    "systemEfficiency",
+                                    "energyConsumption",
+                                    "qualityScore",
+                                    "plannedProduction",
+                                    "actualProduction",
+                                    "efficiency",
+                                ],
+                            },
+                        },
+                        "required": [
+                            "source",
+                            "uri",
+                            "asset",
+                            "product",
+                            "additionalInfo",
+                        ],
+                    },
+                },
+                "required": ["timestamp", "start_ts", "end_ts", "counts", "metadata"],
+            },
+        },
+        {
+            "elementId": "measurements-type",
+            "name": "Measurements",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {"measurements": {"type": "array", "items": {}}},
+                "required": ["measurements"],
+            },
+        },
+        {
+            "elementId": "measurement-type",
+            "name": "Measurement",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "type": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "value": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "target": {"type": "number"},
+                    "tolerance": {"type": "number"},
+                    "inTolerance": {"type": "boolean"},
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "technician": {"type": "string"},
+                                    "measurementMethod": {"type": "string"},
+                                    "equipmentUsed": {"type": "string"},
+                                    "measurementDate": {"type": "string"},
+                                    "nextMeasurementDue": {"type": "string"},
+                                    "trend": {"type": "string"},
+                                    "measurementLocation": {"type": "string"},
+                                },
+                                "required": [
+                                    "technician",
+                                    "measurementMethod",
+                                    "equipmentUsed",
+                                    "measurementDate",
+                                    "nextMeasurementDue",
+                                    "trend",
+                                    "measurementLocation",
+                                ],
+                            },
+                        },
+                        "required": ["source", "uri", "asset", "additionalInfo"],
+                    },
+                    "product": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                            "family": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                        },
+                        "required": ["id", "name", "description", "family"],
+                    },
+                    "productionContext": {
+                        "type": "object",
+                        "properties": {
+                            "batchId": {"type": "string"},
+                            "processStep": {"type": "string"},
+                            "demand": {"type": "string"},
+                        },
+                        "required": ["batchId", "processStep", "demand"],
+                    },
+                },
+                "required": [
+                    "timestamp",
+                    "type",
+                    "value",
+                    "unit",
+                    "target",
+                    "tolerance",
+                    "inTolerance",
+                    "metadata",
+                    "product",
+                    "productionContext",
+                ],
+            },
+        },
+        {
+            "elementId": "count-type",
+            "name": "Count",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "value": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "type": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "production": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "product": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "maintenanceDue": {"type": "integer"},
+                                    "lastMaintenance": {"type": "string"},
+                                    "nextMaintenance": {"type": "string"},
+                                    "flowRate": {"type": "number"},
+                                    "efficiency": {"type": "number"},
+                                    "totalEnergy": {"type": "number"},
+                                    "increment": {"type": "number"},
+                                    "lastReset": {"type": "string"},
+                                    "nextReset": {"type": "string"},
+                                },
+                                "required": [
+                                    "maintenanceDue",
+                                    "lastMaintenance",
+                                    "nextMaintenance",
+                                    "flowRate",
+                                    "efficiency",
+                                    "totalEnergy",
+                                    "increment",
+                                    "lastReset",
+                                    "nextReset",
+                                ],
+                            },
+                        },
+                        "required": [
+                            "source",
+                            "uri",
+                            "asset",
+                            "production",
+                            "product",
+                            "additionalInfo",
+                        ],
+                    },
+                },
+                "required": ["timestamp", "value", "unit", "type", "metadata"],
+            },
+        },
+        {
+            "elementId": "kpi-type",
+            "name": "KPI",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "value": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "type": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "product": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                            "family": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                        },
+                        "required": ["id", "name", "description", "family"],
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                },
+                                "required": ["id", "name"],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "calculationPeriod": {"type": "string"},
+                                    "inputPower": {"type": "number"},
+                                    "outputPower": {"type": "number"},
+                                    "targetEfficiency": {"type": "number"},
+                                    "trend": {"type": "string"},
+                                    "lastCalculation": {"type": "string"},
+                                    "baselineValue": {"type": "number"},
+                                    "improvement": {"type": "number"},
+                                },
+                                "required": [
+                                    "calculationPeriod",
+                                    "inputPower",
+                                    "outputPower",
+                                    "targetEfficiency",
+                                    "trend",
+                                    "lastCalculation",
+                                    "baselineValue",
+                                    "improvement",
+                                ],
+                            },
+                        },
+                        "required": ["source", "uri", "asset", "additionalInfo"],
+                    },
+                },
+                "required": [
+                    "timestamp",
+                    "value",
+                    "unit",
+                    "type",
+                    "product",
+                    "metadata",
+                ],
+            },
+        },
+        {
+            "elementId": "measurement-type",
+            "name": "Measurement",
+            "namespaceUri": "https://abelara.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "timestamp": {"type": "string"},
+                    "type": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                        },
+                        "required": ["id", "name", "description"],
+                    },
+                    "value": {"type": "number"},
+                    "unit": {"type": "string"},
+                    "target": {"type": "number"},
+                    "tolerance": {"type": "number"},
+                    "inTolerance": {"type": "boolean"},
+                    "metadata": {
+                        "type": "object",
+                        "properties": {
+                            "source": {"type": "string"},
+                            "uri": {"type": "string"},
+                            "asset": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                            "additionalInfo": {
+                                "type": "object",
+                                "properties": {
+                                    "technician": {"type": "string"},
+                                    "measurementMethod": {"type": "string"},
+                                    "equipmentUsed": {"type": "string"},
+                                    "measurementDate": {"type": "string"},
+                                    "nextMeasurementDue": {"type": "string"},
+                                    "trend": {"type": "string"},
+                                    "measurementLocation": {"type": "string"},
+                                },
+                                "required": [
+                                    "technician",
+                                    "measurementMethod",
+                                    "equipmentUsed",
+                                    "measurementDate",
+                                    "nextMeasurementDue",
+                                    "trend",
+                                    "measurementLocation",
+                                ],
+                            },
+                        },
+                        "required": ["source", "uri", "asset", "additionalInfo"],
+                    },
+                    "product": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "name": {"type": "string"},
+                            "description": {"type": "string"},
+                            "family": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer"},
+                                    "name": {"type": "string"},
+                                    "description": {"type": "string"},
+                                },
+                                "required": ["id", "name", "description"],
+                            },
+                        },
+                        "required": ["id", "name", "description", "family"],
+                    },
+                    "productionContext": {
+                        "type": "object",
+                        "properties": {
+                            "batchId": {"type": "string"},
+                            "processStep": {"type": "string"},
+                            "demand": {"type": "string"},
+                        },
+                        "required": ["batchId", "processStep", "demand"],
+                    },
+                },
+                "required": [
+                    "timestamp",
+                    "type",
+                    "value",
+                    "unit",
+                    "target",
+                    "tolerance",
+                    "inTolerance",
+                    "metadata",
+                    "product",
+                    "productionContext",
+                ],
+            },
+        },
+        {
+            "elementId": "sensor-type",
+            "name": "Measurements",
+            "namespaceUri": "https://thinkiq.com/equipment",
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "type": "object",
+                "properties": {
+                    "value": {"type": "number"},
+                    "engUnit": {"type": "string"},
+                    "status": {"type": "string"},
+                    "calibrationDate": {"type": "string"},
+                },
+                "required": ["value", "engUnit", "status"],
+            },
+        },
     ],
     "instances": [
         {
-            "elementId": "machine-001",
-            "name": "CNC-101",
-            "typeId": "machine-type-001",
-            "parentId": "plant-001",
+            "elementId": "cesmii-enterprise",
+            "name": "CESMII",
+            "typeId": "enterprise-type",
+            "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "SN-45678",
-                "model": "Model25",
-                "status": "running",                
-                "temperature": {
-                    "value": 65.4,
-                    "engUnit": "CEL"
-                },
-                "powerConsumption": {
-                    "value": 4.7,
-                    "engUnit": "KWH"
-                }
-            },
             "relationships": {
-                "controlledby": ["controller-001"],
-                "connectedby": ["network-switch-001"],
-                "suppliedby": ["conveyor-001"],
-                "monitoredby": ["sensor-001"]
+                "HasChildren": ["cesmii-plant-1"],
             },
-            "timestamp": "2025-07-07T10:15:30Z"
         },
         {
-            "elementId": "machine-002",
-            "static": True,         
-            "name": "CNC-102",
-            "typeId": "machine-type-001",
-            "parentId": "plant-001",
+            "elementId": "cesmii-plant-1",
+            "name": "CESMII Plant 1",
+            "typeId": "site-type",
+            "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "SN-45679",
-                "model": "Model25",
-                "status": "idle",                
-                "temperature": {
-                    "value": 42.1,
-                    "engUnit": "CEL"
-                },
-                "powerConsumption": {
-                    "value": 1.2,
-                    "engUnit": "KWH"
-                }
-            },
             "relationships": {
-                "controlledby": ["controller-001"],
-                "connectedby": ["network-switch-001"],
-                "monitoredby": ["sensor-002"]
+                "HasParent": ["cesmii-enterprise"],
+                "HasChildren": ["cesmii-plant-1-utilities"],
             },
-            "timestamp": "2025-07-07T10:15:30Z"
+        },
+        {
+            "elementId": "cesmii-plant-1-utilities",
+            "name": "Utilities",
+            "typeId": "area-type",
+            "namespaceUri": "https://isa.org/isa95",
+            "hasChildren": True,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1"],
+                "HasChildren": ["cesmii-plant-1-utilities-water-system"],
+            },
+        },
+        {
+            "elementId": "cesmii-plant-1-utilities-water-system",
+            "name": "Water System",
+            "typeId": "work-center-type",
+            "namespaceUri": "https://isa.org/isa95",
+            "hasChildren": True,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities"],
+                "HasChildren": ["cesmii-plant-1-utilities-water-system-pump-station"],
+            },
+        },
+        {
+            "elementId": "cesmii-plant-1-utilities-water-system-pump-station",
+            "name": "Pump Station",
+            "typeId": "work-center-type",
+            "namespaceUri": "https://isa.org/isa95",
+            "hasChildren": True,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system"],
+                "HasChildren": [
+                    "cesmii-plant-1-utilities-water-system-pump-station-pump-101"
+                ],
+            },
+        },
+        {
+            "elementId": "cesmii-plant-1-utilities-water-system-pump-station-pump-101",
+            "name": "pump-101",
+            "typeId": "work-unit-type",
+            "namespaceUri": "https://isa.org/isa95",
+            "hasChildren": True,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-station"],
+                "HasChildren": [
+                    "pump-101-state",
+                    "pump-101-alert",
+                    "pump-101-product",
+                    "pump-101-production",
+                    "pump-101-measurements",
+                ],
+                "SuppliesTo": ["tank-201"],
+            },
+        },
+        {
+            "elementId": "pump-101-state",
+            "name": "pump-101 State",
+            "typeId": "state-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:20:44.779036+00:00",
+                    "description": "Pump is in maintenance",
+                    "color": "#800080",
+                    "type": {
+                        "id": 5,
+                        "name": "Maintenance",
+                        "description": "Equipment under maintenance",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW0",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:20:44.779036+00:00",
+                    "description": "Pump is in operation",
+                    "color": "#00FF00",
+                    "type": {
+                        "id": 1,
+                        "name": "Operating",
+                        "description": "Equipment operating normally",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW0",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-27T18:20:44.779036+00:00",
+                    "description": "Pump is in operation",
+                    "color": "#FFFF00",
+                    "type": {
+                        "id": 1,
+                        "name": "Starved",
+                        "description": "Equipment starved",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW0",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                    },
+                },
+            ],
+        },
+        {
+            "elementId": "pump-101-alert",
+            "name": "pump-101 Alert",
+            "typeId": "alert-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:24:50.802109+00:00",
+                    "severity": 3,
+                    "code": "TEMP_ALARM",
+                    "message": "Pump bearing temperature above alert threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD4",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "temperature": 106.1,
+                            "warningThreshold": 75.0,
+                            "alarmThreshold": 85.0,
+                            "sensorLocation": "Drive End Bearing",
+                            "trend": "Rising",
+                            "timeInAlarm": 23,
+                            "recommendedAction": "Check alignment",
+                            "priority": "Low",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-29T18:26:07.704923+00:00",
+                    "severity": 2,
+                    "code": "TEMP_HIGH",
+                    "message": "Pump bearing temperature exceeds warning threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD4",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "temperature": 78.7,
+                            "warningThreshold": 75.0,
+                            "alarmThreshold": 85.0,
+                            "sensorLocation": "Drive End Bearing",
+                            "trend": "Stable",
+                            "timeInAlarm": 12,
+                            "recommendedAction": "Reduce load",
+                            "priority": "Medium",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-29T18:23:28.764138+00:00",
+                    "severity": 1,
+                    "code": "MAINT_DUE",
+                    "message": "Pump maintenance due within 100 hours",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD4",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "temperature": 77.0,
+                            "warningThreshold": 75.0,
+                            "alarmThreshold": 85.0,
+                            "sensorLocation": "Drive End Bearing",
+                            "trend": "Stable",
+                            "timeInAlarm": 21,
+                            "recommendedAction": "Check alignment",
+                            "priority": "Critical",
+                        },
+                    },
+                },
+            ],
+        },
+        {
+            "elementId": "pump-101-product",
+            "name": "pump-101 Product",
+            "typeId": "product-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:27:55.457173+00:00",
+                    "id": 1,
+                    "name": "Cooling Water",
+                    "description": "Process cooling water for heat exchange systems",
+                    "idealCycleTime": 3600,
+                    "tolerance": 0.05,
+                    "unit": "m\u00b3/h",
+                    "family": {
+                        "id": 1,
+                        "name": "Utilities",
+                        "description": "Utility products and services",
+                    },
+                    "metadata": {
+                        "source": "product-management",
+                        "uri": "product://cooling-water",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "specifications": {
+                                "temperature": "15-25\u00b0C",
+                                "pressure": "3-8 bar",
+                                "quality": "Process Grade",
+                                "chlorinated": True,
+                            },
+                            "regulatoryCompliance": [
+                                "ISO 14001",
+                                "Water Quality Standards",
+                            ],
+                        },
+                    },
+                }
+            ],
+        },
+        {
+            "elementId": "pump-101-production",
+            "name": "pump-101 Production",
+            "typeId": "production-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:29:53.368598+00:00",
+                    "start_ts": "2025-10-29T18:29:53.368607+00:00",
+                    "end_ts": None,
+                    "counts": [
+                        {
+                            "type": {
+                                "id": 1,
+                                "name": "Water Delivered",
+                                "description": "Total water delivered to cooling system",
+                                "unit": "m\u00b3",
+                            },
+                            "quantity": 320,
+                            "timestamp": "2025-10-29T18:29:53.368610+00:00",
+                        },
+                        {
+                            "type": {
+                                "id": 2,
+                                "name": "Runtime Hours",
+                                "description": "Total pump runtime hours",
+                                "unit": "hours",
+                            },
+                            "quantity": 6.9,
+                            "timestamp": "2025-10-29T18:29:53.368615+00:00",
+                        },
+                    ],
+                    "metadata": {
+                        "source": "production-tracker",
+                        "uri": "production://cooling-system-2024-009",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "product": {
+                            "id": 1,
+                            "name": "Cooling Water",
+                            "description": "Process cooling water for heat exchange systems",
+                            "idealCycleTime": 3600,
+                            "tolerance": 0.05,
+                            "unit": "m\u00b3/h",
+                            "family": {
+                                "id": 1,
+                                "name": "Utilities",
+                                "description": "Utility products and services",
+                            },
+                        },
+                        "additionalInfo": {
+                            "shift": "Weekend",
+                            "operator": "Bob Wilson",
+                            "demandLevel": "High",
+                            "systemEfficiency": 96.6,
+                            "energyConsumption": 32.3,
+                            "qualityScore": 101.1,
+                            "plannedProduction": 350,
+                            "actualProduction": 320,
+                            "efficiency": 91.4,
+                        },
+                    },
+                }
+            ],
+        },
+        {
+            "elementId": "pump-101-measurements",
+            "name": "pump-101 Measurements",
+            "typeId": "measurements-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": True,
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasChildren": [
+                    "pump-101-measurements-bearing-temperature",
+                    "pump-101-measurements-vibration-analysis",
+                    "pump-101-measurements-oil-analysis",
+                ],
+            },
+        },
+        {
+            "elementId": "pump-101-bearing-temperature",
+            "name": "pump-101 Bearing Temperature",
+            "typeId": "measurement-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["pump-101-measurements"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-28T18:32:47.673157+00:00",
+                    "type": {
+                        "id": 1,
+                        "name": "Bearing Temperature",
+                        "description": "Precision bearing temperature measurement",
+                    },
+                    "value": 70.34,
+                    "unit": "\u00b0C",
+                    "target": 70.0,
+                    "tolerance": 10.5,
+                    "inTolerance": True,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/bearing-temperature",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "John Smith",
+                            "measurementMethod": "Oil Sampling",
+                            "equipmentUsed": "Fluke Ti480",
+                            "measurementDate": "2025-10-29T18:32:47.673173+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Drive End Bearing",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-979",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-29T18:32:47.673157+00:00",
+                    "type": {
+                        "id": 1,
+                        "name": "Bearing Temperature",
+                        "description": "Precision bearing temperature measurement",
+                    },
+                    "value": 71.79,
+                    "unit": "\u00b0C",
+                    "target": 70.0,
+                    "tolerance": 10.5,
+                    "inTolerance": True,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/bearing-temperature",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "John Smith",
+                            "measurementMethod": "Oil Sampling",
+                            "equipmentUsed": "Fluke Ti480",
+                            "measurementDate": "2025-10-29T18:32:47.673173+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Drive End Bearing",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-979",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+            ],
+        },
+        {
+            "elementId": "pump-101-vibration-analysis",
+            "name": "pump-101 Vibration Analysis",
+            "typeId": "measurement-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["pump-101-measurements"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:34:55.885390+00:00",
+                    "type": {
+                        "id": 2,
+                        "name": "Vibration Analysis",
+                        "description": "Precision vibration measurement",
+                    },
+                    "value": 1.36,
+                    "unit": "mm/s",
+                    "target": 1.2,
+                    "tolerance": 0.18,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/vibration-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Mike Johnson",
+                            "measurementMethod": "Laser Alignment",
+                            "equipmentUsed": "Spectro Scientific",
+                            "measurementDate": "2025-10-29T18:34:55.885397+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Drive End",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-438",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Condition Based",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:34:55.885390+00:00",
+                    "type": {
+                        "id": 2,
+                        "name": "Vibration Analysis",
+                        "description": "Precision vibration measurement",
+                    },
+                    "value": 1.75,
+                    "unit": "mm/s",
+                    "target": 1.2,
+                    "tolerance": 0.18,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/vibration-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Mike Johnson",
+                            "measurementMethod": "Laser Alignment",
+                            "equipmentUsed": "Spectro Scientific",
+                            "measurementDate": "2025-10-29T18:34:55.885397+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Drive End",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-438",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Condition Based",
+                    },
+                },
+            ],
+            "timestamp": "2025-10-29T10:15:30Z",
+        },
+        {
+            "elementId": "pump-101-oil-analysis",
+            "name": "pump-101 Oil Analysis",
+            "typeId": "measurement-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["pump-101-measurements"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 12.41,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 9.35,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+                {
+                    "timestamp": "2025-10-27T18:35:42.019884+00:00",
+                    "type": {
+                        "id": 3,
+                        "name": "Oil Analysis",
+                        "description": "Oil quality measurement",
+                    },
+                    "value": 11.77,
+                    "unit": "mg/kg",
+                    "target": 8.0,
+                    "tolerance": 1.2,
+                    "inTolerance": False,
+                    "metadata": {
+                        "source": "precision-maintenance",
+                        "uri": "maintenance://pump-101/oil-analysis",
+                        "asset": {
+                            "id": 101,
+                            "name": "Pump-101",
+                            "description": "Centrifugal water pump for cooling system",
+                        },
+                        "additionalInfo": {
+                            "technician": "Jane Doe",
+                            "measurementMethod": "Infrared Thermography",
+                            "equipmentUsed": "Fluke 1507",
+                            "measurementDate": "2025-10-29T18:35:42.019891+00:00",
+                            "nextMeasurementDue": "2024-06-15",
+                            "trend": "Deteriorating",
+                            "measurementLocation": "Oil Reservoir",
+                        },
+                    },
+                    "product": {
+                        "id": 1,
+                        "name": "Cooling Water",
+                        "description": "Process cooling water",
+                        "family": {
+                            "id": 1,
+                            "name": "Utilities",
+                            "description": "Utility products and services",
+                        },
+                    },
+                    "productionContext": {
+                        "batchId": "MAINT-2024-852",
+                        "processStep": "Precision Maintenance",
+                        "demand": "Emergency",
+                    },
+                },
+            ],
+        },
+        {
+            "elementId": "tank-201",
+            "name": "tank-201",
+            "typeId": "work-unit-type",
+            "hasChildren": True,
+            "namespaceUri": "https://isa.org/isa95",
+            "relationships": {
+                "HasParent": ["cesmii-plant-1-utilities-water-system"],
+                "HasChildren": ["tank-201-machine-id", "tank-201-state"],
+                "SuppliedBy": "pump-101",
+                "MonitoredBy": "sensor-001",
+            },
+        },
+        {
+            "elementId": "tank-201-state",
+            "name": "tank-201 State",
+            "typeId": "state-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["tank-201"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:42:41.516253+00:00",
+                    "description": "Tank is maintenance",
+                    "color": "#800080",
+                    "type": {
+                        "id": 5,
+                        "name": "Maintenance",
+                        "description": "Tank under maintenance",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "previousState": {
+                            "id": 2,
+                            "name": "Full",
+                            "description": "Tank is full",
+                            "color": "#228B22",
+                            "type": {
+                                "id": 2,
+                                "name": "Full",
+                                "description": "Tank is full",
+                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 562,
+                            "lastFillTime": "2025-10-29T18:42:41.516272+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Eva Green",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:43:01.789262+00:00",
+                    "description": "Tank is filling",
+                    "color": "#00BFFF",
+                    "type": {
+                        "id": 1,
+                        "name": "Filling",
+                        "description": "Tank is being filled",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "previousState": {
+                            "id": 3,
+                            "name": "Emptying",
+                            "description": "Tank is being emptied",
+                            "color": "#FFD700",
+                            "type": {
+                                "id": 3,
+                                "name": "Emptying",
+                                "description": "Tank is being emptied",
+                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 2669,
+                            "lastFillTime": "2025-10-29T18:43:01.789282+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Tom Lee",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-27T18:43:27.125067+00:00",
+                    "description": "Tank is filling",
+                    "color": "#00BFFF",
+                    "type": {
+                        "id": 1,
+                        "name": "Filling",
+                        "description": "Tank is being filled",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "previousState": {
+                            "id": 5,
+                            "name": "Maintenance",
+                            "description": "Tank under maintenance",
+                            "color": "#800080",
+                            "type": {
+                                "id": 5,
+                                "name": "Maintenance",
+                                "description": "Tank under maintenance",
+                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 664,
+                            "lastFillTime": "2025-10-29T18:43:27.125086+00:00",
+                            "mode": "AUTO",
+                            "operator": "Alice Brown",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-26T18:43:42.345524+00:00",
+                    "description": "Tank is low level",
+                    "color": "#FF4500",
+                    "type": {
+                        "id": 4,
+                        "name": "Low Level",
+                        "description": "Tank water level is low",
+                    },
+                    "metadata": {
+                        "source": "plc-controller",
+                        "uri": "opc://plc1/DB1.DBW10",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "previousState": {
+                            "id": 3,
+                            "name": "Emptying",
+                            "description": "Tank is being emptied",
+                            "color": "#FFD700",
+                            "type": {
+                                "id": 3,
+                                "name": "Emptying",
+                                "description": "Tank is being emptied",
+                            },
+                        },
+                        "additionalInfo": {
+                            "runTime": 1948,
+                            "lastFillTime": "2025-10-29T18:43:42.345542+00:00",
+                            "mode": "MANUAL",
+                            "operator": "Eva Green",
+                        },
+                    },
+                },
+            ],
+        },
+        {
+            "elementId": "tank-201-alert",
+            "name": "tank-201 Alert",
+            "typeId": "alert-type",
+            "namespaceUri": "https://abelara.com/equipment",
+            "hasChildren": False,
+            "relationships": {
+                "HasParent": ["tank-201"],
+            },
+            "Values": [
+                {
+                    "timestamp": "2025-10-29T18:44:17.833121+00:00",
+                    "severity": 2,
+                    "code": "LEVEL_LOW",
+                    "message": "Tank water level below minimum threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.84,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Falling",
+                            "timeInAlarm": 4,
+                            "recommendedAction": "Schedule maintenance",
+                            "priority": "Critical",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-28T18:44:38.104100+00:00",
+                    "severity": 3,
+                    "code": "QUALITY_ALARM",
+                    "message": "Water quality exceeds alarm threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": True,
+                            "acknowledgedBy": "Tom Lee",
+                            "acknowledgedAt": "2025-10-29T18:44:38.104091+00:00",
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.74,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Rising",
+                            "timeInAlarm": 8,
+                            "recommendedAction": "Monitor",
+                            "priority": "Low",
+                        },
+                    },
+                },
+                {
+                    "timestamp": "2025-10-29T18:44:53.320437+00:00",
+                    "severity": 3,
+                    "code": "LEVEL_HIGH",
+                    "message": "Tank water level exceeds maximum threshold",
+                    "metadata": {
+                        "source": "monitoring-system",
+                        "uri": "opc://plc1/DB1.DBD44",
+                        "asset": {
+                            "id": 201,
+                            "name": "Tank-201",
+                            "description": "Raw water storage tank for process supply",
+                        },
+                        "acknowledgment": {
+                            "acknowledged": False,
+                            "acknowledgedBy": None,
+                            "acknowledgedAt": None,
+                        },
+                        "additionalInfo": {
+                            "waterLevel": 3.78,
+                            "minThreshold": 1.0,
+                            "maxThreshold": 5.0,
+                            "sensorLocation": "Tank Center",
+                            "trend": "Stable",
+                            "timeInAlarm": 5,
+                            "recommendedAction": "Check sensors",
+                            "priority": "High",
+                        },
+                    },
+                },
+            ],
         },
         {
             "elementId": "sensor-001",
             "name": "TempSensor-101",
-            "typeId": "sensor-type-001",
-            "parentId": "machine-001",
+            "typeId": "sensor-type",
+            "parentId": "cesmii-plant-1-utilities-water-system",
             "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {                
-                "value": 65.4,
-                "engUnit": "CEL",
-                "status": "active",
-                "calibrationDate": "2025-01-15"
-            },
-            "relationships": {
-                "monitors": ["machine-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "process-001",
-            "name": "Part-XYZ-Production",
-            "typeId": "process-type-001",            
-            "parentId": None,
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/process",
-            "attributes": {
-                "name": "Part XYZ Production Run",                
-                "status": "running",
-                "startTime": "2025-07-07T08:00:00Z",
-                "endTime": None,
-                "efficiency": 92.5
-            },
-            "relationships": {
-                "monitoredby": ["sensor-003"],
-                "controlledby": ["controller-002"],
-                "suppliedby": ["material-feeder-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "sensor-002",
-            "name": "PressureSensor-102",
-            "typeId": "sensor-type-001",
-            "parentId": None,  
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {                
-                "value": 8.7,
-                "engUnit": "BAR",
-                "status": "active",
-                "calibrationDate": "2025-02-10"
-            },
-            "relationships": {
-                "monitors": ["machine-002"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "sensor-003",
-            "name": "VibrationSensor-103",
-            "typeId": "sensor-type-001",
-            "parentId": None, 
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {                
-                "value": 2.3,
-                "engUnit": "MM/S",
-                "status": "active",
-                "calibrationDate": "2025-01-20"
-            },
-            "relationships": {
-                "monitors": ["process-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "controller-001",
-            "name": "PLC-Main-Controller",
-            "typeId": "machine-type-001",  
-            "parentId": None,  
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "PLC-12345",
-                "model": "ControllerPro",
-                "status": "active",                
-                "temperature": {
-                    "value": 35.2,
-                    "engUnit": "CEL"
+            "namespaceUri": "https://thinkiq.com/equipment",
+            "relationships": {"Monitors": ["tank-201"]},
+            "Values": [
+                {
+                    "Value": 65.4,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-29T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
                 },
-                "powerConsumption": {
-                    "value": 0.8,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "controls": ["machine-001", "machine-002"],
-                "connectedby": ["network-switch-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "controller-002",
-            "name": "Process-Controller",
-            "typeId": "machine-type-001",
-            "parentId": None, 
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "PC-67890",
-                "model": "ProcessPro",
-                "status": "active",                
-                "temperature": {
-                    "value": 38.1,
-                    "engUnit": "CEL"
+                {
+                    "Value": 67.1,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-28T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
                 },
-                "powerConsumption": {
-                    "value": 1.1,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "controls": ["process-001"],
-                "connectedby": ["network-switch-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "network-switch-001",
-            "name": "Industrial-Switch-Main",
-            "typeId": "machine-type-001",
-            "parentId": None,  
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "SW-11111",
-                "model": "IndustrialSwitch24",
-                "status": "active",                
-                "temperature": {
-                    "value": 28.5,
-                    "engUnit": "CEL"
+                {
+                    "Value": 54.9,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-27T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
                 },
-                "powerConsumption": {
-                    "value": 0.3,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "connectsto": ["machine-001", "machine-002", "controller-001", "controller-002"],
-                "connectedby": ["gateway-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "gateway-001",
-            "name": "SCADA-Gateway",
-            "typeId": "machine-type-001",
-            "parentId": None, 
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "GW-22222",
-                "model": "SCADAGateway",
-                "status": "active",                
-                "temperature": {
-                    "value": 31.7,
-                    "engUnit": "CEL"
+                {
+                    "Value": 68.2,
+                    "Quality": "GOOD",
+                    "Timestamp": "2025-10-26T10:15:30Z",
+                    "EngUnit": "CEL",
+                    "calibrationDate": "2025-01-15",
                 },
-                "powerConsumption": {
-                    "value": 0.5,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "connectsto": ["network-switch-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
+            ],
         },
-        {
-            "elementId": "conveyor-001",
-            "name": "Parts-Conveyor-A",
-            "typeId": "machine-type-001",
-            "parentId": None,  
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "CV-33333",
-                "model": "ConveyorBelt200",
-                "status": "running",                
-                "temperature": {
-                    "value": 22.3,
-                    "engUnit": "CEL"
-                },
-                "powerConsumption": {
-                    "value": 2.1,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "suppliesto": ["machine-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        },
-        {
-            "elementId": "material-feeder-001",
-            "name": "Raw-Material-Feeder",
-            "typeId": "machine-type-001",
-            "parentId": None, 
-            "hasChildren": False,
-            "namespaceUri": "http://i3x.org/mfg/equipment",            
-            "attributes": {
-                "serialNumber": "MF-44444",
-                "model": "MaterialFeeder500",
-                "status": "active",                
-                "temperature": {
-                    "value": 25.8,
-                    "engUnit": "CEL"
-                },
-                "powerConsumption": {
-                    "value": 1.5,
-                    "engUnit": "KWH"
-                }
-            },
-            "relationships": {
-                "suppliesto": ["process-001"]
-            },
-            "timestamp": "2025-07-07T10:15:30Z"
-        }
     ],
-    "relationship_types": {
-        "HasParent": "HasChildren",
-        "HasChildren": "HasParent",
-        "Monitors": "MonitoredBy",
-        "Controls": "ControlledBy",
-        "ConnectsTo": "ConnectedBy",
-        "SuppliesTo": "SuppliedBy",
-        "MonitoredBy": "Monitors",
-        "ControlledBy": "Controls", 
-        "ConnectedBy": "ConnectsTo",
-        "SuppliedBy": "SuppliesTo",
-    }
+    "relationshipTypes": [
+        {
+            "elementId": "hierarchical-relationship-type",
+            "name": "ParentChild",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "directions": [
+                {
+                    "Subject": "HasChildren",
+                    "Target": "HasParent",
+                    "Cardinality": "1:0..1",
+                },
+                {
+                    "Subject": "HasParent",
+                    "Target": "HasChildren",
+                    "Cardinality": "1..*:1",
+                },
+            ],
+        },
+        {
+            "elementId": "inheritance-relationship-type",
+            "name": "Inheritance",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "directions": [
+                {
+                    "Subject": "InheritedBy",
+                    "Target": "Inherits",
+                    "Cardinality": "1:0..1",
+                },
+                {
+                    "Subject": "InheritedFrom",
+                    "Target": "InheritedBy",
+                    "Cardinality": "1..*:1",
+                },
+            ],
+        },
+        {
+            "elementId": "implementation-relationship-type",
+            "name": "Implements",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "directions": [
+                {
+                    "Subject": "ImplentedBy",
+                    "Target": "Implements",
+                    "Cardinality": "1:0..1",
+                },
+                {
+                    "Subject": "ImplementedFrom",
+                    "Target": "ImplementedBy",
+                    "Cardinality": "1..*:1",
+                },
+            ],
+        },
+        {
+            "elementId": "dependency-relationship-type",
+            "name": "Dependency",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "directions": [
+                {
+                    "Subject": "DependedOnBy",
+                    "Target": "DependsOn",
+                    "Cardinality": "1:0..1",
+                },
+                {
+                    "Subject": "DependsOn",
+                    "Target": "DependedOnBy",
+                    "Cardinality": "1..*:1",
+                },
+            ],
+        },
+        {
+            "elementId": "aggregation-relationship-type",
+            "name": "Aggregates",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "directions": [
+                {
+                    "Subject": "AggregatedBy",
+                    "Target": "Aggregates",
+                    "Cardinality": "1:0..1",
+                },
+                {
+                    "Subject": "Aggregates",
+                    "Target": "AggregatedBy",
+                    "Cardinality": "1..*:1",
+                },
+            ],
+        },
+        {
+            "elementId": "supply-relationship-type",
+            "name": "Supply",
+            "namespaceUri": "https://thinkiq.com/equipment",
+            "directions": [
+                {
+                    "Subject": "SuppliesTo",
+                    "Target": "SuppliedBy",
+                    "Cardinality": "1..*:1..*",
+                },
+                {
+                    "Subject": "SuppliedBy",
+                    "Target": "SuppliesTo",
+                    "Cardinality": "1..*:1..*",
+                },
+            ],
+        },
+        {
+            "elementId": "monitoring-relationship-type",
+            "name": "Monitoring",
+            "namespaceUri": "https://thinkiq.com/equipment",
+            "directions": [
+                {
+                    "Subject": "Monitors",
+                    "Target": "MonitoredBy",
+                    "Cardinality": "1..*:1..*",
+                },
+                {
+                    "Subject": "MonitorBy",
+                    "Target": "Monitors",
+                    "Cardinality": "1..*:1..*",
+                },
+            ],
+        },
+    ],
 }
