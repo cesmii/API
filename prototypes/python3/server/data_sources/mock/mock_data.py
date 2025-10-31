@@ -869,69 +869,72 @@ I3X_DATA = {
     ],
     "instances": [
         {
-            "elementId": "cesmii-enterprise",
+            "elementId": "cesmii",
             "name": "CESMII",
+            "description": "CESMII enterprise",
             "typeId": "enterprise-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasChildren": ["cesmii-plant-1"],
+				"HasParent": [""],
+                "HasChildren": ["cesmii-plant1"],
             },
         },
         {
-            "elementId": "cesmii-plant-1",
-            "name": "CESMII Plant 1",
+            "elementId": "cesmii-plant1",
+            "name": "Plant 1",
+            "description": "CESMII Plant 1",
             "typeId": "site-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-enterprise"],
-                "HasChildren": ["cesmii-plant-1-utilities"],
+                "HasParent": ["cesmii"],
+                "HasChildren": ["cesmii-plant1-utilities"],
             },
         },
         {
-            "elementId": "cesmii-plant-1-utilities",
+            "elementId": "cesmii-plant1-utilities",
             "name": "Utilities",
             "typeId": "area-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1"],
-                "HasChildren": ["cesmii-plant-1-utilities-water-system"],
+                "HasParent": ["cesmii-plant1"],
+                "HasChildren": ["cesmii-plant1-utilities-watersystem"],
             },
         },
         {
-            "elementId": "cesmii-plant-1-utilities-water-system",
+            "elementId": "cesmii-plant1-utilities-watersystem",
             "name": "Water System",
             "typeId": "work-center-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities"],
-                "HasChildren": ["cesmii-plant-1-utilities-water-system-pump-station"],
+                "HasParent": ["cesmii-plant1-utilities"],
+                "HasChildren": ["cesmii-plant1-utilities-watersystem-pumpstation"],
             },
         },
         {
-            "elementId": "cesmii-plant-1-utilities-water-system-pump-station",
+            "elementId": "cesmii-plant1-utilities-watersystem-pumpstation",
             "name": "Pump Station",
             "typeId": "work-center-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem"],
                 "HasChildren": [
-                    "cesmii-plant-1-utilities-water-system-pump-station-pump-101"
+                    "cesmii-plant1-utilities-watersystem-pumpstation-pump101"
                 ],
             },
         },
         {
-            "elementId": "cesmii-plant-1-utilities-water-system-pump-station-pump-101",
+            "elementId": "cesmii-plant1-utilities-watersystem-pumpstation-pump101",
             "name": "pump-101",
             "typeId": "work-unit-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-station"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation"],
                 "HasChildren": [
                     "pump-101-state",
                     "pump-101-alert",
@@ -949,7 +952,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
             "Values": [
                 {
@@ -1018,7 +1021,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
             "Values": [
                 {
@@ -1120,7 +1123,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
             "Values": [
                 {
@@ -1167,7 +1170,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
             },
             "Values": [
                 {
@@ -1239,7 +1242,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem-pumpstation-pump101"],
                 "HasChildren": [
                     "pump-101-measurements-bearing-temperature",
                     "pump-101-measurements-vibration-analysis",
@@ -1613,7 +1616,7 @@ I3X_DATA = {
             "hasChildren": True,
             "namespaceUri": "https://isa.org/isa95",
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system"],
+                "HasParent": ["cesmii-plant1-utilities-watersystem"],
                 "HasChildren": ["tank-201-machine-id", "tank-201-state"],
                 "SuppliedBy": "pump-101",
                 "MonitoredBy": "sensor-001",
@@ -1881,7 +1884,7 @@ I3X_DATA = {
             "elementId": "sensor-001",
             "name": "TempSensor-101",
             "typeId": "sensor-type",
-            "parentId": "cesmii-plant-1-utilities-water-system",
+            "parentId": "cesmii-plant1-utilities-watersystem",
             "hasChildren": False,
             "namespaceUri": "https://thinkiq.com/equipment",
             "relationships": {"Monitors": ["tank-201"]},
