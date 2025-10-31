@@ -875,7 +875,6 @@ I3X_DATA = {
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-				"HasParent": [""],
                 "HasChildren": ["cesmii-plant1"],
             },
         },
