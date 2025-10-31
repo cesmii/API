@@ -919,17 +919,19 @@ I3X_DATA = {
             "hasChildren": True,
             "relationships": {
                 "HasParent": ["cesmii-plant-1-utilities-water-system"],
-                "HasChildren": ["cesmii-plant-1-utilities-water-system-pump-101"],
+                "HasChildren": [
+                    "cesmii-plant-1-utilities-water-system-pump-station-pump-101"
+                ],
             },
         },
         {
-            "elementId": "cesmii-plant-1-utilities-water-system-pump-101",
+            "elementId": "cesmii-plant-1-utilities-water-system-pump-station-pump-101",
             "name": "pump-101",
             "typeId": "work-unit-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
             "relationships": {
-                "HasParent": ["cesmii-plant-1-utilities-water-system"],
+                "HasParent": ["cesmii-plant-1-utilities-water-system-pump-station"],
                 "HasChildren": [
                     "pump-101-state",
                     "pump-101-alert",
