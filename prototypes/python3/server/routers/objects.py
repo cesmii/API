@@ -13,6 +13,7 @@ from models import (
 )
 from data_sources.data_interface import I3XDataSource
 from datetime import datetime, timezone
+from .utils import getValue, getObject
 
 explore = APIRouter(prefix="", tags=["Explore"])
 query = APIRouter(prefix="", tags=["Query"])
@@ -31,28 +32,15 @@ def get_objects(
     data_source: I3XDataSource = Depends(get_data_source),
 ) -> List[ObjectInstanceMinimal] | List[ObjectInstance]:
     """Return all Objects. Optionally filter by TypeId"""
-    instances = data_source.get_instances(typeId)
-
-    if not includeMetadata:
-        # Return minimal required metadata per RFC 3.1.1
-        return [
-            {
-                "elementId": i["elementId"],
-                "name": i["name"],
-                "typeId": i["typeId"],
-                "namespaceUri": i["namespaceUri"],
-                "parentId": i.get("parentId"),
-                "hasChildren": i["hasChildren"],
-            }
-            for i in instances
-        ]
-
+    instances = [getObject(i, includeMetadata) for i in data_source.get_instances(typeId)]
     return instances
+      
 
 # RFC 4.1.5 - Single Object
 @explore.get("/objects/{elementId}", summary="Get Object")
 def get_objects_by_id(
     elementId: str = Path(...),
+    includeMetadata: bool = Query(default=False),
     data_source: I3XDataSource = Depends(get_data_source),
 ) -> ObjectInstanceMinimal | ObjectInstance:
     """Return an Object including it's value and metadata"""
@@ -64,7 +52,7 @@ def get_objects_by_id(
             status_code=404, detail=f"Instance with elementId '{elementId}' not found"
         )
 
-    return instance
+    return getObject(instance, includeMetadata)
 
 # 4.1.6 Objects linked by Relationship Type
 @explore.get("/objects/{elementId}/related", summary="Get Related Objects")
@@ -79,7 +67,7 @@ def get_related_objects(
     return related_objects
 
 
-# RFC 4.2.1.1 - [GET] Object Element LastKnown Value
+# RFC 4.2.1.1 - Object Element LastKnown Value
 @query.get("/objects/{elementId}/value", summary="Get Last Known Value")
 def get_last_known_value(
     elementId: str = Path(...),
@@ -97,18 +85,9 @@ def get_last_known_value(
     # Get the value. Some objects may not have a value
     value = data_source.get_instance_values_by_id(elementId)
 
-    if not includeMetadata:
-        return value
+    return getValue(value, includeMetadata)
 
-    metadataObject = {
-        "dataType": "object",
-        "quality": "GoodNoData" if not value else "Good",
-        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if not value else value.get("timestamp"),
-        "value": value
-    }
-    return metadataObject
-
-# 4.2.2.1 [UPDATE] Object Element LastKnownValue
+# 4.2.2.1 Object Element LastKnownValue
 @update.put("/objects/{elementId}/value", summary="Update Value of Object")
 def update_object(
     elementId: str = Path(...),
@@ -120,7 +99,7 @@ def update_object(
     return data_source.update_instance_value(elementId, body)
 
 
-# RFC 4.2.1.2 - [GET] Object Element HistoricalValue
+# RFC 4.2.1.2 - Object Element HistoricalValue
 @query.get("/objects/{elementId}/history", response_model=Any, summary="Get Historical Values")
 def get_historical_values(
     elementId: str = Path(...),
@@ -131,26 +110,25 @@ def get_historical_values(
 ):
     """Get the historical values for one or more Objects"""
     elementId = unquote(elementId)
+    
+     # Lookup instance to verify it exists
+    instance = data_source.get_instance_by_id(elementId)
+    if not instance:
+        raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
+
     # Mock historical data - in real implementation this would query historical store
-    values = data_source.get_instance_values_by_id(elementId, startTime, endTime)
-    if values:
-        # Return mock historical data
-        historical_values = values
+    historical_values = data_source.get_instance_values_by_id(elementId, startTime, endTime)
 
-        # Should always be a list
-        if not isinstance(historical_values, list):
-            historical_values = [historical_values]
-        
-        if includeMetadata:
-            instance = data_source.get_instance_by_id(elementId)
-            return {**instance, "values": historical_values}
-        else:
-            return historical_values
+    if not isinstance(historical_values, list):
+        historical_values = [historical_values]
 
-    raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
+    if not includeMetadata:
+        return historical_values
 
+    metadata_array = [getValue(val, includeMetadata) for val in historical_values]
+    return metadata_array
 
-# RFC 4.2.2.2 - [UPDATE] Object Element HistoricalValue
+# RFC 4.2.2.2 - Object Element HistoricalValue
 @update.put("/objects/{elementId}/history", summary="Update Historical Values of Object")
 def update_object_history(elementId: str = Path(...),data_source: I3XDataSource = Depends(get_data_source)):
     """Update the historical values for one or more Objects"""

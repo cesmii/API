@@ -74,17 +74,7 @@ class MockDataUpdater:
 
                 # If callback is provided, notify about the update
                 if self.update_callback and old_value != current_value:
-                    update = {
-                        "elementId": instance["elementId"],
-                        "name": instance.get("name", ""),
-                        "typeId": instance.get("typeId", ""),
-                        "parentId": instance.get("parentId"),
-                        "hasChildren": instance.get("hasChildren", False),
-                        "namespaceUri": instance.get("namespaceUri", ""),
-                        "value": current_value,
-                        "timestamp": current_value[timestamp_key],
-                    }
-                    self.update_callback(update)
+                    self.update_callback(instance, current_value)
 
             time.sleep(1)  # Update every second
 

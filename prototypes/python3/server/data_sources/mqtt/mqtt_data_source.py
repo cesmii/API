@@ -1,4 +1,5 @@
 import json
+from genson import SchemaBuilder
 import logging
 import re
 import ssl
@@ -148,19 +149,18 @@ class MQTTDataSource(I3XDataSource):
                     # Extract name from original topic
                     name = self._get_name_from_topic(msg.topic)
                     
-                    update = {
+                    instance = {
                         "elementId": element_id,
                         "name": name,
                         "typeId": "",  # Empty for now
                         "parentId": "",  # Empty for now
                         "hasChildren": False,
                         "namespaceUri": self.MQTT_NAMESPACE_URI,
-                        "value": value,
                         "timestamp": timestamp
                     }
                     
                     try:
-                        self.update_callback(update)
+                        self.update_callback(instance, value)
                     except Exception as e:
                         self.logger.error(f"Error calling update callback: {e}")
 
@@ -231,14 +231,14 @@ class MQTTDataSource(I3XDataSource):
             type_name = self._get_name_from_topic(original_topic)
             
             # Build attributes array by analyzing the current value structure
-            attributes = self._analyze_value_structure(current_value)
+            jsonSchema = self._get_json_schema(current_value)
             
             type_definition = {
                 "elementId": element_id + "_TYPE",
                 "name": f"{type_name}Type",
                 "namespaceUri": self.MQTT_NAMESPACE_URI,
-                "attributes": attributes
-            }
+                "schema": jsonSchema
+                }
             
             self.logger.info(f"Generated type definition for {element_id}: {type_definition}")
             return type_definition
@@ -275,21 +275,26 @@ class MQTTDataSource(I3XDataSource):
             self.logger.info(f"Returning instance: {instance}")
             return instance
     
-    def get_relationship_types(self) -> List[str]:
-        return ["HasChildren", "HasParent"]
+    def get_instance_values_by_id(
+        self,
+        element_id: str,
+        startTime: Optional[str] = None,
+        endTime: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        value = self.get_topic_value(element_id)
+        return value
 
-    # TODO - need to fix this to return proper types
+    # No custom types
+    def get_relationship_types(self, namespace_uri: Optional[str] = None) -> List[Dict[str, Any]]:
+        return []
+
     def get_relationship_type_by_id(self, element_id: str) -> Optional[Dict[str, Any]]:
-        if element_id.lower() == "haschildren":
-            return "HasChildren"
-        elif element_id.lower() == "hasparent":
-            return "HasParent"
-        else:
-            return None
+        return []
 
+    # Only support children
     def get_related_instances(self, element_id: str, relationship_type: str) -> List[Dict[str, Any]]:
         """MQTT does not have non-hierarchical relationships, return empty"""
-        if relationship_type.lower() == "haschildren":
+        if relationship_type.lower() == "haschildren" or relationship_type.lower() == "children":
             """Return direct child topics for the given parent element_id"""
             children = []
 
@@ -312,7 +317,7 @@ class MQTTDataSource(I3XDataSource):
                             children.append(instance)
 
             return children
-        elif relationship_type.lower() == "hasparent":
+        elif relationship_type.lower() == "hasparent" or relationship_type.lower() == "parent":
             """Return the direct parent topic for the given child element_id"""
             with self.cache_lock:
                 topic_data = self.topic_cache.get(element_id)
@@ -344,50 +349,45 @@ class MQTTDataSource(I3XDataSource):
             self.logger.error("MQTT client is not connected, cannot publish updates")
             return []
 
-        if len(element_ids) != len(values):
-            self.logger.error(f"Mismatch between element_ids ({len(element_ids)}) and values ({len(values)})")
-            return []
+        result = {}
 
-        results = []
+        try:
+            # Convert element_id back to topic path
+            topic = element_id.replace('_', '/')
 
-        for element_id, value in zip(element_ids, values):
-            try:
-                # Convert element_id back to topic path
-                topic = element_id.replace('_', '/')
+            # Serialize value to JSON if it's not already a string
+            if isinstance(value, str):
+                payload = value
+            else:
+                payload = json.dumps(value)
 
-                # Serialize value to JSON if it's not already a string
-                if isinstance(value, str):
-                    payload = value
-                else:
-                    payload = json.dumps(value)
+            # Publish to MQTT topic
+            mqtt_result = self.client.publish(topic, payload)
 
-                # Publish to MQTT topic
-                result = self.client.publish(topic, payload)
-
-                if result.rc == mqtt.MQTT_ERR_SUCCESS:
-                    self.logger.info(f"Successfully published to topic '{topic}': {payload}")
-                    results.append({
-                        "elementId": element_id,
-                        "success": True,
-                        "message": "Published successfully"
-                    })
-                else:
-                    self.logger.error(f"Failed to publish to topic '{topic}', error code: {result.rc}")
-                    results.append({
-                        "elementId": element_id,
-                        "success": False,
-                        "message": f"Publish failed with error code {result.rc}"
-                    })
-
-            except Exception as e:
-                self.logger.error(f"Error publishing to element_id '{element_id}': {e}")
-                results.append({
+            if mqtt_result.rc == mqtt.MQTT_ERR_SUCCESS:
+                self.logger.info(f"Successfully published to topic '{topic}': {payload}")
+                result = {
+                    "elementId": element_id,
+                    "success": True,
+                    "message": "Published successfully"
+                }
+            else:
+                self.logger.error(f"Failed to publish to topic '{topic}', error code: {mqtt_result.rc}")
+                result = {
                     "elementId": element_id,
                     "success": False,
-                    "message": f"Exception: {str(e)}"
-                })
+                    "message": f"Publish failed with error code {result.rc}"
+                }
 
-        return results
+        except Exception as e:
+            self.logger.error(f"Error publishing to element_id '{element_id}': {e}")
+            result = {
+                "elementId": element_id,
+                "success": False,
+                "message": f"Exception: {str(e)}"
+            }
+
+        return result
     
     def get_all_instances(self) -> List[Dict[str, Any]]:
         """Return all instances from MQTT topics"""
@@ -404,26 +404,11 @@ class MQTTDataSource(I3XDataSource):
     # Helpers to respond to data source method calls above
 
     # Create a "type" definition based on the value on a payload
-    def _analyze_value_structure(self, value: Any) -> List[Dict[str, Any]]:
-        """Analyze a value and return attribute definitions"""
-        attributes = []
-
-        if isinstance(value, dict):
-            # If value is a JSON object, create attributes for each key
-            for key, val in value.items():
-                attr = {
-                    "name": key,
-                    "dataType": self._get_data_type(val)
-                }
-                attributes.append(attr)
-        else:
-            # If value is primitive, create single "value" attribute
-            attributes.append({
-                "name": "value",
-                "dataType": self._get_data_type(value)
-            })
-
-        return attributes
+    def _get_json_schema(self, value: Any) -> List[Dict[str, Any]]:
+        builder = SchemaBuilder()
+        builder.add_object(value)
+        schema = builder.to_schema()
+        return (schema)
 
     # Convert value type to type definition. Do not traverse objects or arrays
     def _get_data_type(self, value: Any) -> str:

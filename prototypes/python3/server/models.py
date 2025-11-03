@@ -162,14 +162,9 @@ class RegisterMonitoredItemsRequest(BaseModel):
 
 class SyncResponseItem(BaseModel):
     elementId: str
-    value: dict
+    value: Any
     timestamp: str
     dataType: str = "object"
-    name: str
-    typeId: str
-    parentId: Optional[str]
-    hasChildren: bool
-    namespaceUri: str
 
 
 class UnsubscribeRequest(BaseModel):
