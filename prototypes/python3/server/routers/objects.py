@@ -49,30 +49,22 @@ def get_objects(
 
     return instances
 
-# RFC 4.1.7 - Object Definition
+# RFC 4.1.5 - Single Object
 @explore.get("/objects/{elementId}", summary="Get Object")
 def get_objects_by_id(
     elementId: str = Path(...),
     data_source: I3XDataSource = Depends(get_data_source),
-) -> ObjectType:
+) -> ObjectInstanceMinimal | ObjectInstance:
     """Return an Object including it's value and metadata"""
-    i = data_source.get_instance_by_id(elementId)
+    instance = data_source.get_instance_by_id(elementId)
 
     # Check if instance was found, return 404 if not
-    if not i:
+    if not instance:
         raise HTTPException(
             status_code=404, detail=f"Instance with elementId '{elementId}' not found"
         )
 
-    find_type = i["typeId"]
-    j = data_source.get_object_type_by_id(find_type)
-
-    if not j:
-        raise HTTPException(
-            status_code=404, detail=f"Type with elementId '{elementId}' not found"
-        )
-
-    return j
+    return instance
 
 # 4.1.6 Objects linked by Relationship Type
 @explore.get("/objects/{elementId}/related", summary="Get Related Objects")
@@ -96,24 +88,25 @@ def get_last_known_value(
 ):
     """Return last known value for an Object"""
     elementId = unquote(elementId)
-    instance = data_source.get_instance_values_by_id(elementId)
-    if instance:
-        result = instance
+    
+    # Lookup instance to verify it exists
+    instance = data_source.get_instance_by_id(elementId)
+    if not instance:
+        raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
 
-        if includeMetadata:
-            result.update(
-                {
-                    "dataType": "object",
-                    "timestamp": instance.get(
-                        "timestamp",
-                        datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    ),
-                }
-            )
+    # Get the value. Some objects may not have a value
+    value = data_source.get_instance_values_by_id(elementId)
 
-        return result
+    if not includeMetadata:
+        return value
 
-    raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
+    metadataObject = {
+        "dataType": "object",
+        "quality": "GoodNoData" if not value else "Good",
+        "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ") if not value else value.get("timestamp"),
+        "value": value
+    }
+    return metadataObject
 
 # 4.2.2.1 [UPDATE] Object Element LastKnownValue
 @update.put("/objects/{elementId}/value", summary="Update Value of Object")
