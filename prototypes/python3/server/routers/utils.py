@@ -8,7 +8,7 @@ def getObject(instance: Any, includeMetadata: bool) -> Any:
 
     noMetadataObject = {
         "elementId": instance["elementId"],
-        "name": instance["name"],
+        "displayName": instance["displayName"],
         "typeId": instance["typeId"],
         "namespaceUri": instance["namespaceUri"],
         "parentId": instance.get("parentId"),
