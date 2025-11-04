@@ -10,6 +10,7 @@ from models import CreateSubscriptionRequest, CreateSubscriptionResponse
 from models import RegisterMonitoredItemsRequest, SyncResponseItem
 from models import GetSubscriptionsResponse, SubscriptionSummary
 from data_sources.data_interface import I3XDataSource
+from .utils import getSubscriptionValue
 
 
 # Not required, but showing what information is stored for simulated subscriptions
@@ -196,7 +197,7 @@ def delete_subscription(request: Request, subscriptionId: str):
 # Subscription thread responsible creating updated for items being monitored.
 # If QoS is QoS0, it will call the handler immediately to send updates
 # if QoS is QoS2, it will store the updates in a pending dictionary to be sent on the /sync call
-def handle_data_source_update(update, I3X_DATA_SUBSCRIPTIONS):
+def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS):
     """Route updates from data sources to active subscriptions"""
     try:
         # Iterate through all active subscriptions
@@ -205,20 +206,25 @@ def handle_data_source_update(update, I3X_DATA_SUBSCRIPTIONS):
                 continue
 
             # Check if this update is for a monitored element
-            element_id = update.get("elementId")
+            element_id = instance.get("elementId")
             if element_id and element_id in sub.monitoredItems:
+
+                # Get the payload
+                updateValue = getSubscriptionValue(instance, value, includeMetadata=True)
+
+
                 if sub.qos == "QoS0":
                     # Immediate delivery via handler
                     if sub.handler:
                         try:
-                            sub.handler(update)
+                            sub.handler(updateValue)
                         except Exception as e:
                             print(f"[QoS0] Handler error: {e}")
                 elif sub.qos == "QoS2":
                     # Queue for later sync
-                    sub.pendingUpdates.append(update)
+                    sub.pendingUpdates.append(updateValue)
     except Exception as e:
-        print(f"Error routing data source update: {e}")
+        print(f"Error routing data source update: {e}\n{stack_trace}")
 
 
 def subscription_worker(I3X_DATA_SUBSCRIPTIONS, running_flag):

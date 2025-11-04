@@ -693,9 +693,16 @@ async def main():
             ##### SUBSCRIPTION METHODS #####
             elif user_selection == "4":
                 while True:
-                    print(
-                        f"Subscription Methods\n0: Back\n1: Subscribe\n2: Register Monitored Items\n3: Sync QoS2 subscription\n4: Unsubscribe\nX: Quit\n"
+                    menu_text = (
+                        "Subscription Methods\n"
+                        "0: Back\n"
+                        "1: Create Subscription\n"
+                        "2: Register Objects\n"
+                        "3: Sync (QoS2 Subscription)\n"
+                        "4: Unsubscribe\n"
+                        "X: Quit\n"
                     )
+                    print(menu_text)
                     user_selection = get_user_selection(["0", "1", "2", "3", "4", "X"])
                     if user_selection.upper() == "X":
                         exit()
@@ -717,24 +724,14 @@ async def main():
                             ).strip()
                             if another != "1":
                                 break
-                        max_depth = input(
-                            "Enter Max Depth (optional, integer, default 0): "
-                        ).strip()
-                        try:
-                            max_depth = int(max_depth) if max_depth else 0
-                        except ValueError:
-                            print(
-                                f"Max depth entered - '{max_depth}' - is invalid. must be an integer, defaulting to 0."
-                            )
-                            max_depth = 0
                         try:
                             pretty_print_json(
                                 await register(
                                     base_url,
                                     subscription_id,
                                     element_ids,
-                                    get_include_metadata(),
-                                    max_depth,
+                                    True,
+                                    0,
                                 )
                             )
                         except Exception as e:
