@@ -3,19 +3,19 @@ from datetime import datetime
 # I3X API compliant mock data - Industrial Information Interface eXchange (RFC 001)
 I3X_DATA = {
     "namespaces": [
-        {"uri": "https://cesmii.org/i3x", "name": "I3X"},
-        {"uri": "https://isa.org/isa95", "name": "ISA95"},
-        {"uri": "https://abelara.com/equipment", "name": "Abelara Equipment"},
-        {"uri": "https://thinkiq.com/equipment", "name": "ThinkIQ Equipment"},
+        {"uri": "https://cesmii.org/i3x", "displayName": "I3X"},
+        {"uri": "https://isa.org/isa95", "displayName": "ISA95"},
+        {"uri": "https://abelara.com/equipment", "displayName": "Abelara Equipment"},
+        {"uri": "https://thinkiq.com/equipment", "displayName": "ThinkIQ Equipment"},
         {
             "uri": "http://opcfoundation.org/UA/Machinery",
-            "name": "OPC UA for Machinery",
+            "displayName": "OPC UA for Machinery",
         },
     ],
     "objectTypes": [
         {
             "elementId": "enterprise-type",
-            "name": "Enterprise",
+            "displayName": "Enterprise",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -26,7 +26,7 @@ I3X_DATA = {
         },
         {
             "elementId": "site-type",
-            "name": "Site",
+            "displayName": "Site",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -37,7 +37,7 @@ I3X_DATA = {
         },
         {
             "elementId": "area-type",
-            "name": "Area",
+            "displayName": "Area",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -48,7 +48,7 @@ I3X_DATA = {
         },
         {
             "elementId": "work-center-type",
-            "name": "Work-Center",
+            "displayName": "Work-Center",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -59,7 +59,7 @@ I3X_DATA = {
         },
         {
             "elementId": "work-unit-type",
-            "name": "Work-Unit",
+            "displayName": "Work-Unit",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -68,7 +68,7 @@ I3X_DATA = {
         },
         {
             "elementId": "state-type",
-            "name": "State",
+            "displayName": "State",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -155,7 +155,7 @@ I3X_DATA = {
         },
         {
             "elementId": "alert-type",
-            "name": "Alert",
+            "displayName": "Alert",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -230,7 +230,7 @@ I3X_DATA = {
         },
         {
             "elementId": "product-type",
-            "name": "Product",
+            "displayName": "Product",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -313,7 +313,7 @@ I3X_DATA = {
         },
         {
             "elementId": "production-type",
-            "name": "Production",
+            "displayName": "Production",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -456,7 +456,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurements-type",
-            "name": "Measurements",
+            "displayName": "Measurements",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -467,7 +467,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurement-type",
-            "name": "Measurement",
+            "displayName": "Measurement",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -570,7 +570,7 @@ I3X_DATA = {
         },
         {
             "elementId": "count-type",
-            "name": "Count",
+            "displayName": "Count",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -661,7 +661,7 @@ I3X_DATA = {
         },
         {
             "elementId": "kpi-type",
-            "name": "KPI",
+            "displayName": "KPI",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -749,7 +749,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurement-type",
-            "name": "Measurement",
+            "displayName": "Measurement",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -852,7 +852,7 @@ I3X_DATA = {
         },
         {
             "elementId": "sensor-type",
-            "name": "Measurements",
+            "displayName": "Measurements",
             "namespaceUri": "https://thinkiq.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
