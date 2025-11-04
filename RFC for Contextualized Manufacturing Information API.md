@@ -64,6 +64,7 @@ The reader will observe that the API requires the underlying platform to support
 
 ### 3.1.1 Required Object Metadata
 
+- DisplayName: a human-friendly name for the purpose of browsing or displaying objects within an address space
 - ParentId: the ElementId of the parent object
 - HasChildren: if the element value is complex, a boolean value indicating if the element is composed of one or more child objects
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
@@ -283,5 +284,6 @@ Implementations of this API MUST be able to return Historical Value responses wi
 ## 6. Acknowledgements
 
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+
 
 
