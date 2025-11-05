@@ -10,13 +10,13 @@ from enum import Enum
 # RFC 4.1.1 - Namespace Model
 class Namespace(BaseModel):
     uri: str = Field(..., description="Namespace URI")
-    name: str = Field(..., description="Namespace name")
+    displayName: str = Field(..., description="Namespace name")
 
 
 # RFC 4.1.2/4.1.3 - Object Type Model
 class ObjectType(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the type")
-    name: str = Field(..., description="Type name")
+    displayName: str = Field(..., description="Type name")
     namespaceUri: str = Field(..., description="Namespace URI")
     schema: Dict[str, Any] = Field(
         ..., description="JSON Schema definition for this object type"
@@ -34,7 +34,7 @@ class RelationshipType(BaseModel):
     elementId: str = Field(
         ..., description="Unique string identifier for the relationship type"
     )
-    name: str = Field(..., description="Relationship type name")
+    displayName: str = Field(..., description="Relationship type name")
     namespaceUri: str = Field(..., description="Namespace URI")
     directions: List[RelationshipTypeDirection] = Field(
         ..., description="Relationship directions and cardinality"
@@ -44,7 +44,7 @@ class RelationshipType(BaseModel):
 # RFC 3.1.1 - Required Object Metadata (Minimal Instance)
 class ObjectInstanceMinimal(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the element")
-    name: str = Field(..., description="Object name")
+    displayName: str = Field(..., description="Object name")
     typeId: str = Field(..., description="ElementId of the object type")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
     hasChildren: bool = Field(
@@ -62,7 +62,7 @@ class ObjectLinkedByRelationshipType(BaseModel):
         None, description="Inverse relationship type from this instance to source"
     )
     elementId: str = Field(..., description="Unique string identifier for the element")
-    name: str = Field(..., description="Object name")
+    displayName: str = Field(..., description="Object name")
     typeId: str = Field(..., description="ElementId of the object type")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
     hasChildren: bool = Field(
