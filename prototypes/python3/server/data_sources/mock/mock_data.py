@@ -3,19 +3,19 @@ from datetime import datetime
 # I3X API compliant mock data - Industrial Information Interface eXchange (RFC 001)
 I3X_DATA = {
     "namespaces": [
-        {"uri": "https://cesmii.org/i3x", "name": "I3X"},
-        {"uri": "https://isa.org/isa95", "name": "ISA95"},
-        {"uri": "https://abelara.com/equipment", "name": "Abelara Equipment"},
-        {"uri": "https://thinkiq.com/equipment", "name": "ThinkIQ Equipment"},
+        {"uri": "https://cesmii.org/i3x", "displayName": "I3X"},
+        {"uri": "https://isa.org/isa95", "displayName": "ISA95"},
+        {"uri": "https://abelara.com/equipment", "displayName": "Abelara Equipment"},
+        {"uri": "https://thinkiq.com/equipment", "displayName": "ThinkIQ Equipment"},
         {
             "uri": "http://opcfoundation.org/UA/Machinery",
-            "name": "OPC UA for Machinery",
+            "displayName": "OPC UA for Machinery",
         },
     ],
     "objectTypes": [
         {
             "elementId": "enterprise-type",
-            "name": "Enterprise",
+            "displayName": "Enterprise",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -26,7 +26,7 @@ I3X_DATA = {
         },
         {
             "elementId": "site-type",
-            "name": "Site",
+            "displayName": "Site",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -37,7 +37,7 @@ I3X_DATA = {
         },
         {
             "elementId": "area-type",
-            "name": "Area",
+            "displayName": "Area",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -48,7 +48,7 @@ I3X_DATA = {
         },
         {
             "elementId": "work-center-type",
-            "name": "Work-Center",
+            "displayName": "Work-Center",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -59,7 +59,7 @@ I3X_DATA = {
         },
         {
             "elementId": "work-unit-type",
-            "name": "Work-Unit",
+            "displayName": "Work-Unit",
             "namespaceUri": "https://isa.org/isa95",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -68,7 +68,7 @@ I3X_DATA = {
         },
         {
             "elementId": "state-type",
-            "name": "State",
+            "displayName": "State",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -155,7 +155,7 @@ I3X_DATA = {
         },
         {
             "elementId": "alert-type",
-            "name": "Alert",
+            "displayName": "Alert",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -230,7 +230,7 @@ I3X_DATA = {
         },
         {
             "elementId": "product-type",
-            "name": "Product",
+            "displayName": "Product",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -313,7 +313,7 @@ I3X_DATA = {
         },
         {
             "elementId": "production-type",
-            "name": "Production",
+            "displayName": "Production",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -456,7 +456,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurements-type",
-            "name": "Measurements",
+            "displayName": "Measurements",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -467,7 +467,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurement-type",
-            "name": "Measurement",
+            "displayName": "Measurement",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -570,7 +570,7 @@ I3X_DATA = {
         },
         {
             "elementId": "count-type",
-            "name": "Count",
+            "displayName": "Count",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -661,7 +661,7 @@ I3X_DATA = {
         },
         {
             "elementId": "kpi-type",
-            "name": "KPI",
+            "displayName": "KPI",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -749,7 +749,7 @@ I3X_DATA = {
         },
         {
             "elementId": "measurement-type",
-            "name": "Measurement",
+            "displayName": "Measurement",
             "namespaceUri": "https://abelara.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -852,7 +852,7 @@ I3X_DATA = {
         },
         {
             "elementId": "sensor-type",
-            "name": "Measurements",
+            "displayName": "Measurements",
             "namespaceUri": "https://thinkiq.com/equipment",
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -870,7 +870,7 @@ I3X_DATA = {
     "instances": [
         {
             "elementId": "cesmii",
-            "name": "CESMII",
+            "displayName": "CESMII",
             "typeId": "enterprise-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -880,7 +880,7 @@ I3X_DATA = {
         },
         {
             "elementId": "cesmii-plant1",
-            "name": "Plant 1",
+            "displayName": "Plant 1",
             "typeId": "site-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -891,7 +891,7 @@ I3X_DATA = {
         },
         {
             "elementId": "cesmii-plant1-utilities",
-            "name": "Utilities",
+            "displayName": "Utilities",
             "typeId": "area-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -902,7 +902,7 @@ I3X_DATA = {
         },
         {
             "elementId": "cesmii-plant1-utilities-watersystem",
-            "name": "Water System",
+            "displayName": "Water System",
             "typeId": "work-center-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -913,7 +913,7 @@ I3X_DATA = {
         },
         {
             "elementId": "cesmii-plant1-utilities-watersystem-pumpstation",
-            "name": "Pump Station",
+            "displayName": "Pump Station",
             "typeId": "work-center-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -926,7 +926,7 @@ I3X_DATA = {
         },
         {
             "elementId": "cesmii-plant1-utilities-watersystem-pumpstation-pump101",
-            "name": "pump-101",
+            "displayName": "pump-101",
             "typeId": "work-unit-type",
             "namespaceUri": "https://isa.org/isa95",
             "hasChildren": True,
@@ -944,7 +944,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-state",
-            "name": "pump-101 State",
+            "displayName": "pump-101 State",
             "typeId": "state-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1013,7 +1013,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-alert",
-            "name": "pump-101 Alert",
+            "displayName": "pump-101 Alert",
             "typeId": "alert-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1115,7 +1115,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-product",
-            "name": "pump-101 Product",
+            "displayName": "pump-101 Product",
             "typeId": "product-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1162,7 +1162,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-production",
-            "name": "pump-101 Production",
+            "displayName": "pump-101 Production",
             "typeId": "production-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1234,7 +1234,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-measurements",
-            "name": "pump-101 Measurements",
+            "displayName": "pump-101 Measurements",
             "typeId": "measurements-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": True,
@@ -1249,7 +1249,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-bearing-temperature",
-            "name": "pump-101 Bearing Temperature",
+            "displayName": "pump-101 Bearing Temperature",
             "typeId": "measurement-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1353,7 +1353,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-vibration-analysis",
-            "name": "pump-101 Vibration Analysis",
+            "displayName": "pump-101 Vibration Analysis",
             "typeId": "measurement-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1458,7 +1458,7 @@ I3X_DATA = {
         },
         {
             "elementId": "pump-101-oil-analysis",
-            "name": "pump-101 Oil Analysis",
+            "displayName": "pump-101 Oil Analysis",
             "typeId": "measurement-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1608,7 +1608,7 @@ I3X_DATA = {
         },
         {
             "elementId": "tank-201",
-            "name": "tank-201",
+            "displayName": "tank-201",
             "typeId": "work-unit-type",
             "hasChildren": True,
             "namespaceUri": "https://isa.org/isa95",
@@ -1621,7 +1621,7 @@ I3X_DATA = {
         },
         {
             "elementId": "tank-201-state",
-            "name": "tank-201 State",
+            "displayName": "tank-201 State",
             "typeId": "state-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1777,7 +1777,7 @@ I3X_DATA = {
         },
         {
             "elementId": "tank-201-alert",
-            "name": "tank-201 Alert",
+            "displayName": "tank-201 Alert",
             "typeId": "alert-type",
             "namespaceUri": "https://abelara.com/equipment",
             "hasChildren": False,
@@ -1879,7 +1879,7 @@ I3X_DATA = {
         },
         {
             "elementId": "sensor-001",
-            "name": "TempSensor-101",
+            "displayName": "TempSensor-101",
             "typeId": "sensor-type",
             "parentId": "cesmii-plant1-utilities-watersystem",
             "hasChildren": False,
@@ -1920,7 +1920,7 @@ I3X_DATA = {
     "relationshipTypes": [
         {
             "elementId": "hierarchical-relationship-type",
-            "name": "ParentChild",
+            "displayName": "ParentChild",
             "namespaceUri": "https://cesmii.org/i3x",
             "directions": [
                 {
@@ -1937,7 +1937,7 @@ I3X_DATA = {
         },
         {
             "elementId": "inheritance-relationship-type",
-            "name": "Inheritance",
+            "displayName": "Inheritance",
             "namespaceUri": "https://cesmii.org/i3x",
             "directions": [
                 {
@@ -1954,11 +1954,11 @@ I3X_DATA = {
         },
         {
             "elementId": "implementation-relationship-type",
-            "name": "Implements",
+            "displayName": "Implements",
             "namespaceUri": "https://cesmii.org/i3x",
             "directions": [
                 {
-                    "Subject": "ImplentedBy",
+                    "Subject": "ImplementedBy",
                     "Target": "Implements",
                     "Cardinality": "1:0..1",
                 },
@@ -1971,7 +1971,7 @@ I3X_DATA = {
         },
         {
             "elementId": "dependency-relationship-type",
-            "name": "Dependency",
+            "displayName": "Dependency",
             "namespaceUri": "https://cesmii.org/i3x",
             "directions": [
                 {
@@ -1988,7 +1988,7 @@ I3X_DATA = {
         },
         {
             "elementId": "aggregation-relationship-type",
-            "name": "Aggregates",
+            "displayName": "Aggregates",
             "namespaceUri": "https://cesmii.org/i3x",
             "directions": [
                 {
@@ -2005,7 +2005,7 @@ I3X_DATA = {
         },
         {
             "elementId": "supply-relationship-type",
-            "name": "Supply",
+            "displayName": "Supply",
             "namespaceUri": "https://thinkiq.com/equipment",
             "directions": [
                 {
@@ -2022,7 +2022,7 @@ I3X_DATA = {
         },
         {
             "elementId": "monitoring-relationship-type",
-            "name": "Monitoring",
+            "displayName": "Monitoring",
             "namespaceUri": "https://thinkiq.com/equipment",
             "directions": [
                 {
@@ -2031,7 +2031,7 @@ I3X_DATA = {
                     "Cardinality": "1..*:1..*",
                 },
                 {
-                    "Subject": "MonitorBy",
+                    "Subject": "MonitoredBy",
                     "Target": "Monitors",
                     "Cardinality": "1..*:1..*",
                 },

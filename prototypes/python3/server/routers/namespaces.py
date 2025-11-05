@@ -7,14 +7,14 @@ from data_sources.data_interface import I3XDataSource
 import logging
 
 logger = logging.getLogger("uvicorn.error")  # or your module logger
-ns = APIRouter(prefix="", tags=["Namespaces"])
+ns = APIRouter(prefix="", tags=["Explore"])
 
 def get_data_source(request: Request) -> I3XDataSource:
     """Dependency to inject data source"""
     return request.app.state.data_source
 
 # RFC 4.1.1 - Namespaces
-@ns.get("/namespaces", response_model=List[Namespace], tags=["Namespaces"])
+@ns.get("/namespaces", response_model=List[Namespace])
 def get_namespaces(data_source: I3XDataSource = Depends(get_data_source)):
     """Get all Namespaces"""
     return data_source.get_namespaces()

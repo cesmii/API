@@ -151,7 +151,7 @@ class MQTTDataSource(I3XDataSource):
                     
                     instance = {
                         "elementId": element_id,
-                        "name": name,
+                        "displayName": name,
                         "typeId": "",  # Empty for now
                         "parentId": "",  # Empty for now
                         "hasChildren": False,
@@ -190,7 +190,7 @@ class MQTTDataSource(I3XDataSource):
     # For now just return a single hardcoded namespace
     def get_namespaces(self) -> List[Dict[str, Any]]:
         # TODO - should these be the topics we're subscribed to? what about #?
-        return [{"uri": self.MQTT_NAMESPACE_URI, "name": "MQTT"}]
+        return [{"uri": self.MQTT_NAMESPACE_URI, "displayName": "MQTT"}]
 
     # Since MQTT doesn't have types per topic, for now iterate all topics and create a type for each
     #   use the topic as the element ID for the type
@@ -235,7 +235,7 @@ class MQTTDataSource(I3XDataSource):
             
             type_definition = {
                 "elementId": element_id + "_TYPE",
-                "name": f"{type_name}Type",
+                "displayName": f"{type_name}Type",
                 "namespaceUri": self.MQTT_NAMESPACE_URI,
                 "schema": jsonSchema
                 }
@@ -533,7 +533,7 @@ class MQTTDataSource(I3XDataSource):
 
         return {
             "elementId": element_id,
-            "name": name,
+            "displayName": name,
             "typeId": "",  # Empty for now
             "parentId": "",  # Empty for now
             "hasChildren": False,
