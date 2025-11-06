@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/production-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "start_ts": {"type": "string"},
+    "end_ts": {"type": "null"},
+    "counts": {
+      "type": "array",
+      "items": {"$ref": "https://abelara.com/equipment/count-type/v1.0#"}},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "product": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "idealCycleTime": {"type": "integer"},
+            "tolerance": {"type": "number"},
+            "unit": {"type": "string"},
+            "family": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "description": {"type": "string"}
+              },
+              "required": ["id", "name", "description"]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "description",
+            "idealCycleTime",
+            "tolerance",
+            "unit",
+            "family"
+          ]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "shift": {"type": "string"},
+            "operator": {"type": "string"},
+            "demandLevel": {"type": "string"},
+            "systemEfficiency": {"type": "number"},
+            "energyConsumption": {"type": "number"},
+            "qualityScore": {"type": "number"},
+            "plannedProduction": {"type": "integer"},
+            "actualProduction": {"type": "integer"},
+            "efficiency": {"type": "number"}
+          },
+          "required": [
+            "shift",
+            "operator",
+            "demandLevel",
+            "systemEfficiency",
+            "energyConsumption",
+            "qualityScore",
+            "plannedProduction",
+            "actualProduction",
+            "efficiency"
+          ]
+        }
+      },
+      "required": ["source", "uri", "asset", "product", "additionalInfo"]
+    }
+  },
+  "required": ["timestamp", "start_ts", "end_ts", "counts", "metadata"]
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/count-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "value": {"type": "number"},
+    "type": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "unit": {"type": "string"}
+      },
+      "required": ["id", "name", "unit", "description"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "production": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "product": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "maintenanceDue": {"type": "integer"},
+            "lastMaintenance": {"type": "string"},
+            "nextMaintenance": {"type": "string"},
+            "flowRate": {"type": "number"},
+            "efficiency": {"type": "number"},
+            "totalEnergy": {"type": "number"},
+            "increment": {"type": "number"},
+            "lastReset": {"type": "string"},
+            "nextReset": {"type": "string"}
+          },
+          "required": [
+            "maintenanceDue",
+            "lastMaintenance",
+            "nextMaintenance",
+            "flowRate",
+            "efficiency",
+            "totalEnergy",
+            "increment",
+            "lastReset",
+            "nextReset"
+          ]
+        }
+      },
+      "required": ["source", "uri", "asset", "production", "product", "additionalInfo"]
+    }
+  },
+  "required": ["timestamp", "value", "type"]
+}

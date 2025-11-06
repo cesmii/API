@@ -1,0 +1,83 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "https://abelara.com/equipment/state-type/v1.0",
+    "type": "object",
+    "properties": {
+        "timestamp": {"type": "string"},
+        "description": {"type": "string"},
+        "color": {"type": "string"},
+        "type": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "description": {"type": "string"}
+            },
+            "required": ["id", "name", "description"]
+        },
+        "metadata": {
+            "type": "object",
+            "properties": {
+                "source": {"type": "string"},
+                "uri": {"type": "string"},
+                "asset": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "name": {"type": "string"},
+                        "description": {"type": "string"}
+                    },
+                    "required": ["id", "name", "description"]
+                },
+                "previousState": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                        "color": {"type": "string"},
+                        "type": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer"},
+                                "name": {"type": "string"},
+                                "description": {"type": "string"}
+                            },
+                            "required": ["id", "name", "description"]
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "name",
+                        "description",
+                        "color",
+                        "type"
+                    ]
+                },
+                "additionalInfo": {
+                    "type": "object",
+                    "properties": {
+                        "runTime": {"type": "integer"},
+                        "lastFillTime": {"type": "string"},
+                        "mode": {"type": "string"},
+                        "operator": {"type": "string"}
+                    },
+                    "required": [
+                        "runTime",
+                        "lastFillTime",
+                        "mode",
+                        "operator"
+                    ]
+                }
+            },
+            "required": [
+                "source",
+                "uri",
+                "asset",
+                "previousState",
+                "additionalInfo"
+            ]
+        }
+    },
+    "required": ["timestamp", "description", "color", "type", "metadata"]
+}

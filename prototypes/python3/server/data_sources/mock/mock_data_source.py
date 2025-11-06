@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any, Callable
+from pathlib import Path
+import json
+
 from ..data_interface import I3XDataSource
-from .mock_data import I3X_DATA
+from .mock import I3X_DATA
 from .mock_updater import MockDataUpdater
 
 
@@ -9,7 +12,10 @@ class MockDataSource(I3XDataSource):
     """Mock data implementation of I3XDataSource"""
 
     def __init__(self):
+        # Load base mock data from mock.py which references schema file paths
         self.data = I3X_DATA
+        # Replace any string schema file references in objectTypes with loaded JSON
+        self._load_schema_files()
         self.updater = MockDataUpdater(self)
         self.update_callback = None
 
@@ -292,6 +298,30 @@ class MockDataSource(I3XDataSource):
             return [self._get_schema(obj[0])]
         else:
             return type(obj).__name__
+
+    def _load_schema_files(self) -> None:
+        """Load JSON schema files referenced by string paths in objectTypes.
+
+        If an objectType has a 'schema' value that is a string, treat it as a
+        relative path under the mock package directory and replace it with the
+        parsed JSON object.
+        """
+        base_dir = Path(__file__).parent
+        object_types = self.data.get("objectTypes", [])
+        for ot in object_types:
+            schema_val = ot.get("schema")
+            if isinstance(schema_val, str):
+                schema_path = base_dir / schema_val
+                try:
+                    with open(schema_path, "r", encoding="utf-8") as f:
+                        ot["schema"] = json.load(f)
+                except FileNotFoundError:
+                    # If schema file isn't found, leave the string and continue
+                    # (this preserves previous behavior and aids debugging)
+                    # Optionally could log a warning here.
+                    ot["schema"] = {"_error": f"schema file not found: {schema_path}"}
+                except Exception as e:
+                    ot["schema"] = {"_error": f"failed to load schema: {e}"}
 
     def get_all_instances(self) -> List[Dict[str, Any]]:
         return self.data["instances"]

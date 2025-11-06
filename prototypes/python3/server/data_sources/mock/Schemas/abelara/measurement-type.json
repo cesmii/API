@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/measurement-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "type": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "required": ["id", "name", "description"]
+    },
+    "value": {"type": "number"},
+    "unit": {"type": "string"},
+    "target": {"type": "number"},
+    "tolerance": {"type": "number"},
+    "inTolerance": {"type": "boolean"},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "technician": {"type": "string"},
+            "measurementMethod": {"type": "string"},
+            "equipmentUsed": {"type": "string"},
+            "measurementDate": {"type": "string"},
+            "nextMeasurementDue": {"type": "string"},
+            "trend": {"type": "string"},
+            "measurementLocation": {"type": "string"}
+          },
+          "required": [
+            "technician",
+            "measurementMethod",
+            "equipmentUsed",
+            "measurementDate",
+            "nextMeasurementDue",
+            "trend",
+            "measurementLocation"
+          ]
+        }
+      },
+      "required": ["source", "uri", "asset", "additionalInfo"]
+    },
+    "product": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "family": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        }
+      },
+      "required": ["id", "name", "description", "family"]
+    },
+    "productionContext": {
+      "type": "object",
+      "properties": {
+        "batchId": {"type": "string"},
+        "processStep": {"type": "string"},
+        "demand": {"type": "string"}
+      },
+      "required": ["batchId", "processStep", "demand"]
+    }
+  },
+  "required": [
+    "timestamp",
+    "type",
+    "value",
+    "unit",
+    "target",
+    "tolerance",
+    "inTolerance",
+    "metadata",
+    "product",
+    "productionContext"
+  ]
+}

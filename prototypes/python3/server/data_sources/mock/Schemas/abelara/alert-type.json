@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/alert-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "severity": {"type": "integer"},
+    "code": {"type": "string"},
+    "message": {"type": "string"},
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "acknowledgment": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {"type": "boolean"},
+            "acknowledgedBy": {"type": "null"},
+            "acknowledgedAt": {"type": "null"}
+          },
+          "required": ["acknowledged", "acknowledgedBy", "acknowledgedAt"]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "temperature": {"type": "number"},
+            "warningThreshold": {"type": "number"},
+            "alarmThreshold": {"type": "number"},
+            "sensorLocation": {"type": "string"},
+            "trend": {"type": "string"},
+            "timeInAlarm": {"type": "integer"},
+            "recommendedAction": {"type": "string"},
+            "priority": {"type": "string"}
+          },
+          "required": [
+            "temperature",
+            "warningThreshold",
+            "alarmThreshold",
+            "sensorLocation",
+            "trend",
+            "timeInAlarm",
+            "recommendedAction",
+            "priority"
+          ]
+        }
+      },
+      "required": ["source", "uri", "asset", "acknowledgment", "additionalInfo"]
+    }
+  },
+  "required": ["timestamp", "severity", "code", "message", "metadata"]
+}

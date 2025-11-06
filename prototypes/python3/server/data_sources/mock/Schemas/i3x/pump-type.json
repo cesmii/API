@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://cesmii.org/i3x/pump-type/v1.0",
+  "type": "object",
+  "properties": {
+    "state": {"$ref": "https://abelara.com/equipment/state-type/v1.0#"},
+    "alert": {"$ref": "https://abelara.com/equipment/alert-type/v1.0#"},
+    "product": {"$ref": "https://abelara.com/equipment/product-type/v1.0#"},
+    "production": {"$ref": "https://abelara.com/equipment/production-type/v1.0#"},
+    "measurements": {"type": "array", "items": {"$ref": "https://abelara.com/equipment/measurement-type/v1.0#"}}
+  },
+  "required": ["state", "alert", "product", "production", "measurements"]
+}

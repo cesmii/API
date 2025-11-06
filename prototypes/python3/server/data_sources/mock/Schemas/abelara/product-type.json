@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/product-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "id": {"type": "integer"},
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "idealCycleTime": {"type": "integer"},
+    "tolerance": {"type": "number"},
+    "unit": {"type": "string"},
+    "family": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "required": ["id", "name", "description"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "specifications": {
+              "type": "object",
+              "properties": {
+                "temperature": {"type": "string"},
+                "pressure": {"type": "string"},
+                "quality": {"type": "string"},
+                "chlorinated": {"type": "boolean"}
+              },
+              "required": ["temperature", "pressure", "quality", "chlorinated"]
+            },
+            "regulatoryCompliance": {
+              "type": "array",
+              "items": [
+                {"type": "string"},
+                {"type": "string"}
+              ]
+            }
+          },
+          "required": ["specifications", "regulatoryCompliance"]
+        }
+      },
+      "required": ["source", "uri", "asset", "additionalInfo"]
+    }
+  },
+  "required": [
+    "timestamp",
+    "id",
+    "name",
+    "description",
+    "idealCycleTime",
+    "tolerance",
+    "unit",
+    "family",
+    "metadata"
+  ]
+}

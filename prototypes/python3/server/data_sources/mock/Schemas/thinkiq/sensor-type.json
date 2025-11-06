@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://thinkiq.com/equipment/sensor-type/v1.0",
+  "type": "object",
+  "properties": {
+    "value": {"type": "number"},
+    "engUnit": {"type": "string"},
+    "status": {"type": "string"},
+    "calibrationDate": {"type": "string"}
+  },
+  "required": ["value", "engUnit", "status"]
+}

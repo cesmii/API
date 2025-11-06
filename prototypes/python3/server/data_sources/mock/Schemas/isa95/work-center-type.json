@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://isa.org/isa95/work-center-type/v1.0",
+  "type": "object",
+  "properties": {
+    "work-unit": {
+      "type": "array",
+      "items": {}
+    }
+  },
+  "required": [
+    "work-unit"
+  ]
+}

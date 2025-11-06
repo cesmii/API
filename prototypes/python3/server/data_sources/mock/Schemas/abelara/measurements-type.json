@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/measurements-type/v1.0",
+  "type": "object",
+  "properties": {
+    "measurements": {"type": "array", "items": {}}
+  },
+  "required": ["measurements"]
+}

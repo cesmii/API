@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://abelara.com/equipment/kpi-type/v1.0",
+  "type": "object",
+  "properties": {
+    "timestamp": {"type": "string"},
+    "value": {"type": "number"},
+    "unit": {"type": "string"},
+    "type": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"}
+      },
+      "required": ["id", "name", "description"]
+    },
+    "product": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "family": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"},
+            "description": {"type": "string"}
+          },
+          "required": ["id", "name", "description"]
+        }
+      },
+      "required": ["id", "name", "description", "family"]
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "uri": {"type": "string"},
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "integer"},
+            "name": {"type": "string"}
+          },
+          "required": ["id", "name"]
+        },
+        "additionalInfo": {
+          "type": "object",
+          "properties": {
+            "calculationPeriod": {"type": "string"},
+            "inputPower": {"type": "number"},
+            "outputPower": {"type": "number"},
+            "targetEfficiency": {"type": "number"},
+            "trend": {"type": "string"},
+            "lastCalculation": {"type": "string"},
+            "baselineValue": {"type": "number"},
+            "improvement": {"type": "number"}
+          },
+          "required": [
+            "calculationPeriod",
+            "inputPower",
+            "outputPower",
+            "targetEfficiency",
+            "trend",
+            "lastCalculation",
+            "baselineValue",
+            "improvement"
+          ]
+        }
+      },
+      "required": ["source", "uri", "asset", "additionalInfo"]
+    }
+  },
+  "required": [
+    "timestamp",
+    "value",
+    "unit",
+    "type",
+    "product",
+    "metadata"
+  ]
+}

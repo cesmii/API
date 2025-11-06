@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "https://cesmii.org/i3x/tank-type/v1.0",
+  "type": "object",
+  "properties": {
+    "machineId": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "state": { "$ref": "https://abelara.com/equipment/state-type/v1.0#" },
+    "alert": { "$ref": "https://abelara.com/equipment/alert-type/v1.0#" }
+  },
+  "required": ["machineId", "state"]
+}
