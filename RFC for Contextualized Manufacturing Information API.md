@@ -90,6 +90,20 @@ To properly support Object Orientation, underlying platforms MUST support hierar
 
 Modern manufacturing information involves relationships in data that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
 
+### 3.3 ObjectTypes
+
+An ObjectType defines the schema for a class of objects within the contextualized manufacturing information model. It describes the structure, attributes, and relationships that instances of that type may exhibit, for example, defining what constitutes a `Machine`, `Sensor`, or `ProductionOrder`.
+
+ObjectTypes serve as the basis for instantiation and discovery through the I3X interfaces, such as retrieving the definition of a single ObjectType, enumerating all available ObjectTypes within a namespace, and listing object instances derived from a given ObjectType.
+
+### 3.4 Namespaces
+
+A Namespace provides a logical scope within the address space that groups related types, instances, and relationships. Namespaces allow clients to explore and manage subsets of the overall model, such as those tied to a particular site, discipline, or version, without conflict or ambiguity.
+
+### 3.5 ElementIds
+
+Within the scope of the platform providing the I3X interface, an ElementId is a unique string value that is assigned to every fundamental element in the address space. It enables unambiguous reference, linking, and retrieval of items within the CMIP address space.  Elements that contain an ElementId include:  ObjectTypes, Object Instances, Relationship Types, and Namespaces.
+
 ## 4. I3X Address Space Methods
 
 ### 4.1 Exploratory Methods
@@ -284,6 +298,7 @@ Implementations of this API MUST be able to return Historical Value responses wi
 ## 6. Acknowledgements
 
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+
 
 
 
