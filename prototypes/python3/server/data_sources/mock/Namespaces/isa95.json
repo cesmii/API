@@ -1,0 +1,9 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "https://abelara.com/equipment/v1.0",
+    "types": {
+        "work-unit-type": {
+            "type": "object"
+        }
+    }
+}

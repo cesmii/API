@@ -42,39 +42,52 @@ class MockDataUpdater:
                 if instance.get("static", False):
                     continue
 
-                # Check if instance has a Values array
-                values_array = instance.get("values")
+                # Check if instance has a records array
+                records_array = instance.get("records")
                 if (
-                    not values_array
-                    or not isinstance(values_array, list)
-                    or len(values_array) == 0
+                    not records_array
+                    or not isinstance(records_array, list)
+                    or len(records_array) == 0
                 ):
                     continue
 
-                # Get the most recent value (first element in array)
-                current_value = values_array[0]
+                # Get the most recent record (first element in array)
+                current_record = records_array[0]
+
+                # Skip if record doesn't have the expected structure
+                if not isinstance(current_record, dict) or "value" not in current_record:
+                    continue
 
                 # Make a copy to detect changes
-                old_value = (
-                    current_value.copy()
-                    if isinstance(current_value, dict)
-                    else current_value
-                )
+                old_record = current_record.copy()
 
-                # Randomize numeric values in the current value
-                self.randomize_numeric_values(current_value)
+                # Randomize numeric values in the current record's value
+                # Handle both primitive values and complex objects
+                if isinstance(current_record["value"], (int, float)):
+                    # For primitive numeric values, randomize directly
+                    v = current_record["value"]
+                    variation = v * 0.1
+                    new_val = v + random.uniform(-variation, variation)
+                    current_record["value"] = int(new_val) if isinstance(v, int) else new_val
+                elif isinstance(current_record["value"], (dict, list)):
+                    # For complex objects, randomize recursively
+                    self.randomize_numeric_values(current_record["value"])
 
-                # Update timestamp (check for both "Timestamp" and "timestamp")
-                timestamp_key = (
-                    "Timestamp" if "Timestamp" in current_value else "timestamp"
-                )
-                current_value[timestamp_key] = datetime.now(timezone.utc).strftime(
+                # Update timestamp at record level
+                current_record["timestamp"] = datetime.now(timezone.utc).strftime(
                     "%Y-%m-%dT%H:%M:%SZ"
                 )
 
+                # Also update timestamp inside value if it exists (check for both "Timestamp" and "timestamp")
+                if isinstance(current_record["value"], dict):
+                    if "Timestamp" in current_record["value"]:
+                        current_record["value"]["Timestamp"] = current_record["timestamp"]
+                    elif "timestamp" in current_record["value"]:
+                        current_record["value"]["timestamp"] = current_record["timestamp"]
+
                 # If callback is provided, notify about the update
-                if self.update_callback and old_value != current_value:
-                    self.update_callback(instance, current_value)
+                if self.update_callback and old_record != current_record:
+                    self.update_callback(instance, current_record)
 
             time.sleep(1)  # Update every second
 

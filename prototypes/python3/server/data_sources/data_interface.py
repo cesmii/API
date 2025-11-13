@@ -61,15 +61,26 @@ class I3XDataSource(ABC):
         element_id: str,
         startTime: Optional[str] = None,
         endTime: Optional[str] = None,
+        includeMetadata: bool = False,
+        returnHistory: bool = False,
     ) -> Optional[Dict[str, Any]]:
-        """Return instance object by ElementId"""
+        """
+        Return instance values by ElementId.
+
+        Args:
+            element_id: The element to get values for
+            startTime: Optional start time for filtering
+            endTime: Optional end time for filtering
+            includeMetadata: If True, returns full record with quality and timestamp. If False, returns only the value field(s).
+            returnHistory: If True and no time range specified, returns all historical values. If False, returns only most recent value.
+        """
         pass
 
     @abstractmethod
     def get_related_instances(
-        self, element_id: str, relationship_type: str
+        self, element_id: str, relationship_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Return array of objects related by specified relationship type"""
+        """Return array of objects related by specified relationship type. If relationship_type is None, return all related objects."""
         pass
 
     @abstractmethod

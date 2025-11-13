@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any, Union, Callable
 from datetime import datetime
 from enum import Enum
@@ -36,9 +36,7 @@ class RelationshipType(BaseModel):
     )
     displayName: str = Field(..., description="Relationship type name")
     namespaceUri: str = Field(..., description="Namespace URI")
-    directions: List[RelationshipTypeDirection] = Field(
-        ..., description="Relationship directions and cardinality"
-    )
+    reverseOf: str = Field(..., description="Type name of reverse relationship")
 
 
 # RFC 3.1.1 - Required Object Metadata (Minimal Instance)
@@ -161,10 +159,12 @@ class RegisterMonitoredItemsRequest(BaseModel):
 
 
 class SyncResponseItem(BaseModel):
+    model_config = ConfigDict(extra='allow')  # Allow extra fields from record metadata
+
     elementId: str
     value: Any
-    timestamp: str
-    dataType: str = "object"
+    timestamp: Optional[str] = None
+    quality: Optional[str] = None
 
 
 class UnsubscribeRequest(BaseModel):

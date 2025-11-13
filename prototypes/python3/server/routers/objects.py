@@ -76,16 +76,17 @@ def get_last_known_value(
 ):
     """Return last known value for an Object"""
     elementId = unquote(elementId)
-    
+
     # Lookup instance to verify it exists
     instance = data_source.get_instance_by_id(elementId)
     if not instance:
         raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
 
-    # Get the value. Some objects may not have a value
-    value = data_source.get_instance_values_by_id(elementId)
+    # Get the most recent value with or without metadata based on includeMetadata flag
+    # returnHistory=False ensures only the most recent value is returned
+    value = data_source.get_instance_values_by_id(elementId, includeMetadata=includeMetadata, returnHistory=False)
 
-    return getValue(value, includeMetadata)
+    return value
 
 # 4.2.2.1 Object Element LastKnownValue
 @update.put("/objects/{elementId}/value", summary="Update Value of Object")
@@ -110,23 +111,17 @@ def get_historical_values(
 ):
     """Get the historical values for one or more Objects"""
     elementId = unquote(elementId)
-    
+
      # Lookup instance to verify it exists
     instance = data_source.get_instance_by_id(elementId)
     if not instance:
         raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
 
-    # Mock historical data - in real implementation this would query historical store
-    historical_values = data_source.get_instance_values_by_id(elementId, startTime, endTime)
+    # Get historical data with or without metadata based on includeMetadata flag
+    # returnHistory=True ensures all values are returned when no time range is specified
+    historical_values = data_source.get_instance_values_by_id(elementId, startTime, endTime, includeMetadata, returnHistory=True)
 
-    if not isinstance(historical_values, list):
-        historical_values = [historical_values]
-
-    if not includeMetadata:
-        return historical_values
-
-    metadata_array = [getValue(val, includeMetadata) for val in historical_values]
-    return metadata_array
+    return historical_values
 
 # RFC 4.2.2.2 - Object Element HistoricalValue
 @update.put("/objects/{elementId}/history", summary="Update Historical Values of Object")

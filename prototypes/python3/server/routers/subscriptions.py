@@ -18,6 +18,7 @@ class Subscription(BaseModel):
     subscriptionId: int
     qos: str
     created: str
+    includeMetadata: bool = False  # Whether to include metadata in updates
     monitoredItems: List[str] = []
     pendingUpdates: List[Any] = []  # For QoS2, list of values to send
     # Exclude these fields from JSON serialization/schema
@@ -98,6 +99,8 @@ async def register_monitored_items(
         all_element_ids.update([i["elementId"] for i in tree])
 
     # Update the subscription
+    # Store includeMetadata preference from the request
+    sub.includeMetadata = req.includeMetadata
     # TODO right now this is additive, currently need to call delete and re-create the subscription entirely to remove items.
     for eid in all_element_ids:
         if eid not in sub.monitoredItems:
@@ -117,7 +120,9 @@ async def register_monitored_items(
         async def event_stream():
             while True:
                 update = await queue.get()
-                yield json.dumps([update]) + "\n"
+                # Remove None values to match QoS2 behavior
+                filtered_update = {k: v for k, v in update.items() if v is not None}
+                yield json.dumps([filtered_update]) + "\n"
 
         def push_update_to_client(update):
             asyncio.run_coroutine_threadsafe(queue.put(update), loop)
@@ -140,7 +145,8 @@ async def register_monitored_items(
 # RFC 4.2.3.3 Sync
 @subs.post(
     "/subscriptions/{subscriptionId}/sync",
-    response_model=List[SyncResponseItem]
+    response_model=List[SyncResponseItem],
+    response_model_exclude_none=True
 )
 def sync_qos2(request: Request, subscriptionId: str):
     """Sync changes for a QoS 2 subscription"""
@@ -209,8 +215,8 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS):
             element_id = instance.get("elementId")
             if element_id and element_id in sub.monitoredItems:
 
-                # Get the payload
-                updateValue = getSubscriptionValue(instance, value, includeMetadata=True)
+                # Get the payload using the subscription's includeMetadata preference
+                updateValue = getSubscriptionValue(instance, value, includeMetadata=sub.includeMetadata)
 
 
                 if sub.qos == "QoS0":

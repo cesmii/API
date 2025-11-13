@@ -119,15 +119,15 @@ class DataSourceManager(I3XDataSource):
         source = self._get_source_for_operation("get_instance_by_id")
         return source.get_instance_by_id(element_id)
 
-    def get_instance_values_by_id(self, element_id: str, startTime: Optional[str] = None, endTime: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """Return instance object by ElementId"""
+    def get_instance_values_by_id(self, element_id: str, startTime: Optional[str] = None, endTime: Optional[str] = None, includeMetadata: bool = False, returnHistory: bool = False) -> Optional[Dict[str, Any]]:
+        """Return instance values by ElementId. If includeMetadata is True, returns full record with quality and timestamp. If False, returns only the value field(s). If returnHistory is True and no time range specified, returns all historical values."""
         source = self._get_source_for_operation("get_instance_by_id")
-        return source.get_instance_values_by_id(element_id, startTime, endTime)
+        return source.get_instance_values_by_id(element_id, startTime, endTime, includeMetadata, returnHistory)
 
     def get_related_instances(
-        self, element_id: str, relationship_type: str
+        self, element_id: str, relationship_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Return array of objects related by specified relationship type"""
+        """Return array of objects related by specified relationship type. If relationship_type is None, return all related objects."""
         source = self._get_source_for_operation("get_related_instances")
         return source.get_related_instances(element_id, relationship_type)
 
