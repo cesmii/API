@@ -39,13 +39,34 @@ def getValueMetadata(value: Any) -> Any:
     }
     return metadata
 
-def getSubscriptionValue(instance: Any, value: Any, includeMetadata: bool) -> Any:
-    """Helper to get subscription value formatted with or without metadata"""
+def getSubscriptionValue(instance: Any, record: Any, includeMetadata: bool) -> Any:
+    """
+    Helper to get subscription value formatted with or without metadata.
+
+    Args:
+        instance: The instance object with elementId
+        record: The record object with structure {value: ..., quality: ..., timestamp: ..., localTimestamp: ..., etc}
+        includeMetadata: If True, include all record-level metadata fields; if False, only include value
+
+    Returns:
+        Dictionary with elementId and value, optionally with all record-level metadata fields
+    """
+    # Extract the actual value from the record structure
+    # The value itself may be a primitive (67.1) or a complex object with its own fields
+    actual_value = record.get("value") if isinstance(record, dict) else record
+
+    # Start with elementId and value (value contains all its data, primitive or complex)
     updateValue = {
         "elementId": instance["elementId"],
-        **getValueMetadata(value),
-        "value": value
+        "value": actual_value
     }
+
+    # If includeMetadata is True, add ALL record-level metadata fields
+    if includeMetadata and isinstance(record, dict):
+        # Add all fields from the record except "value" (which is already included)
+        for key, val in record.items():
+            if key != "value":
+                updateValue[key] = val
 
     return updateValue
 
