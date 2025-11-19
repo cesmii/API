@@ -16,14 +16,14 @@ This is a FastAPI-based HTTP server that implements the RFC 001 compliant I3X (I
   - `mqtt/`: MQTT data source implementation with real-time updates, subscribes to one or more topics on a single broker
     - `mqtt_data_source.py`: Holds the paho client, topic cache, and all the interface handlers
 - **routers/**: API endpoint implementations organized by functionality (use dependency injection for data access)
-  - `exploratory.py`: Browse equipment/sensors (RFC 4.1.x)
-  - `values.py`: Read current/historical values (RFC 4.2.1.x)  
-  - `updates.py`: Write operations (RFC 4.2.2.x)
-  - `subscriptions.py`: Real-time data streaming (RFC 4.2.3.x)
-- **schemas/**: JSON Schema definitions for API request/response validation
-  - `exploratory/`:
-      - relationships-response.json: Schema for relationships endpoint response
-      - instances-response.json: Schema for instances endpoint response
+  - `namespaces.py`: Namespace operations (RFC 4.1.1)
+  - `typeDefinitions.py`: Type and relationship type definitions (RFC 4.1.2-4.1.5)
+  - `objects.py`: Three router instances (explore, query, update) handling object operations:
+    - Explore: Object instance queries (RFC 4.1.6-4.1.8)
+    - Query: Current and historical values (RFC 4.2.1.x)
+    - Update: Value updates (RFC 4.2.2.x)
+  - `subscriptions.py`: Real-time data streaming with QoS0/QoS2 support (RFC 4.2.3.x)
+  - `utils.py`: Helper functions for formatting responses (getObject, getValue, getValueMetadata, getSubscriptionValue)
 
 ## Docker Deployment
 
@@ -81,7 +81,7 @@ pip install -r requirements.txt
 
 3. **Configure the server** (optional):
 
-Edit `config.json` to change server settings and data sources:
+Create `config.json` from the provided `config-example.json` template and customize as needed:
 
 **Mock Data Source (simulated data with random updates):**
 ```json
@@ -106,11 +106,15 @@ Edit `config.json` to change server settings and data sources:
         "type": "mqtt",
         "config": {
             "mqtt_endpoint": "mqtt://localhost:1883",
-            "topics": ["#"]
+            "topics": ["#"],
+            "username": "optional_username",
+            "password": "optional_password",
+            "excluded_topics": []
         }
     }
 }
 ```
+Note: `username`, `password`, and `excluded_topics` are optional.
 
 **MQTT with TLS (secure connection):**
 ```json
@@ -133,7 +137,7 @@ Edit `config.json` to change server settings and data sources:
 {
     "port": 8080,
     "host": "0.0.0.0",
-    "debug": true, 
+    "debug": true,
     "app": {
         "title": "I3X API Prototype",
         "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
@@ -141,18 +145,25 @@ Edit `config.json` to change server settings and data sources:
     },
     "data_sources": {
         "exploratory": {"type": "mock", "config": {}},
-        "values": {"type": "database", "config": {"host": "db.example.com"}},
-        "updates": {"type": "cache", "config": {"redis_url": "redis://localhost"}},
-        "subscriptions": {"type": "streaming", "config": {"broker": "kafka://localhost"}}
+        "values": {"type": "mock", "config": {}},
+        "updates": {"type": "mock", "config": {}},
+        "subscriptions": {"type": "mock", "config": {}}
     },
     "data_source_routing": {
         "primary": "exploratory",
+        "get_namespaces": "exploratory",
+        "get_object_types": "exploratory",
+        "get_object_type_by_id": "exploratory",
+        "get_instances": "exploratory",
         "get_instance_by_id": "values",
+        "get_relationship_types": "exploratory",
+        "get_related_instances": "exploratory",
         "update_instance_value": "updates",
         "get_all_instances": "subscriptions"
     }
 }
 ```
+Note: This example uses mock data sources for all operations. In production, different sources could be different types (e.g., database for values, cache for updates, streaming broker for subscriptions). See `config-example.json` for reference.
 
 4. **Run the server**:
 
@@ -181,7 +192,7 @@ Windows:
 Linux/Mac:
 ```bash
 # Run the setup script
-chmox +x ./setup.sh
+chmod +x ./setup.sh
 ./setup.sh
 ```
 
@@ -268,11 +279,16 @@ The server includes a mock data source stored in `mock_data.py` that simulates a
 
 **MQTT Data Source**
 The server supports connecting to MQTT brokers for real-time industrial data:
-- **Topic Subscription**: Subscribe to specific topics or use wildcards (`#`, `+`)
-- **Real-time Updates**: Automatic cache updates and subscription notifications
-- **TLS Support**: Secure connections with `mqtts://` URLs (accepts any certificate)
+- **Connection Support**:
+  - `mqtt://` (plain connection, default port 1883)
+  - `mqtts://` (TLS encrypted, default port 8883, accepts any certificate)
+  - Optional username/password authentication
+- **Topic Subscription**: Subscribe to specific topics or use wildcards (`#` for multi-level, `+` for single-level)
+- **Topic Filtering**: Exclude specific topics via `excluded_topics` configuration
+- **Real-time Updates**: Automatic cache updates and subscription notifications when messages arrive
 - **Dynamic Types**: Automatically generates I3X object types from JSON message structure
 - **URL Path Safe**: Converts topic `/` to `_` for API element IDs (e.g., `sensors/temp` becomes `sensors_temp`)
+- **Limitations**: Read-only (no write operations), limited exploratory support
 
 ### RFC 001 Compliance
 
@@ -282,8 +298,9 @@ This implementation follows RFC 001 - Common API for Industrial Information Inte
 - **Object Elements** (RFC 3.1) - Objects with attributes and required metadata
 - **Object Relationships** (RFC 3.2) - Hierarchical and non-hierarchical relationships
 - **Exploratory Methods** (RFC 4.1) - Read-only operations for browsing data
-- **Value Methods** (RFC 4.2) - Reading current and historical values
-- **Subscription Methods** (RFC 4.2.3) - Real-time data publishing (not yet implemented)
+- **Value Methods** (RFC 4.2.1) - Reading current and historical values
+- **Update Methods** (RFC 4.2.2) - Writing values (4.2.2.1 implemented, 4.2.2.2 returns 501)
+- **Subscription Methods** (RFC 4.2.3) - Real-time data streaming with QoS0/QoS2 support
 
-This implementation provides all required exploratory and value query methods as specified in the RFC, with proper metadata handling and JSON serialization as mandated by the specification.
+This implementation provides comprehensive RFC-compliant endpoints with proper metadata handling and JSON serialization. See the interactive Swagger UI documentation at http://localhost:8080/docs for complete API details.
 
