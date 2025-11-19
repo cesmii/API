@@ -220,11 +220,12 @@ async def get_relationships(
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
     if relationship_type is None:
-        raise ValueError("relationship_type is required to run get_relationships")
-    url += f"/{element_id}/related"
-    params = {"relationshiptype": relationship_type}
+        url += f"/{element_id}/related"
+        json_response = await get(url)
+    else:
+        params = {"relationshiptype": relationship_type}
+        json_response = await get(url, params=params)
 
-    json_response = await get(url, params=params)
     return json_response
 
 
@@ -249,7 +250,7 @@ async def get_object(
 
 
 #######################################
-########### Value Methods #############
+########### Query Methods #############
 #######################################
 async def get_value(
     base_url: str = None, element_id: str = None, include_metadata: bool = False
@@ -460,6 +461,8 @@ async def unsubscribe(base_url: str = None, subscription_id: str = None):
 #######################################
 async def main():
     try:
+        print()
+        print()
         print("Welcome to the CESMII I3X API Test Client.")
         default_url = "http://localhost:8080"
         base_url = input(
@@ -468,7 +471,7 @@ async def main():
         if not base_url:
             base_url = default_url
 
-        selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
+        selections = "\n1: Exploratory Methods\n2: Query Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
 
         ##### MAIN INPUT LOOP #####
         while True:  # broken by user input
@@ -528,7 +531,7 @@ async def main():
                                 raise e
                     elif user_selection == "4":
                         type_id = input(
-                            "Enter Type ElementID (leave blank to return all instance objects): "
+                            "Enter Object Type ElementID (leave blank to return all instance objects): "
                         ).strip()
                         try:
                             pretty_print_json(
@@ -544,7 +547,7 @@ async def main():
                             else:
                                 raise e
                     elif user_selection == "5":
-                        element_id = input("Enter ElementID (required): ").strip()
+                        element_id = input("Enter Object ElementID (required): ").strip()
                         try:
                             pretty_print_json(
                                 await get_object(
@@ -585,8 +588,10 @@ async def main():
                     elif user_selection == "8":
                         element_id = input("Enter ElementID (required): ").strip()
                         relationship_type = input(
-                            "Enter Relationship Type (required, see 'Get Relationship Types'): "
+                            "Enter Relationship Type (leave blank to return all related objects): "
                         ).strip()
+                        if not relationship_type:
+                            relationship_type = None
                         try:
                             pretty_print_json(
                                 await get_relationships(
@@ -610,7 +615,7 @@ async def main():
             elif user_selection == "2":
                 while True:
                     print(
-                        f"Value Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n"
+                        f"Query Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n"
                     )
                     user_selection = get_user_selection(["0", "1", "2", "X"])
                     if user_selection.upper() == "X":
