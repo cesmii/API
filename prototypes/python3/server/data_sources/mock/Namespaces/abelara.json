@@ -144,57 +144,21 @@
             ]
         },
         "product-type": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "idealCycleTime": {
-                    "type": "integer"
-                },
-                "tolerance": {
-                    "type": "number"
-                },
-                "unit": {
-                    "type": "string"
-                },
-                "family": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "integer"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "id",
-                        "name",
-                        "description"
-                    ]
-                }
-            },
-            "required": [
-                "id",
-                "name",
-                "description",
-                "idealCycleTime",
-                "tolerance",
-                "unit",
-                "family"
-            ]
+            "description": "Product metadata container - no records, metadata only",
+            "type": "object"
         },
         "production-type": {
+            "description": "Production container - no records, organizational metadata with HasChildren relationships",
+            "type": "object",
+            "!related": {
+                "relationshipType": "HasChildren",
+                "types": [
+                    "https://abelara.com/equipment:product-type"
+                ]
+            }
+        },
+        "production-type-ORIGINAL-UNUSED": {
+            "description": "ORIGINAL COMPLEX SCHEMA - NOT USED IN CURRENT MOCK DATA",
             "type": "object",
             "properties": {
                 "timestamp": {
@@ -445,15 +409,14 @@
             ]
         },
         "measurements-type": {
-            "properties": {
-                "measurements": {
-                    "type": "array",
-                    "items": {}
-                }
-            },
-            "required": [
-                "measurements"
-            ]
+            "description": "Composite measurements container - no records, composed of measurement-type children",
+            "type": "object",
+            "!related": {
+                "relationshipType": "ComposedOf",
+                "types": [
+                    "https://abelara.com/equipment:measurement-type"
+                ]
+            }
         },
         "measurement-type": {
             "description": "Composite measurement type composed of value and health subtypes, with tolerance metadata in records",
