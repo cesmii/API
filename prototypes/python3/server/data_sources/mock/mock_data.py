@@ -255,7 +255,25 @@ I3X_DATA = {
             "relationships": {
                 "ComposedBy": "pump-101-measurements",
                 "ComposedOf": ["pump-101-measurements-bearing-temperature-value", "pump-101-measurements-bearing-temperature-health"]
-            }
+            },
+            "records": [
+                {
+                    "value": {
+                        "inTolerance": True,
+                        "tolerance": 5.0,
+                    },
+                    "quality": "GOOD",
+                    "timestamp": "2025-10-28T18:20:44.779036+00:00",
+                },
+                {
+                    "value": {
+                        "inTolerance": True,
+                        "tolerance": 5.1,
+                    },
+                    "quality": "GOOD",
+                    "timestamp": "2025-10-27T18:20:44.779036+00:00",
+                }
+            ]
         },
         {
             "elementId": "pump-101-measurements-bearing-temperature-value",
