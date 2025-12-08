@@ -123,7 +123,7 @@ The Query MAY accept an array of JSON structures defining Types for the requeste
 
 This Query MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
 
-The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
+The the response payload MAY be filtered by NamespaceURI if indicated by an optional query parameter.
 
 #### 4.1.4 Relationship Types - Hierarchical
 
@@ -298,6 +298,7 @@ Implementations of this API MUST be able to return Historical Value responses wi
 ## 6. Acknowledgements
 
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+
 
 
 
