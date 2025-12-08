@@ -45,7 +45,7 @@ class ObjectInstanceMinimal(BaseModel):
     displayName: str = Field(..., description="Object name")
     typeId: str = Field(..., description="ElementId of the object type")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
-    hasChildren: bool = Field(
+    isComplex: bool = Field(
         ..., description="Boolean indicating if element has child objects"
     )
     namespaceUri: str = Field(..., description="Namespace URI")
@@ -63,7 +63,7 @@ class ObjectLinkedByRelationshipType(BaseModel):
     displayName: str = Field(..., description="Object name")
     typeId: str = Field(..., description="ElementId of the object type")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
-    hasChildren: bool = Field(
+    isComplex: bool = Field(
         ..., description="Boolean indicating if element has child objects"
     )
     namespaceUri: str = Field(..., description="Namespace URI")
@@ -81,7 +81,7 @@ class LastKnownValue(BaseModel):
     elementId: str = Field(..., description="Unique string identifier for the element")
     value: Dict[str, Any] = Field(..., description="Current attribute values")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
-    hasChildren: bool = Field(
+    isComplex: bool = Field(
         ..., description="Boolean indicating if element has child objects"
     )
     namespaceUri: str = Field(..., description="Namespace URI")
@@ -102,7 +102,7 @@ class HistoricalValue(BaseModel):
     )
     timestamp: str = Field(..., description="ISO 8601 timestamp when data was recorded")
     parentId: Optional[str] = Field(None, description="ElementId of the parent object")
-    hasChildren: bool = Field(
+    isComplex: bool = Field(
         ..., description="Boolean indicating if element has child objects"
     )
     namespaceUri: str = Field(..., description="Namespace URI")
@@ -154,8 +154,8 @@ class CreateSubscriptionResponse(BaseModel):
 
 class RegisterMonitoredItemsRequest(BaseModel):
     elementIds: List[str]
-    includeMetadata: Optional[bool] = False
-    maxDepth: Optional[int] = 0  # 0 means no limit
+    recurseDepth: Optional[int] = 0  # 0 means no recursion, >0 follows ComposedOf relationships
+    maxDepth: Optional[int] = 0  # 0 means no limit on tree depth
 
 
 class SyncResponseItem(BaseModel):

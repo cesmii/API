@@ -156,7 +156,7 @@ class MockDataSource(I3XDataSource):
         element_id: str,
         startTime: Optional[str] = None,
         endTime: Optional[str] = None,
-        includeMetadata: bool = False,
+        recurseDepth: int = 0,
         returnHistory: bool = False,
     ):
         instance = self.get_instance_by_id(element_id, values=True)
@@ -167,10 +167,51 @@ class MockDataSource(I3XDataSource):
         # Get the records array
         records_array = instance.get("records")
 
-        # If no records or records is not a list, return as is
+        # If recurseDepth > 0, check for ComposedOf relationships even if no records
+        if recurseDepth > 0:
+            relationships = instance.get("relationships", {})
+            composed_of = relationships.get("ComposedOf", [])
+
+            if composed_of:
+                # Convert string to list if needed
+                if isinstance(composed_of, str):
+                    composed_of = [composed_of]
+
+                # Build result with composed children
+                result = {}
+
+                # Include this element's own value if it has records
+                if records_array and isinstance(records_array, list):
+                    # Process this element's records
+                    own_value = self._process_records(records_array, startTime, endTime, returnHistory)
+                    if own_value is not None:
+                        result["_value"] = own_value
+
+                # Recursively fetch each composed child's value
+                # Always include composed children, even if they have no value
+                for child_id in composed_of:
+                    child_value = self.get_instance_values_by_id(
+                        child_id,
+                        startTime,
+                        endTime,
+                        recurseDepth - 1,
+                        returnHistory
+                    )
+                    # Always include the child in the result
+                    # Use null/empty dict as placeholder if no value
+                    result[child_id] = child_value if child_value is not None else {}
+
+                return result
+
+        # If no records and no ComposedOf relationships, return None
         if not records_array or not isinstance(records_array, list):
             return None
 
+        # No recursion needed, just process and return the records
+        return self._process_records(records_array, startTime, endTime, returnHistory)
+
+    def _process_records(self, records_array, startTime, endTime, returnHistory):
+        """Helper method to process records array and return value with metadata"""
         returned_records = None
 
         # Filter based on time range
@@ -182,7 +223,6 @@ class MockDataSource(I3XDataSource):
             # Filter records array to only include items within time range
             filtered_records = []
             for record in records_array:
-                # Each record now has a standard structure with timestamp at the record level
                 if "timestamp" in record:
                     value_dt = datetime.fromisoformat(
                         record["timestamp"].replace("Z", "+00:00")
@@ -212,20 +252,29 @@ class MockDataSource(I3XDataSource):
 
                 returned_records = most_recent
 
-        # Process based on includeMetadata flag
-        if not includeMetadata:
-            # Return only the value field(s), not the metadata
-            if isinstance(returned_records, list):
-                # For historical values (list), extract value from each record
-                return [record.get("value") for record in returned_records if "value" in record]
-            elif isinstance(returned_records, dict) and "value" in returned_records:
-                # For single value, extract just the value field
-                return returned_records["value"]
-            else:
-                return returned_records
+        # Extract the value(s) from the records
+        if isinstance(returned_records, list):
+            # For historical values (list), extract value from each record with metadata
+            return [{"value": record.get("value"), "quality": record.get("quality"), "timestamp": record.get("timestamp")}
+                   for record in returned_records if "value" in record]
+        elif isinstance(returned_records, dict) and "value" in returned_records:
+            # For single value, extract value with metadata
+            return {
+                "value": returned_records["value"],
+                "quality": returned_records.get("quality"),
+                "timestamp": returned_records.get("timestamp")
+            }
         else:
-            # Return full record(s) with metadata (value, quality, timestamp)
-            return returned_records
+            return None
+
+    def _handle_no_recurse(self, instance, records_array, startTime, endTime, returnHistory):
+        """Handle the case when recurseDepth == 0"""
+        # If no records, return None
+        if not records_array or not isinstance(records_array, list):
+            return None
+
+        # Process and return the records
+        return self._process_records(records_array, startTime, endTime, returnHistory)
 
     def get_instance_by_id(
         self, element_id: str, values: bool = False
@@ -419,4 +468,9 @@ class MockDataSource(I3XDataSource):
             return type(obj).__name__
 
     def get_all_instances(self) -> List[Dict[str, Any]]:
-        return self.data["instances"]
+        # Filter out records member from each instance before returning (unique to mock data)
+        filtered_results = []
+        for instance in self.data["instances"]:
+            filtered_instance = {k: v for k, v in instance.items() if k != "records"}
+            filtered_results.append(filtered_instance)
+        return filtered_results

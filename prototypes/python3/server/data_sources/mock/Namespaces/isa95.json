@@ -1,7 +1,10 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$id": "https://abelara.com/equipment/v1.0",
+    "$id": "https://isa.org/isa95/v95.00.03-2005",
     "types": {
+        "work-center-type": {
+            "type": "object"
+        },
         "work-unit-type": {
             "type": "object"
         }

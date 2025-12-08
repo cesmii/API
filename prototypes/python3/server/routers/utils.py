@@ -12,7 +12,7 @@ def getObject(instance: Any, includeMetadata: bool) -> Any:
         "typeId": instance["typeId"],
         "namespaceUri": instance["namespaceUri"],
         "parentId": instance.get("parentId"),
-        "hasChildren": instance["hasChildren"]
+        "isComplex": instance["isComplex"]
     }
     return noMetadataObject
     
@@ -39,31 +39,44 @@ def getValueMetadata(value: Any) -> Any:
     }
     return metadata
 
-def getSubscriptionValue(instance: Any, record: Any, includeMetadata: bool) -> Any:
+def getSubscriptionValue(instance: Any, record: Any, recurseDepth: int = 0, data_source: Any = None) -> Any:
     """
-    Helper to get subscription value formatted with or without metadata.
+    Helper to get subscription value, optionally with recursive ComposedOf children.
 
     Args:
         instance: The instance object with elementId
-        record: The record object with structure {value: ..., quality: ..., timestamp: ..., localTimestamp: ..., etc}
-        includeMetadata: If True, include all record-level metadata fields; if False, only include value
+        record: The record object with structure {value: ..., quality: ..., timestamp: ..., etc}
+        recurseDepth: If > 0, fetch ComposedOf children's values recursively (requires data_source)
+        data_source: Data source to fetch recursive values (required if recurseDepth > 0)
 
     Returns:
-        Dictionary with elementId and value, optionally with all record-level metadata fields
+        Dictionary with elementId and value, optionally with recursive composed values
     """
-    # Extract the actual value from the record structure
-    # The value itself may be a primitive (67.1) or a complex object with its own fields
+    element_id = instance["elementId"]
+
+    # If recurseDepth > 0 and we have a data_source, fetch the full recursive structure
+    if recurseDepth > 0 and data_source is not None:
+        # Use the data source to get the full recursive value structure
+        recursive_value = data_source.get_instance_values_by_id(
+            element_id,
+            recurseDepth=recurseDepth,
+            returnHistory=False
+        )
+        return {
+            "elementId": element_id,
+            "value": recursive_value
+        }
+
+    # Otherwise, just return the simple value with metadata
     actual_value = record.get("value") if isinstance(record, dict) else record
 
-    # Start with elementId and value (value contains all its data, primitive or complex)
     updateValue = {
-        "elementId": instance["elementId"],
+        "elementId": element_id,
         "value": actual_value
     }
 
-    # If includeMetadata is True, add ALL record-level metadata fields
-    if includeMetadata and isinstance(record, dict):
-        # Add all fields from the record except "value" (which is already included)
+    # Include all record-level metadata fields
+    if isinstance(record, dict):
         for key, val in record.items():
             if key != "value":
                 updateValue[key] = val

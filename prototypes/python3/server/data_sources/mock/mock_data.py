@@ -10,6 +10,12 @@ I3X_DATA = {
     ],
     "objectTypes": [
         {
+            "elementId": "work-center-type",
+            "displayName": "WorkCenterType",
+            "namespaceUri": "https://isa.org/isa95",
+            "schema": "Namespaces/isa95.json#types/work-center-type",
+        },
+        {
             "elementId": "work-unit-type",
             "displayName": "WorkUnitType",
             "namespaceUri": "https://isa.org/isa95",
@@ -66,18 +72,42 @@ I3X_DATA = {
     ],
     "instances": [
         {
+            "elementId": "pump-station",
+            "displayName": "pump-station",
+            "namespaceUri": "https://isa.org/isa95",
+            "typeId": "work-center-type",
+            # A "/" is unsed to indicate this object is attached to the root
+            "parentId": "/",
+            # A platform implementation would read its graph in order to populate these required response fields.
+            #   This element has child objects, but they do not make up the data of this element, so this element is NOT complex
+            #   We would expect a client would not want to recurse through these relationships by default
+            "isComplex": False,
+            # This is where we maintain the graph relationships used above and in the /related endpoints for the mock data
+            "relationships": {
+                "HasParent": "/",
+                "HasChildren": [
+                    "pump-101",
+                    "tank-201",
+                    "sensor-001"
+                ],
+            },
+            # Optional property or attribute metadata (extra fields, per RFC 3.1.2 bullet 4)
+            "operationStartDate": "July 1, 1980",
+            "lastMaintainedDate": "August 1, 2001"
+        },
+        {
             "elementId": "pump-101",
             "displayName": "pump-101",
             "namespaceUri": "https://isa.org/isa95",
             "typeId": "work-unit-type",
-            #These two fields are required in the response so placed in the mock data for readability
-            # A platform implementation would read its graph in order to populate these required response fields.
-            "parentId": "/",
-            "hasChildren": True,
-            #This is where we maintain the graph relationships used above and in the /related endpoints
+            "parentId": "pump-station",
+            # This element's data is made up of the data of other elements, so this element IS complex
+            #   We would expect a client would want to recurse a complex structure by default
+            "isComplex": True,
+            # This is where we maintain the graph relationships used above and in the /related endpoints for the mock data
             "relationships": {
-                "HasParent": "/",
-                "HasChildren": [
+                "HasParent": "pump-station",
+                "ComposedOf": [
                     "pump-101-state",
                     "pump-101-production",
                     "pump-101-measurements"
@@ -94,9 +124,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "state-type",
             "parentId": "pump-101",
-            "hasChildren": False,
+            "isComplex": False,
             "relationships": {
-                "HasParent": "pump-101",
+                "ComposedBy": "pump-101",
             },
             "records": [
                 {
@@ -178,15 +208,12 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "production-type",
             "parentId": "pump-101",
-            #In this case, we set hasChildren false to indicate that a value query should not recurse through the Composition relationship
-            # This is an implementation choice on the part of a platform that limits or expands discoverability
-            # TODO: Discuss with group!
-            "hasChildren": False,
+            # This element has related data, but that data is not a part of the definition of this data, so it is not complex
+            "isComplex": False,
             "relationships": {
                 "HasParent": "pump-101",
-                #Class-composition relationship, shown at the instance level,
-                # This indicates that pump-101-production data is a composition that includes another type of data
-                "ComposedOf": [
+                # Related classes, not a part of the definition of this element. Client can "dig" through HasChildren as needed
+                "HasChildren": [
                     "pump-101-production-product",
                 ]
             },
@@ -196,13 +223,10 @@ I3X_DATA = {
             "displayName": "pump-101 Product",
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "product-type",
-            #This parenthood is through the composition relationship, not a topological hierarchy
-            # The RFC requires this member, but it should be understood in the context of the relationships defined below
             "parentId": "pump-101-production",
-            "hasChildren": False,
+            "isComplex": False,
             "relationships": {
-                # The inclusion of ComposedBy and deliberate ommission of HasParent indicates a graph relationship and labels the edge
-                "ComposedBy": ["pump-101-production"],
+                "HasParent": "pump-101-production",
             },
         },
         {
@@ -211,10 +235,11 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurements-type",
             "parentId": "pump-101",
-            "hasChildren": True,
+            # This element has related data, and that data IS a part of the definition of this data, so it IS complex
+            "isComplex": True,
             "relationships": {
                 "HasParent": "pump-101",
-                "HasChildren": [
+                "ComposedOf": [
                     "pump-101-bearing-temperature",
                 ],
             },
@@ -225,115 +250,12 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurement-type",
             "parentId": "pump-101-measurements",
-            "hasChildren": True,
+            # This element has related data, and that data IS a part of the definition of this data, so it IS complex
+            "isComplex": True,
             "relationships": {
-                "HasParent": "pump-101-measurements",
-                "HasChildren": ["pump-101-measurements-bearing-temperature-value", "pump-101-measurements-bearing-temperature-health"]
-            },
-            "records": [
-                {
-                    "value": {
-                        "timestamp": "2025-10-29T18:32:47.673157+00:00",
-                        "type": {
-                            "id": 1,
-                            "name": "Bearing Temperature",
-                            "description": "Precision bearing temperature measurement",
-                        },
-                        "value": 70.34,
-                        "health": 12,
-                        "unit": "\u00b0C",
-                        "target": 70.0,
-                        "tolerance": 10.5,
-                        "inTolerance": True,
-                        "metadata": {
-                            "source": "precision-maintenance",
-                            "uri": "maintenance://pump-101/bearing-temperature",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "technician": "John Smith",
-                                "measurementMethod": "Oil Sampling",
-                                "equipmentUsed": "Fluke Ti480",
-                                "measurementDate": "2025-10-29T18:32:47.673173+00:00",
-                                "nextMeasurementDue": "2024-06-15",
-                                "trend": "Deteriorating",
-                                "measurementLocation": "Drive End Bearing",
-                            },
-                        },
-                        "product": {
-                            "id": 1,
-                            "name": "Cooling Water",
-                            "description": "Process cooling water",
-                            "family": {
-                                "id": 1,
-                                "name": "Utilities",
-                                "description": "Utility products and services",
-                            },
-                        },
-                        "productionContext": {
-                            "batchId": "MAINT-2024-979",
-                            "processStep": "Precision Maintenance",
-                            "demand": "Emergency",
-                        },
-                    },
-                    "quality": "GOOD",
-                    "timestamp": "2025-10-29T18:32:47.673157+00:00",
-                },
-                {
-                    "value": {
-                        "timestamp": "2025-10-28T18:32:47.673157+00:00",
-                        "type": {
-                            "id": 1,
-                            "name": "Bearing Temperature",
-                            "description": "Precision bearing temperature measurement",
-                        },
-                        "value": 71.79,
-                        "health": 13,
-                        "unit": "\u00b0C",
-                        "target": 70.0,
-                        "tolerance": 10.5,
-                        "inTolerance": True,
-                        "metadata": {
-                            "source": "precision-maintenance",
-                            "uri": "maintenance://pump-101/bearing-temperature",
-                            "asset": {
-                                "id": 101,
-                                "name": "Pump-101",
-                                "description": "Centrifugal water pump for cooling system",
-                            },
-                            "additionalInfo": {
-                                "technician": "John Smith",
-                                "measurementMethod": "Oil Sampling",
-                                "equipmentUsed": "Fluke Ti480",
-                                "measurementDate": "2025-10-28T18:32:47.673173+00:00",
-                                "nextMeasurementDue": "2024-06-15",
-                                "trend": "Deteriorating",
-                                "measurementLocation": "Drive End Bearing",
-                            },
-                        },
-                        "product": {
-                            "id": 1,
-                            "name": "Cooling Water",
-                            "description": "Process cooling water",
-                            "family": {
-                                "id": 1,
-                                "name": "Utilities",
-                                "description": "Utility products and services",
-                            },
-                        },
-                        "productionContext": {
-                            "batchId": "MAINT-2024-979",
-                            "processStep": "Precision Maintenance",
-                            "demand": "Emergency",
-                        },
-                    },
-                    "quality": "GOOD",
-                    "timestamp": "2025-10-28T18:32:47.673157+00:00",
-                },
-            ],
+                "ComposedBy": "pump-101-measurements",
+                "ComposedOf": ["pump-101-measurements-bearing-temperature-value", "pump-101-measurements-bearing-temperature-health"]
+            }
         },
         {
             "elementId": "pump-101-measurements-bearing-temperature-value",
@@ -341,9 +263,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurement-value-type",
             "parentId": "pump-101-bearing-temperature",
-            "hasChildren": False,
+            "isComplex": False,
             "relationships": {
-                "HasParent": "pump-101-bearing-temperature"
+                "ComposedBy": "pump-101-bearing-temperature"
             },
             "records": [
                 {
@@ -367,9 +289,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurement-health-type",
             "parentId": "pump-101-bearing-temperature",
-            "hasChildren": False,
+            "isComplex": False,
             "relationships": {
-                "HasParent": "pump-101-bearing-temperature"
+                "ComposedBy": "pump-101-bearing-temperature"
             },
             "records": [
                 {
@@ -389,8 +311,8 @@ I3X_DATA = {
             "displayName": "tank-201",
             "namespaceUri": "https://isa.org/isa95",
             "typeId": "work-unit-type",
-            "parentId": "/",
-            "hasChildren": False,
+            "parentId": "pump-station",
+            "isComplex": False,
             "relationships": {
                 "SuppliedBy": "pump-101",
                 "MonitoredBy": "sensor-001",
@@ -401,8 +323,8 @@ I3X_DATA = {
             "displayName": "TempSensor-101",
             "namespaceUri": "https://thinkiq.com/equipment",
             "typeId": "sensor-type",
-            "parentId": "/",
-            "hasChildren": False,
+            "parentId": "pump-station",
+            "isComplex": False,
             "relationships": {
                 "Monitors": "tank-201"
             },
@@ -434,6 +356,8 @@ I3X_DATA = {
         },
     ],
     "relationshipTypes": [
+        # Used for topological relationships
+        #   These will not usually indicate data structure complexity (one thing has another below/inside it)
         {
             "elementId": "HasParent",
             "displayName": "HasParent",
@@ -445,6 +369,20 @@ I3X_DATA = {
             "displayName": "HasChildren",
             "namespaceUri": "https://cesmii.org/i3x",
             "reverseOf": "HasParent"
+        },
+        # Used for OOP relationships
+        #   These will always indicate data structure complexity (one thing is made-up of another)
+        {
+            "elementId": "ComposedOf",
+            "displayName": "ComposedOf",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "reverseOf": "ComposedBy"
+        },
+        {
+            "elementId": "ComposedBy",
+            "displayName": "ComposedBy",
+            "namespaceUri": "https://cesmii.org/i3x",
+            "reverseOf": "ComposedOf"
         },
         {
             "elementId": "InheritedBy",
@@ -458,18 +396,7 @@ I3X_DATA = {
             "namespaceUri": "https://cesmii.org/i3x",
             "reverseOf": "InheritedBy"
         },
-        {
-            "elementId": "ComposedOf",
-            "displayName": "ComposedOf",
-            "namespaceUri": "https://cesmii.org/i3x",
-            "reverseOf": "ComposedBy"
-        },
-        {
-            "elementId": "ComposedBy",
-            "displayName": "ComposedBy",
-            "namespaceUri": "https://cesmii.org/i3x",
-            "reverseOf": "ComposedOf"
-        },
+        # Used for Graph relationships
         {
             "elementId": "Monitors",
             "displayName": "Monitors",

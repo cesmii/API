@@ -154,7 +154,7 @@ class MQTTDataSource(I3XDataSource):
                         "displayName": name,
                         "typeId": "",  # Empty for now
                         "parentId": "",  # Empty for now
-                        "hasChildren": False,
+                        "isComplex": False,
                         "namespaceUri": self.MQTT_NAMESPACE_URI,
                         "timestamp": timestamp
                     }
@@ -536,7 +536,7 @@ class MQTTDataSource(I3XDataSource):
             "displayName": name,
             "typeId": "",  # Empty for now
             "parentId": "",  # Empty for now
-            "hasChildren": False,
+            "isComplex": False,
             "namespaceUri": self.MQTT_NAMESPACE_URI,
             "attributes": topic_data['value'],
             "timestamp": topic_data['timestamp']

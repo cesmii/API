@@ -59,9 +59,9 @@ async def lifespan(app: FastAPI):
     # Set the data source in app state
     app.state.data_source = data_source
 
-    # Create callback function that passes subscriptions to the handler
+    # Create callback function that passes subscriptions and data source to the handler
     def callback(instance, value):
-        handle_data_source_update(instance, value, app.state.I3X_DATA_SUBSCRIPTIONS)
+        handle_data_source_update(instance, value, app.state.I3X_DATA_SUBSCRIPTIONS, data_source)
 
     # Start the data source with the callback
     data_source.start(callback)

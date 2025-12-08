@@ -131,9 +131,7 @@
                     "required": [
                         "source",
                         "uri",
-                        "asset",
-                        "previousState",
-                        "additionalInfo"
+                        "asset"
                     ]
                 }
             },
