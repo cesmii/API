@@ -31,22 +31,22 @@ This is a FastAPI-based implementation of the I3X API (RFC 001), providing a sta
 
 ### Composition vs Organization Relationships
 
-**Composition (ComposedOf/ComposedBy)**:
+**Composition (HasComponent/ComponentOf)**:
 - Used when child data IS part of the parent's definition
-- Parent has `isComplex: True`
+- Parent has `isComposition: True`
 - Children contribute to the parent's value
 - Example: `pump-101` is composed of state, production, and measurements
 - Example: `measurement-type` is composed of value and health subtypes
 
 **Organization (HasChildren/HasParent)**:
 - Used for hierarchical organization
-- Parent typically has `isComplex: False`
+- Parent typically has `isComposition: False`
 - Children are separate entities
 - Example: `pump-station` has children `pump-101`, `tank-201`
 
 ### maxDepth Parameter
 
-Controls recursion depth when fetching values through ComposedOf relationships:
+Controls recursion depth when fetching values through HasComponent relationships:
 - `maxDepth=0` - Infinite recursion (include all nested composed elements)
 - `maxDepth=1` - No recursion (just this element's value) - this is the default
 - `maxDepth=N` (N>1) - Recurse up to N levels deep
@@ -108,7 +108,7 @@ Based on schema/data review (Dec 2024):
 
 3. **Composite Containers** (no records, only composed children)
    - `measurements-type` - container composed of measurement-type children
-   - `work-unit-type` - can be simple or complex with ComposedOf relationships
+   - `work-unit-type` - can be simple or complex with HasComponent relationships
 
 4. **Organizational Containers** (no records, HasChildren relationships)
    - `production-type` - organizational container with HasChildren
@@ -140,7 +140,7 @@ Use `!related` field to document composition/organizational relationships:
   "type-name": {
     "type": "object",
     "!related": {
-      "relationshipType": "ComposedOf",
+      "relationshipType": "HasComponent",
       "types": [
         "https://namespace:child-type"
       ]
@@ -219,7 +219,7 @@ python -m pytest test_app.py -v
 
 ### 1. maxDepth Implementation
 - Replaced `includeMetadata` boolean with `maxDepth` integer
-- Enables recursive traversal of ComposedOf relationships
+- Enables recursive traversal of HasComponent relationships
 - `maxDepth=0` for infinite recursion, `maxDepth=1` (default) for no recursion
 - Returns nested structure with `_value` for own data and child keys for composed data
 
@@ -284,9 +284,9 @@ Supports two modes:
 
 1. Add instance to `mock_data.py` `instances` array
 2. Define `typeId` (must exist in a Namespace schema)
-3. Set `isComplex` based on ComposedOf relationships
+3. Set `isComposition` based on HasComponent relationships
 4. Add `records` array if type has values (VQT format)
-5. Define `relationships` (ComposedOf, HasChildren, etc.)
+5. Define `relationships` (HasComponent, HasChildren, etc.)
 
 ### Adding New Types
 
@@ -353,7 +353,7 @@ POST /subscriptions/0/sync
 - Element IDs are strings (e.g., "pump-101")
 - Namespace URIs use https:// scheme
 - Type IDs reference types within namespaces
-- Relationships use standard types: ComposedOf, ComposedBy, HasChildren, HasParent, Monitors, MonitoredBy, etc.
+- Relationships use standard types: HasComponent, ComponentOf, HasChildren, HasParent, Monitors, MonitoredBy, etc.
 - maxDepth=0 means infinite recursion (all composed children)
 - maxDepth=1 means no recursion (just the element's own value) - this is the default
 - Empty composed children return `{}` not `null`

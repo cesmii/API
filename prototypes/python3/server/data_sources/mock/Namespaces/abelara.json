@@ -316,7 +316,7 @@
                                 "asset": {
                                     "type": "object",
                                     "!related": {
-                                        "relationshipType": "ComposedOf",
+                                        "relationshipType": "HasComponent",
                                         "type": "https://abelara.com/equipment:product-type"
                                     },
                                     "product": {
@@ -412,7 +412,7 @@
             "description": "Composite measurements container - no records, composed of measurement-type children",
             "type": "object",
             "!related": {
-                "relationshipType": "ComposedOf",
+                "relationshipType": "HasComponent",
                 "types": [
                     "https://abelara.com/equipment:measurement-type"
                 ]
@@ -422,7 +422,7 @@
             "description": "Composite measurement type composed of value and health subtypes, with tolerance metadata in records",
             "type": "object",
             "!related": {
-                "relationshipType": "ComposedOf",
+                "relationshipType": "HasComponent",
                 "types": [
                     "https://abelara.com/equipment:measurement-value-type",
                     "https://abelara.com/equipment:measurement-health-type"

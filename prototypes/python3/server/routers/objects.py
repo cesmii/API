@@ -76,7 +76,7 @@ def get_last_known_value(
     maxDepth: int = Query(default=1, ge=0),
     data_source: I3XDataSource = Depends(get_data_source),
 ):
-    """Return last known value for an Object. If maxDepth=0, recursively includes all values from ComposedOf children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
+    """Return last known value for an Object. If maxDepth=0, recursively includes all values from HasComponent children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
     elementId = unquote(elementId)
 
     # Lookup instance to verify it exists
@@ -111,7 +111,7 @@ def get_historical_values(
     maxDepth: int = Query(default=1, ge=0),
     data_source: I3XDataSource = Depends(get_data_source),
 ):
-    """Get the historical values for one or more Objects. If maxDepth=0, recursively includes all values from ComposedOf children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
+    """Get the historical values for one or more Objects. If maxDepth=0, recursively includes all values from HasComponent children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
     elementId = unquote(elementId)
 
      # Lookup instance to verify it exists

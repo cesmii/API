@@ -81,7 +81,7 @@ I3X_DATA = {
             # A platform implementation would read its graph in order to populate these required response fields.
             #   This element has child objects, but they do not make up the data of this element, so this element is NOT complex
             #   We would expect a client would not want to recurse through these relationships by default
-            "isComplex": False,
+            "isComposition": False,
             # This is where we maintain the graph relationships used above and in the /related endpoints for the mock data
             "relationships": {
                 "HasParent": "/",
@@ -103,11 +103,11 @@ I3X_DATA = {
             "parentId": "pump-station",
             # This element's data is made up of the data of other elements, so this element IS complex
             #   We would expect a client would want to recurse a complex structure by default
-            "isComplex": True,
+            "isComposition": True,
             # This is where we maintain the graph relationships used above and in the /related endpoints for the mock data
             "relationships": {
                 "HasParent": "pump-station",
-                "ComposedOf": [
+                "HasComponent": [
                     "pump-101-state",
                     "pump-101-production",
                     "pump-101-measurements"
@@ -124,9 +124,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "state-type",
             "parentId": "pump-101",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
-                "ComposedBy": "pump-101",
+                "ComponentOf": "pump-101",
             },
             "records": [
                 {
@@ -209,7 +209,7 @@ I3X_DATA = {
             "typeId": "production-type",
             "parentId": "pump-101",
             # This element has related data, but that data is not a part of the definition of this data, so it is not complex
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
                 "HasParent": "pump-101",
                 # Related classes, not a part of the definition of this element. Client can "dig" through HasChildren as needed
@@ -224,7 +224,7 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "product-type",
             "parentId": "pump-101-production",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
                 "HasParent": "pump-101-production",
             },
@@ -236,10 +236,10 @@ I3X_DATA = {
             "typeId": "measurements-type",
             "parentId": "pump-101",
             # This element has related data, and that data IS a part of the definition of this data, so it IS complex
-            "isComplex": True,
+            "isComposition": True,
             "relationships": {
                 "HasParent": "pump-101",
-                "ComposedOf": [
+                "HasComponent": [
                     "pump-101-bearing-temperature",
                 ],
             },
@@ -251,10 +251,10 @@ I3X_DATA = {
             "typeId": "measurement-type",
             "parentId": "pump-101-measurements",
             # This element has related data, and that data IS a part of the definition of this data, so it IS complex
-            "isComplex": True,
+            "isComposition": True,
             "relationships": {
-                "ComposedBy": "pump-101-measurements",
-                "ComposedOf": ["pump-101-measurements-bearing-temperature-value", "pump-101-measurements-bearing-temperature-health"]
+                "ComponentOf": "pump-101-measurements",
+                "HasComponent": ["pump-101-measurements-bearing-temperature-value", "pump-101-measurements-bearing-temperature-health"]
             },
             "records": [
                 {
@@ -281,9 +281,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurement-value-type",
             "parentId": "pump-101-bearing-temperature",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
-                "ComposedBy": "pump-101-bearing-temperature"
+                "ComponentOf": "pump-101-bearing-temperature"
             },
             "records": [
                 {
@@ -307,9 +307,9 @@ I3X_DATA = {
             "namespaceUri": "https://abelara.com/equipment",
             "typeId": "measurement-health-type",
             "parentId": "pump-101-bearing-temperature",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
-                "ComposedBy": "pump-101-bearing-temperature"
+                "ComponentOf": "pump-101-bearing-temperature"
             },
             "records": [
                 {
@@ -330,7 +330,7 @@ I3X_DATA = {
             "namespaceUri": "https://isa.org/isa95",
             "typeId": "work-unit-type",
             "parentId": "pump-station",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
                 "SuppliedBy": "pump-101",
                 "MonitoredBy": "sensor-001",
@@ -342,7 +342,7 @@ I3X_DATA = {
             "namespaceUri": "https://thinkiq.com/equipment",
             "typeId": "sensor-type",
             "parentId": "pump-station",
-            "isComplex": False,
+            "isComposition": False,
             "relationships": {
                 "Monitors": "tank-201"
             },
@@ -391,16 +391,16 @@ I3X_DATA = {
         # Used for OOP relationships
         #   These will always indicate data structure complexity (one thing is made-up of another)
         {
-            "elementId": "ComposedOf",
-            "displayName": "ComposedOf",
+            "elementId": "HasComponent",
+            "displayName": "HasComponent",
             "namespaceUri": "https://cesmii.org/i3x",
-            "reverseOf": "ComposedBy"
+            "reverseOf": "ComponentOf"
         },
         {
-            "elementId": "ComposedBy",
-            "displayName": "ComposedBy",
+            "elementId": "ComponentOf",
+            "displayName": "ComponentOf",
             "namespaceUri": "https://cesmii.org/i3x",
-            "reverseOf": "ComposedOf"
+            "reverseOf": "HasComponent"
         },
         {
             "elementId": "InheritedBy",

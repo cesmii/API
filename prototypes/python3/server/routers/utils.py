@@ -12,7 +12,7 @@ def getObject(instance: Any, includeMetadata: bool) -> Any:
         "typeId": instance["typeId"],
         "namespaceUri": instance["namespaceUri"],
         "parentId": instance.get("parentId"),
-        "isComplex": instance["isComplex"]
+        "isComposition": instance["isComposition"]
     }
     return noMetadataObject
     
@@ -41,7 +41,7 @@ def getValueMetadata(value: Any) -> Any:
 
 def getSubscriptionValue(instance: Any, record: Any, maxDepth: int = 1, data_source: Any = None) -> Any:
     """
-    Helper to get subscription value, optionally with recursive ComposedOf children.
+    Helper to get subscription value, optionally with recursive HasComponent children.
 
     Args:
         instance: The instance object with elementId

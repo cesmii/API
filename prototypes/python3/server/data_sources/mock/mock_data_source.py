@@ -167,13 +167,13 @@ class MockDataSource(I3XDataSource):
         # Get the records array
         records_array = instance.get("records")
 
-        # Check if we should recurse into ComposedOf relationships
+        # Check if we should recurse into HasComponent relationships
         # maxDepth=0 means infinite recursion, maxDepth>1 means recurse to that depth
         should_recurse = (maxDepth == 0 or maxDepth > 1)
 
         if should_recurse:
             relationships = instance.get("relationships", {})
-            composed_of = relationships.get("ComposedOf", [])
+            composed_of = relationships.get("HasComponent", [])
 
             if composed_of:
                 # Convert string to list if needed
@@ -209,7 +209,7 @@ class MockDataSource(I3XDataSource):
 
                 return result
 
-        # If no records and no ComposedOf relationships, return None
+        # If no records and no HasComponent relationships, return None
         if not records_array or not isinstance(records_array, list):
             return None
 

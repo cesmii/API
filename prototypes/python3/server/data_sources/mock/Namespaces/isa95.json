@@ -13,10 +13,10 @@
             }
         },
         "work-unit-type": {
-            "description": "ISA-95 Work Unit - can be simple or complex with ComposedOf relationships to child elements",
+            "description": "ISA-95 Work Unit - can be simple or complex with HasComponent relationships to child elements",
             "type": "object",
             "!related": {
-                "relationshipType": "ComposedOf",
+                "relationshipType": "HasComponent",
                 "note": "Complex work units may be composed of state, production, measurements, and other child elements"
             }
         }

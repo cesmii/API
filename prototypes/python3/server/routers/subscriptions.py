@@ -18,7 +18,7 @@ class Subscription(BaseModel):
     subscriptionId: int
     qos: str
     created: str
-    maxDepth: int = 1  # Depth to follow ComposedOf relationships (0=infinite, 1=no recursion, N=recurse N levels)
+    maxDepth: int = 1  # Depth to follow HasComponent relationships (0=infinite, 1=no recursion, N=recurse N levels)
     monitoredItems: List[str] = []
     pendingUpdates: List[Any] = []  # For QoS2, list of values to send
     # Exclude these fields from JSON serialization/schema
@@ -230,7 +230,8 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS, data_sour
                     # Queue for later sync
                     sub.pendingUpdates.append(updateValue)
     except Exception as e:
-        print(f"Error routing data source update: {e}\n{stack_trace}")
+        import traceback
+        print(f"Error routing data source update: {e}\n{traceback.format_exc()}")
 
 
 def subscription_worker(I3X_DATA_SUBSCRIPTIONS, running_flag):
@@ -249,7 +250,7 @@ def collect_instance_tree(
     for inst in instances:
         if inst["elementId"] == root_id:
             collected.append(inst)
-            if inst.get("isComplex") and (max_depth == 0 or depth < max_depth):
+            if inst.get("isComposition") and (max_depth == 0 or depth < max_depth):
                 children = [i for i in instances if i.get("parentId") == root_id]
                 for child in children:
                     collected.extend(
