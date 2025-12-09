@@ -64,9 +64,9 @@ The reader will observe that the API requires the underlying platform to support
 
 ### 3.1.1 Required Object Metadata
 
-- ParentId: the ElementId of the parent object
-- HasChildren: if the element value is complex, a boolean value indicating if the element is composed of one or more child objects
-- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
+- parentId: the ElementId of the parent object
+- isComposition: a boolean value indicating if the element's value is composed of one or more child objects via HasComponent relationships. When true, clients SHOULD expect the implementation will recurse through HasComponent relationships to retrieve the complete value structure.
+- namespaceUri: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
 
 ### 3.1.2 Optional Object Metadata
 
@@ -80,11 +80,15 @@ The reader will observe that the API requires the underlying platform to support
 
 As described in 5.2.2, Objects are derived from Types. This derivation is a relationship that MUST be persisted by underlying platforms in order to support queries in the API.
 
-#### 3.2.2 Hierarchical Relationships
+#### 3.2.2 Organizational Relationships
 
-To properly support Object Orientation, underlying platforms MUST support hierarchical relationships between Objects. These common relationships, such as parent-child, are a minimum requirement for any contextualized manufacturing information platform.
+To properly support Object Orientation, underlying platforms MUST support organizational relationships between Objects. These common relationships, such as HasParent/HasChildren, represent topological or organizational hierarchy where child objects are separate entities organized under a parent. For example, a "pump-station" may have children "pump-101", "tank-201", and "sensor-001" - each is an independent entity that happens to be organized under the pump station.
 
-#### 3.2.3 Non-Hierarchical Relationships
+#### 3.2.3 Composition Relationships
+
+Underlying platforms MAY support composition relationships (HasComponent/ComponentOf) to indicate when child data IS part of the parent's definition. When an element has `isComposition: true`, its value is composed of the values of its component children. For example, a "pump-101" work unit may be composed of "state", "production", and "measurements" components - together these form the complete definition of the pump's data. Clients querying values for composition elements SHOULD expect to recurse through HasComponent relationships to retrieve the complete value structure.
+
+#### 3.2.4 Non-Hierarchical Relationships
 
 Modern manufacturing information involves relationships in data that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
 
@@ -109,9 +113,21 @@ This Query MUST return an array of Type definitions registered in the contextual
 
 The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
 
-#### 4.1.4 Relationship Types - Hierarchical
+#### 4.1.4 Relationship Types
 
-This Query MUST return the relationship types HasChildren, HasParent. MAY return additional relationship types. These relationship type names SHALL be treated as keywords for follow-up queries. 
+This Query MUST return an array of relationship type definitions registered in the CMIP. At minimum, implementations MUST support organizational hierarchy relationship types:
+- **Organizational:** HasParent, HasChildren - for topological/organizational hierarchy
+
+Implementations MAY support Class-composition. If supported, these minimum relationship types MUST be used:
+- **Composition:** HasComponent, ComponentOf - for data composition relationships where child data is part of the parent's definition
+
+Each relationship type definition MUST include:
+- elementId: unique identifier for the relationship type
+- displayName: human-readable name
+- namespaceUri: the namespace URI for the relationship type
+- reverseOf: the elementId of the inverse relationship type (e.g., HasParent's reverseOf is HasChildren)
+
+Implementations MAY return additional relationship types for non-hierarchical relationships. These relationship type names SHALL be treated as keywords for follow-up queries. 
 
 #### 4.1.5 Instances of an Object Type
 
@@ -140,12 +156,17 @@ When invoked as a Query, the LastKnownValue interface MUST return the current va
 
 When invoked as a Query, the LastKnownValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array.
 
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
+When the requested element has `isComposition: true`, the Query MUST support an optional `maxDepth` parameter to control recursion through HasComponent relationships:
+- maxDepth=0: Infinite recursion - include all nested component values
+- maxDepth=1: No recursion - return only this element's direct value (default)
+- maxDepth=N (N>1): Recurse up to N levels deep through HasComponent relationships
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
-- ElementId: a unique string identifier for the element, as defined by the implementation
-- DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
-- TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
+When recursing, the response structure MUST include the element's own value under a `value` key (if present), with each component child's value keyed by its elementId.
+
+When invoked as a Query, the response payload MUST include the Value-Quality-Timestamp (VQT) structure:
+- value: the actual data value
+- quality: a quality indicator (e.g., "Good", "GoodNoData", "Bad")
+- timestamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
 ##### 4.2.1.2 Object Element HistoricalValue
 
@@ -153,12 +174,12 @@ When invoked as a Query, the HistoricalValue interface MUST return an array of h
 
 When invoked as a Query, the HistoricalValue interface MAY support an array of requested object ElementIds to reduce round-trips where multiple values are required by an application, in which case, the return payload MUST be an array of arrays.
 
-When invoked as a Query, the response payload MUST include the metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the metadata indicated in [section 3.1.2](#312-optional-object-metadata).
+When the requested element has `isComposition: true`, the Query MUST support an optional `maxDepth` parameter to control recursion through HasComponent relationships, with the same semantics as defined in [section 4.2.1.1](#4211-object-element-lastknownvalue).
 
-When invoked as a Query, if indicated by an optional query parameter, the response payload MUST include the following metadata about the returned value:
-- ElementId: a unique string identifier for the element, as defined by the implementation
-- DataType: incudes most-derived Type name of an object, or primitive datatype for an attribute, and MUST use the JavaScript primitive types
-- TimeStamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
+When invoked as a Query, each element in the response array MUST include the Value-Quality-Timestamp (VQT) structure:
+- value: the actual data value
+- quality: a quality indicator (e.g., "Good", "GoodNoData", "Bad")
+- timestamp: a timestamp corresponding to the time and date the data was recorded in the CMIP, following the standard established by [Internet RFC 3339](https://www.rfc-editor.org/rfc/rfc3339)
 
 #### 4.2.2 Update Methods
 
@@ -200,23 +221,45 @@ The server will publish messages to subscribed clients when the client indicates
 
 ##### 4.2.3.2 Register Monitored Items
 
-Registers the ElementIds the client wishes to subscribe to, for a given Subscription Id. Upon registration, the CMIP MUST begin publishing changed values according to the client's requested QoS level.
+Registers the ElementIds the client wishes to subscribe to, for a given Subscription Id. Upon registration, the CMIP MUST begin publishing changed values according to the client's requested QoS level. This method is additive, that is the client can add additional monitored items later.
 
-For QoS 0 subscriptions, this method call establishes an ongoing connection between the client and CMIP. The server MUST stream changes to Subscribed items over this connection immediately until the connection is broken or the Unsubscribe method is called. Each element being streamed MUST include the metadata indicated in section 3.1.1 and, if indicated by an optional Registration parameter, MAY include the metadata indicated in section 3.1.2.
+The registration request MUST include:
+- elementIds: an array of ElementIds to monitor
 
-Note I3X explicitly permits subscribing to complex structures (an ElementId may represent a single property of an object, an entire object, or a tree of related objects) but some implementations may need to limit depth. As the required metadata for each object requires a boolean indication if an element HasChildren, a client may detect depth limiting by the server implementation.
+The registration request MAY include:
+- maxDepth: controls recursion through HasComponent relationships for elements with `isComposition: true`, using the same semantics as defined in [section 4.2.1.1](#4211-object-element-lastknownvalue). Default is 1 (no recursion).
 
-##### 4.2.3.3 Sync
+For QoS 0 subscriptions, this method call establishes an ongoing connection between the client and CMIP. The server MUST stream changes to Subscribed items over this connection immediately until the connection is broken or the Unsubscribe method is called. Each update being streamed MUST include:
+- elementId: the ElementId of the changed element
+- value: the new value (with recursive structure if maxDepth was specified)
+- quality: the quality indicator
+- timestamp: the timestamp of the change
+
+For QoS 2 subscriptions, the registration confirms which items will be monitored. Changed values are retrieved via the Sync method ([section 4.2.3.3](#4233-sync)).
+
+Note: I3X explicitly permits subscribing to composition structures (an ElementId may represent a single property of an object, an entire object, or a tree of composed objects). The `maxDepth` parameter controls how deep the CMIP recurses through HasComponent relationships when publishing updates. As the required metadata for each object includes `isComposition`, a client can determine which elements have component children.
+
+##### 4.2.3.3 Remove Monitored Items
+
+Removes the ElementIds the client no longer wishes to have in the subscription, for a given Subscription Id.
+
+##### 4.2.3.4 Sync
 
 This method is used only for QoS 2 subscriptions, and is called with a specific Subscription Id, to allow the client to:
 - Acknowledge receipt of previous messages
 - Check for changes to subscribed elements
 
-When servicing the Sync call, the CMIP MUST respond with the latest value for each registered Subscription element.
+When servicing the Sync call, the CMIP MUST respond with an array of updates for elements that have changed since the last Sync call. Each update in the response array MUST include:
+- elementId: the ElementId of the changed element
+- value: the new value (with recursive structure if maxDepth was specified during registration)
+- quality: the quality indicator
+- timestamp: the timestamp of the change
 
-If the client does not acknowledge a previous message, the CMIP MUST re-send that message as part of the response to the Sync call. The CMIP must maintain state for all pending (un-acknowledged) messages, with that caveat that only the latest value is ever available to QoS 2 clients.
+If no elements have changed since the last Sync call, the response MUST be an empty array.
 
-##### 4.2.3.4 Unsubscribe
+If the client does not acknowledge a previous message, the CMIP MUST re-send that message as part of the response to the Sync call. The CMIP must maintain state for all pending (un-acknowledged) messages, with the caveat that only the latest value is ever available to QoS 2 clients.
+
+##### 4.2.3.5 Unsubscribe
 
 When invoked, the Unsubscribe interface MUST accept a single subscription ID and MAY accept an array of subscription IDs or a wildcard, and cancels publication of future messages matching the parameter to the invoking client, allowing the CMIP to release resources and state held for the client.
 
