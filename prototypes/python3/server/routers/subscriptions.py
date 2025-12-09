@@ -18,7 +18,7 @@ class Subscription(BaseModel):
     subscriptionId: int
     qos: str
     created: str
-    includeMetadata: bool = False  # Whether to include metadata in updates
+    maxDepth: int = 1  # Depth to follow HasComponent relationships (0=infinite, 1=no recursion, N=recurse N levels)
     monitoredItems: List[str] = []
     pendingUpdates: List[Any] = []  # For QoS2, list of values to send
     # Exclude these fields from JSON serialization/schema
@@ -99,8 +99,8 @@ async def register_monitored_items(
         all_element_ids.update([i["elementId"] for i in tree])
 
     # Update the subscription
-    # Store includeMetadata preference from the request
-    sub.includeMetadata = req.includeMetadata
+    # Store maxDepth preference from the request
+    sub.maxDepth = req.maxDepth
     # TODO right now this is additive, currently need to call delete and re-create the subscription entirely to remove items.
     for eid in all_element_ids:
         if eid not in sub.monitoredItems:
@@ -203,7 +203,7 @@ def delete_subscription(request: Request, subscriptionId: str):
 # Subscription thread responsible creating updated for items being monitored.
 # If QoS is QoS0, it will call the handler immediately to send updates
 # if QoS is QoS2, it will store the updates in a pending dictionary to be sent on the /sync call
-def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS):
+def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS, data_source):
     """Route updates from data sources to active subscriptions"""
     try:
         # Iterate through all active subscriptions
@@ -215,8 +215,8 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS):
             element_id = instance.get("elementId")
             if element_id and element_id in sub.monitoredItems:
 
-                # Get the payload using the subscription's includeMetadata preference
-                updateValue = getSubscriptionValue(instance, value, includeMetadata=sub.includeMetadata)
+                # Get the payload using the subscription's maxDepth preference
+                updateValue = getSubscriptionValue(instance, value, maxDepth=sub.maxDepth, data_source=data_source)
 
 
                 if sub.qos == "QoS0":
@@ -230,7 +230,8 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS):
                     # Queue for later sync
                     sub.pendingUpdates.append(updateValue)
     except Exception as e:
-        print(f"Error routing data source update: {e}\n{stack_trace}")
+        import traceback
+        print(f"Error routing data source update: {e}\n{traceback.format_exc()}")
 
 
 def subscription_worker(I3X_DATA_SUBSCRIPTIONS, running_flag):
@@ -249,7 +250,7 @@ def collect_instance_tree(
     for inst in instances:
         if inst["elementId"] == root_id:
             collected.append(inst)
-            if inst.get("hasChildren") and (max_depth == 0 or depth < max_depth):
+            if inst.get("isComposition") and (max_depth == 0 or depth < max_depth):
                 children = [i for i in instances if i.get("parentId") == root_id]
                 for child in children:
                     collected.extend(

@@ -33,8 +33,8 @@ class MockDataUpdater:
     def _update_loop(self):
         """Main loop that generates random updates"""
         while self.running:
-            # Get all instances from the data source
-            instances = self.data_source.get_all_instances()
+            # Get all instances with records (directly from data, not through get_all_instances which filters out records)
+            instances = self.data_source.data["instances"]
 
             # Generate random updates for non-static instances
             for instance in instances:

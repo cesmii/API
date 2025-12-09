@@ -61,7 +61,7 @@ class I3XDataSource(ABC):
         element_id: str,
         startTime: Optional[str] = None,
         endTime: Optional[str] = None,
-        includeMetadata: bool = False,
+        maxDepth: int = 1,
         returnHistory: bool = False,
     ) -> Optional[Dict[str, Any]]:
         """
@@ -71,7 +71,10 @@ class I3XDataSource(ABC):
             element_id: The element to get values for
             startTime: Optional start time for filtering
             endTime: Optional end time for filtering
-            includeMetadata: If True, returns full record with quality and timestamp. If False, returns only the value field(s).
+            maxDepth: Controls recursion through HasComponent relationships.
+                      0 = infinite recursion (include all nested composed elements)
+                      1 = no recursion (just this element's value)
+                      N = recurse up to N levels deep
             returnHistory: If True and no time range specified, returns all historical values. If False, returns only most recent value.
         """
         pass

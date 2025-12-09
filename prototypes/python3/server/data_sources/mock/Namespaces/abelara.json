@@ -131,9 +131,7 @@
                     "required": [
                         "source",
                         "uri",
-                        "asset",
-                        "previousState",
-                        "additionalInfo"
+                        "asset"
                     ]
                 }
             },
@@ -146,57 +144,21 @@
             ]
         },
         "product-type": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "idealCycleTime": {
-                    "type": "integer"
-                },
-                "tolerance": {
-                    "type": "number"
-                },
-                "unit": {
-                    "type": "string"
-                },
-                "family": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "integer"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "id",
-                        "name",
-                        "description"
-                    ]
-                }
-            },
-            "required": [
-                "id",
-                "name",
-                "description",
-                "idealCycleTime",
-                "tolerance",
-                "unit",
-                "family"
-            ]
+            "description": "Product metadata container - no records, metadata only",
+            "type": "object"
         },
         "production-type": {
+            "description": "Production container - no records, organizational metadata with HasChildren relationships",
+            "type": "object",
+            "!related": {
+                "relationshipType": "HasChildren",
+                "types": [
+                    "https://abelara.com/equipment:product-type"
+                ]
+            }
+        },
+        "production-type-ORIGINAL-UNUSED": {
+            "description": "ORIGINAL COMPLEX SCHEMA - NOT USED IN CURRENT MOCK DATA",
             "type": "object",
             "properties": {
                 "timestamp": {
@@ -354,7 +316,7 @@
                                 "asset": {
                                     "type": "object",
                                     "!related": {
-                                        "relationshipType": "ComposedOf",
+                                        "relationshipType": "HasComponent",
                                         "type": "https://abelara.com/equipment:product-type"
                                     },
                                     "product": {
@@ -447,195 +409,46 @@
             ]
         },
         "measurements-type": {
-            "properties": {
-                "measurements": {
-                    "type": "array",
-                    "items": {}
-                }
-            },
-            "required": [
-                "measurements"
-            ]
+            "description": "Composite measurements container - no records, composed of measurement-type children",
+            "type": "object",
+            "!related": {
+                "relationshipType": "HasComponent",
+                "types": [
+                    "https://abelara.com/equipment:measurement-type"
+                ]
+            }
         },
         "measurement-type": {
+            "description": "Composite measurement type composed of value and health subtypes, with tolerance metadata in records",
+            "type": "object",
+            "!related": {
+                "relationshipType": "HasComponent",
+                "types": [
+                    "https://abelara.com/equipment:measurement-value-type",
+                    "https://abelara.com/equipment:measurement-health-type"
+                ]
+            },
             "properties": {
-                "timestamp": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "integer"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "id",
-                        "name",
-                        "description"
-                    ]
-                },
-                "value": "#/types/measurement-value-type",
-                "health": "#/types/measurement-other-value-type",
-                "unit": {
-                    "type": "string"
-                },
-                "target": {
-                    "type": "number"
-                },
                 "tolerance": {
-                    "type": "number"
+                    "type": "number",
+                    "description": "Acceptable deviation from target value"
                 },
                 "inTolerance": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Whether current value is within tolerance"
                 },
-                "metadata": {
-                    "type": "object",
-                    "properties": {
-                        "source": {
-                            "type": "string"
-                        },
-                        "uri": {
-                            "type": "string"
-                        },
-                        "asset": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "name",
-                                "description"
-                            ]
-                        },
-                        "additionalInfo": {
-                            "type": "object",
-                            "properties": {
-                                "technician": {
-                                    "type": "string"
-                                },
-                                "measurementMethod": {
-                                    "type": "string"
-                                },
-                                "equipmentUsed": {
-                                    "type": "string"
-                                },
-                                "measurementDate": {
-                                    "type": "string"
-                                },
-                                "nextMeasurementDue": {
-                                    "type": "string"
-                                },
-                                "trend": {
-                                    "type": "string"
-                                },
-                                "measurementLocation": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "technician",
-                                "measurementMethod",
-                                "equipmentUsed",
-                                "measurementDate",
-                                "nextMeasurementDue",
-                                "trend",
-                                "measurementLocation"
-                            ]
-                        }
-                    },
-                    "required": [
-                        "source",
-                        "uri",
-                        "asset",
-                        "additionalInfo"
-                    ]
+                "!value": {
+                    "$ref": "#/types/measurement-value-type",
+                    "description": "Composed child: measurement value"
                 },
-                "product": {
-                    "type": "object",
-                    "properties": {
-                        "id": {
-                            "type": "integer"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "family": {
-                            "type": "JSON",
-                            "properties": {
-                                "id": {
-                                    "type": "integer"
-                                },
-                                "name": {
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "id",
-                                "name",
-                                "description"
-                            ]
-                        }
-                    },
-                    "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "family"
-                    ]
-                },
-                "productionContext": {
-                    "type": "object",
-                    "properties": {
-                        "batchId": {
-                            "type": "string"
-                        },
-                        "processStep": {
-                            "type": "string"
-                        },
-                        "demand": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "batchId",
-                        "processStep",
-                        "demand"
-                    ]
+                "!health": {
+                    "$ref": "#/types/measurement-health-type",
+                    "description": "Composed child: measurement health indicator"
                 }
             },
             "required": [
-                "timestamp",
-                "type",
-                "value",
-                "unit",
-                "target",
                 "tolerance",
-                "inTolerance",
-                "metadata",
-                "product",
-                "productionContext"
+                "inTolerance"
             ]
         },
         "measurement-value-type": {

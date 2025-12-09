@@ -3,14 +3,7 @@
     "$id": "https://thinkiq.com/equipment/v1.0",
     "types": {
         "sensor-type": {
-            "type": "object",
-            "properties": {
-                "value": {"type": "number"},
-                "engUnit": {"type": "string"},
-                "status": {"type": "string"},
-                "calibrationDate": {"type": "string"}
-            },
-            "required": ["value", "engUnit", "status"]
+            "type": "number"
         }
     }
 }
