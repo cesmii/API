@@ -88,7 +88,13 @@ def get_last_known_value(
     # returnHistory=False ensures only the most recent value is returned
     value = data_source.get_instance_values_by_id(elementId, maxDepth=maxDepth, returnHistory=False)
 
-    return value
+    # Include required object metadata (RFC 3.1.1) including isComposition
+    # so clients know if there are more children to fetch
+    return {
+        "elementId": elementId,
+        "isComposition": instance.get("isComposition", False),
+        "value": value
+    }
 
 # 4.2.2.1 Object Element LastKnownValue
 @update.put("/objects/{elementId}/value", summary="Update Value of Object")

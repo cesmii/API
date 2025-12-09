@@ -82,11 +82,11 @@ As described in 5.2.2, Objects are derived from Types. This derivation is a rela
 
 #### 3.2.2 Organizational Relationships
 
-To properly support Object Orientation, underlying platforms MUST support organizational relationships between Objects. These common relationships, such as HasParent/HasChildren, represent topological or organizational hierarchy where child objects are separate entities organized under a parent. For example, a "pump-station" may have children "pump-101", "tank-201", and "sensor-001" - each is an independent entity that happens to be organized under the pump station.
+To properly support Object Orientation, underlying platforms MUST support organizational relationships between Objects. These common relationships, such as HasParent/HasChildren, represent topological or organizational hierarchy where child objects are separate entities organized under a parent.
 
 #### 3.2.3 Composition Relationships
 
-Underlying platforms MAY support composition relationships (HasComponent/ComponentOf) to indicate when child data IS part of the parent's definition. When an element has `isComposition: true`, its value is composed of the values of its component children. For example, a "pump-101" work unit may be composed of "state", "production", and "measurements" components - together these form the complete definition of the pump's data. Clients querying values for composition elements SHOULD expect to recurse through HasComponent relationships to retrieve the complete value structure.
+Underlying platforms MAY support composition relationships (HasComponent/ComponentOf) to indicate when child data IS part of the parent's definition. When an element has `isComposition: true`, its value is composed of the values of its component children. Clients querying values for composition elements SHOULD expect to recurse through HasComponent relationships to retrieve the complete value structure.
 
 #### 3.2.4 Non-Hierarchical Relationships
 

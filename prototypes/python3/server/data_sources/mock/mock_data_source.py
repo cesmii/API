@@ -167,50 +167,54 @@ class MockDataSource(I3XDataSource):
         # Get the records array
         records_array = instance.get("records")
 
+        # Check if this element has HasComponent relationships (is a composition)
+        relationships = instance.get("relationships", {})
+        composed_of = relationships.get("HasComponent", [])
+
+        # Convert string to list if needed
+        if isinstance(composed_of, str):
+            composed_of = [composed_of]
+
         # Check if we should recurse into HasComponent relationships
         # maxDepth=0 means infinite recursion, maxDepth>1 means recurse to that depth
         should_recurse = (maxDepth == 0 or maxDepth > 1)
 
-        if should_recurse:
-            relationships = instance.get("relationships", {})
-            composed_of = relationships.get("HasComponent", [])
+        if should_recurse and composed_of:
+            # Build result with composed children
+            result = {}
 
-            if composed_of:
-                # Convert string to list if needed
-                if isinstance(composed_of, str):
-                    composed_of = [composed_of]
+            # Include this element's own value if it has records
+            if records_array and isinstance(records_array, list):
+                # Process this element's records
+                own_value = self._process_records(records_array, startTime, endTime, returnHistory)
+                if own_value is not None:
+                    result["_value"] = own_value
 
-                # Build result with composed children
-                result = {}
+            # Calculate next depth: 0 stays 0 (infinite), otherwise decrement
+            next_depth = 0 if maxDepth == 0 else maxDepth - 1
 
-                # Include this element's own value if it has records
-                if records_array and isinstance(records_array, list):
-                    # Process this element's records
-                    own_value = self._process_records(records_array, startTime, endTime, returnHistory)
-                    if own_value is not None:
-                        result["_value"] = own_value
+            # Recursively fetch each composed child's value
+            # Always include composed children, even if they have no value
+            for child_id in composed_of:
+                child_value = self.get_instance_values_by_id(
+                    child_id,
+                    startTime,
+                    endTime,
+                    next_depth,
+                    returnHistory
+                )
+                # Always include the child in the result
+                # Use null/empty dict as placeholder if no value
+                result[child_id] = child_value if child_value is not None else {}
 
-                # Calculate next depth: 0 stays 0 (infinite), otherwise decrement
-                next_depth = 0 if maxDepth == 0 else maxDepth - 1
-
-                # Recursively fetch each composed child's value
-                # Always include composed children, even if they have no value
-                for child_id in composed_of:
-                    child_value = self.get_instance_values_by_id(
-                        child_id,
-                        startTime,
-                        endTime,
-                        next_depth,
-                        returnHistory
-                    )
-                    # Always include the child in the result
-                    # Use null/empty dict as placeholder if no value
-                    result[child_id] = child_value if child_value is not None else {}
-
-                return result
+            return result
 
         # If no records and no HasComponent relationships, return None
         if not records_array or not isinstance(records_array, list):
+            # For composition elements with children but maxDepth=1 (no recursion),
+            # return empty object to indicate there's a structure but it wasn't expanded
+            if composed_of:
+                return {}
             return None
 
         # No recursion needed, just process and return the records
