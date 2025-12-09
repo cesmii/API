@@ -119,10 +119,10 @@ class DataSourceManager(I3XDataSource):
         source = self._get_source_for_operation("get_instance_by_id")
         return source.get_instance_by_id(element_id)
 
-    def get_instance_values_by_id(self, element_id: str, startTime: Optional[str] = None, endTime: Optional[str] = None, recurseDepth: int = 0, returnHistory: bool = False) -> Optional[Dict[str, Any]]:
-        """Return instance values by ElementId. If recurseDepth > 0, follows ComposedOf relationships and includes composed elements' values recursively. If returnHistory is True and no time range specified, returns all historical values."""
+    def get_instance_values_by_id(self, element_id: str, startTime: Optional[str] = None, endTime: Optional[str] = None, maxDepth: int = 1, returnHistory: bool = False) -> Optional[Dict[str, Any]]:
+        """Return instance values by ElementId. If maxDepth=0, follows ComposedOf relationships infinitely. If maxDepth>1, recurses to that depth. If returnHistory is True and no time range specified, returns all historical values."""
         source = self._get_source_for_operation("get_instance_by_id")
-        return source.get_instance_values_by_id(element_id, startTime, endTime, recurseDepth, returnHistory)
+        return source.get_instance_values_by_id(element_id, startTime, endTime, maxDepth, returnHistory)
 
     def get_related_instances(
         self, element_id: str, relationship_type: Optional[str] = None

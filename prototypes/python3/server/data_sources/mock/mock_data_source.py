@@ -156,7 +156,7 @@ class MockDataSource(I3XDataSource):
         element_id: str,
         startTime: Optional[str] = None,
         endTime: Optional[str] = None,
-        recurseDepth: int = 0,
+        maxDepth: int = 1,
         returnHistory: bool = False,
     ):
         instance = self.get_instance_by_id(element_id, values=True)
@@ -167,8 +167,11 @@ class MockDataSource(I3XDataSource):
         # Get the records array
         records_array = instance.get("records")
 
-        # If recurseDepth > 0, check for ComposedOf relationships even if no records
-        if recurseDepth > 0:
+        # Check if we should recurse into ComposedOf relationships
+        # maxDepth=0 means infinite recursion, maxDepth>1 means recurse to that depth
+        should_recurse = (maxDepth == 0 or maxDepth > 1)
+
+        if should_recurse:
             relationships = instance.get("relationships", {})
             composed_of = relationships.get("ComposedOf", [])
 
@@ -187,6 +190,9 @@ class MockDataSource(I3XDataSource):
                     if own_value is not None:
                         result["_value"] = own_value
 
+                # Calculate next depth: 0 stays 0 (infinite), otherwise decrement
+                next_depth = 0 if maxDepth == 0 else maxDepth - 1
+
                 # Recursively fetch each composed child's value
                 # Always include composed children, even if they have no value
                 for child_id in composed_of:
@@ -194,7 +200,7 @@ class MockDataSource(I3XDataSource):
                         child_id,
                         startTime,
                         endTime,
-                        recurseDepth - 1,
+                        next_depth,
                         returnHistory
                     )
                     # Always include the child in the result

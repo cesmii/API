@@ -39,27 +39,28 @@ def getValueMetadata(value: Any) -> Any:
     }
     return metadata
 
-def getSubscriptionValue(instance: Any, record: Any, recurseDepth: int = 0, data_source: Any = None) -> Any:
+def getSubscriptionValue(instance: Any, record: Any, maxDepth: int = 1, data_source: Any = None) -> Any:
     """
     Helper to get subscription value, optionally with recursive ComposedOf children.
 
     Args:
         instance: The instance object with elementId
         record: The record object with structure {value: ..., quality: ..., timestamp: ..., etc}
-        recurseDepth: If > 0, fetch ComposedOf children's values recursively (requires data_source)
-        data_source: Data source to fetch recursive values (required if recurseDepth > 0)
+        maxDepth: Controls recursion (0=infinite, 1=no recursion, N=recurse N levels). Requires data_source if not 1.
+        data_source: Data source to fetch recursive values (required if maxDepth != 1)
 
     Returns:
         Dictionary with elementId and value, optionally with recursive composed values
     """
     element_id = instance["elementId"]
 
-    # If recurseDepth > 0 and we have a data_source, fetch the full recursive structure
-    if recurseDepth > 0 and data_source is not None:
+    # If maxDepth != 1 (i.e., recursion is needed) and we have a data_source, fetch the full recursive structure
+    should_recurse = (maxDepth == 0 or maxDepth > 1)
+    if should_recurse and data_source is not None:
         # Use the data source to get the full recursive value structure
         recursive_value = data_source.get_instance_values_by_id(
             element_id,
-            recurseDepth=recurseDepth,
+            maxDepth=maxDepth,
             returnHistory=False
         )
         return {

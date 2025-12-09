@@ -73,10 +73,10 @@ def get_related_objects(
 @query.get("/objects/{elementId}/value", summary="Get Last Known Value")
 def get_last_known_value(
     elementId: str = Path(...),
-    recurseDepth: int = Query(default=0, ge=0),
+    maxDepth: int = Query(default=1, ge=0),
     data_source: I3XDataSource = Depends(get_data_source),
 ):
-    """Return last known value for an Object. If recurseDepth > 0, recursively includes values from ComposedOf children."""
+    """Return last known value for an Object. If maxDepth=0, recursively includes all values from ComposedOf children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
     elementId = unquote(elementId)
 
     # Lookup instance to verify it exists
@@ -84,9 +84,9 @@ def get_last_known_value(
     if not instance:
         raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
 
-    # Get the most recent value with optional recursion based on recurseDepth
+    # Get the most recent value with optional recursion based on maxDepth
     # returnHistory=False ensures only the most recent value is returned
-    value = data_source.get_instance_values_by_id(elementId, recurseDepth=recurseDepth, returnHistory=False)
+    value = data_source.get_instance_values_by_id(elementId, maxDepth=maxDepth, returnHistory=False)
 
     return value
 
@@ -108,10 +108,10 @@ def get_historical_values(
     elementId: str = Path(...),
     startTime: Optional[str] = Query(default=None),
     endTime: Optional[str] = Query(default=None),
-    recurseDepth: int = Query(default=0, ge=0),
+    maxDepth: int = Query(default=1, ge=0),
     data_source: I3XDataSource = Depends(get_data_source),
 ):
-    """Get the historical values for one or more Objects. If recurseDepth > 0, recursively includes values from ComposedOf children."""
+    """Get the historical values for one or more Objects. If maxDepth=0, recursively includes all values from ComposedOf children (infinite depth). Otherwise, recurses only to the specified depth (1=no recursion, just this element)."""
     elementId = unquote(elementId)
 
      # Lookup instance to verify it exists
@@ -119,9 +119,9 @@ def get_historical_values(
     if not instance:
         raise HTTPException(status_code=404, detail=f"Element '{elementId}' not found")
 
-    # Get historical data with optional recursion based on recurseDepth
+    # Get historical data with optional recursion based on maxDepth
     # returnHistory=True ensures all values are returned when no time range is specified
-    historical_values = data_source.get_instance_values_by_id(elementId, startTime, endTime, recurseDepth, returnHistory=True)
+    historical_values = data_source.get_instance_values_by_id(elementId, startTime, endTime, maxDepth, returnHistory=True)
 
     return historical_values
 

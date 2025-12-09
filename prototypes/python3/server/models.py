@@ -154,8 +154,7 @@ class CreateSubscriptionResponse(BaseModel):
 
 class RegisterMonitoredItemsRequest(BaseModel):
     elementIds: List[str]
-    recurseDepth: Optional[int] = 0  # 0 means no recursion, >0 follows ComposedOf relationships
-    maxDepth: Optional[int] = 0  # 0 means no limit on tree depth
+    maxDepth: Optional[int] = 1  # 0 means infinite recursion, 1 means no recursion, >1 recurses to that depth
 
 
 class SyncResponseItem(BaseModel):

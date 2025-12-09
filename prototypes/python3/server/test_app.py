@@ -68,8 +68,8 @@ class TestI3XEndpoints(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        # Test with recurseDepth
-        response = self.client.get("/objects/pump-101/value?recurseDepth=1")
+        # Test with maxDepth (0=infinite, 2=recurse to depth 2)
+        response = self.client.get("/objects/pump-101/value?maxDepth=2")
         data = response.json()
         self.assertEqual(response.status_code, 200)
 

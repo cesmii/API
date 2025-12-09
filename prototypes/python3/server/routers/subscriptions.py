@@ -18,7 +18,7 @@ class Subscription(BaseModel):
     subscriptionId: int
     qos: str
     created: str
-    recurseDepth: int = 0  # Depth to follow ComposedOf relationships
+    maxDepth: int = 1  # Depth to follow ComposedOf relationships (0=infinite, 1=no recursion, N=recurse N levels)
     monitoredItems: List[str] = []
     pendingUpdates: List[Any] = []  # For QoS2, list of values to send
     # Exclude these fields from JSON serialization/schema
@@ -99,8 +99,8 @@ async def register_monitored_items(
         all_element_ids.update([i["elementId"] for i in tree])
 
     # Update the subscription
-    # Store recurseDepth preference from the request
-    sub.recurseDepth = req.recurseDepth
+    # Store maxDepth preference from the request
+    sub.maxDepth = req.maxDepth
     # TODO right now this is additive, currently need to call delete and re-create the subscription entirely to remove items.
     for eid in all_element_ids:
         if eid not in sub.monitoredItems:
@@ -215,8 +215,8 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS, data_sour
             element_id = instance.get("elementId")
             if element_id and element_id in sub.monitoredItems:
 
-                # Get the payload using the subscription's recurseDepth preference
-                updateValue = getSubscriptionValue(instance, value, recurseDepth=sub.recurseDepth, data_source=data_source)
+                # Get the payload using the subscription's maxDepth preference
+                updateValue = getSubscriptionValue(instance, value, maxDepth=sub.maxDepth, data_source=data_source)
 
 
                 if sub.qos == "QoS0":

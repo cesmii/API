@@ -44,22 +44,22 @@ This is a FastAPI-based implementation of the I3X API (RFC 001), providing a sta
 - Children are separate entities
 - Example: `pump-station` has children `pump-101`, `tank-201`
 
-### recurseDepth Parameter
+### maxDepth Parameter
 
-Replaced `includeMetadata` parameter (December 2024). When `recurseDepth > 0`:
-- Recursively follows `ComposedOf` relationships
-- Returns nested value structure with composed children
-- Applies to both query and subscription methods
+Controls recursion depth when fetching values through ComposedOf relationships:
+- `maxDepth=0` - Infinite recursion (include all nested composed elements)
+- `maxDepth=1` - No recursion (just this element's value) - this is the default
+- `maxDepth=N` (N>1) - Recurse up to N levels deep
 
 **Implementation**:
-- `routers/objects.py` - value query endpoints
+- `routers/objects.py` - value query endpoints (`/value`, `/history`)
 - `routers/subscriptions.py` - subscription system
 - `routers/utils.py` - `getSubscriptionValue()` helper
 - `data_sources/mock/mock_data_source.py` - recursive value fetching
 
 **Key Behavior**:
 - Always includes composed children even if they have no value (uses `{}` placeholder)
-- Own value is stored under `_value` key when recurseDepth > 0
+- Own value is stored under `_value` key when recursing
 - Child values are keyed by their elementId
 
 ## Mock Data Source
@@ -201,7 +201,7 @@ def tearDownClass(cls):
 - Namespace endpoints
 - Type definition endpoints
 - Object instance queries (with correct IDs from mock data)
-- Value queries with `recurseDepth`
+- Value queries with `maxDepth`
 - Relationship queries
 - QoS0 subscription streaming (requires MockDataUpdater)
 - QoS2 subscription polling
@@ -217,9 +217,10 @@ python -m pytest test_app.py -v
 
 ## Recent Changes (December 2024)
 
-### 1. recurseDepth Implementation
-- Replaced `includeMetadata` boolean with `recurseDepth` integer
+### 1. maxDepth Implementation
+- Replaced `includeMetadata` boolean with `maxDepth` integer
 - Enables recursive traversal of ComposedOf relationships
+- `maxDepth=0` for infinite recursion, `maxDepth=1` (default) for no recursion
 - Returns nested structure with `_value` for own data and child keys for composed data
 
 ### 2. MockDataUpdater Bug Fix
@@ -308,7 +309,8 @@ If QoS0 subscriptions don't receive updates:
 
 ### Value Query with Recursion
 ```python
-# GET /objects/{elementId}/value?recurseDepth=2
+# GET /objects/{elementId}/value?maxDepth=0  (infinite recursion)
+# GET /objects/{elementId}/value?maxDepth=3  (recurse 3 levels)
 {
   "_value": {...},  # Own value
   "child-1": {...}, # First child's value
@@ -337,8 +339,7 @@ POST /subscriptions {"qos": "QoS0"}
 # 2. Register monitored items
 POST /subscriptions/0/objects {
   "elementIds": ["sensor-001"],
-  "recurseDepth": 0,
-  "maxDepth": 0
+  "maxDepth": 1  # 0=infinite, 1=no recursion (default), N=recurse N levels
 }
 → StreamingResponse (QoS0) or confirmation (QoS2)
 
@@ -353,5 +354,6 @@ POST /subscriptions/0/sync
 - Namespace URIs use https:// scheme
 - Type IDs reference types within namespaces
 - Relationships use standard types: ComposedOf, ComposedBy, HasChildren, HasParent, Monitors, MonitoredBy, etc.
-- recurseDepth=0 means no recursion (just the element's own value)
+- maxDepth=0 means infinite recursion (all composed children)
+- maxDepth=1 means no recursion (just the element's own value) - this is the default
 - Empty composed children return `{}` not `null`
