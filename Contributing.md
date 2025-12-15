@@ -8,8 +8,8 @@ In the spirit of collaboration and consensus-driven evolution, changes to the pr
 3. [Create a New Issue](https://github.com/cesmii/API/issues/new/choose) describing your proposed changes. The Working Group triages issues twice a month.
 4. If you intend to submit a Pull Request related to the issue, tag the issue with [server-proto](https://github.com/cesmii/API/issues?q=is%3Aissue%20state%3Aopen%20label%3Aserver-proto).
 5. Once triaged, the Working Group will move your issue to the **Todo** column in the [Project Board](https://github.com/orgs/cesmii/projects/1) as a signal to begin work.
-6. Fork the [prototypes](https://github.com/cesmii/API/tree/prototypes) branch to your GitHub account, and make any proposed changes related to the issue in your own fork.
-7. When you are ready, submit a Pull Request back to the [prototypes](https://github.com/cesmii/API/tree/prototypes) branch, and update your issue indicating readiness for Review.
+6. Fork the [main](https://github.com/cesmii/API/tree/main) branch to your GitHub account, and make any proposed changes related to the issue in your own fork.
+7. When you are ready, submit a Pull Request back to the [main](https://github.com/cesmii/API/tree/main) branch, and update your issue indicating readiness for Review.
 8. The Working Group will review your PR during a regular meeting, and provide feedback or merge your change, as appropriate.
 9. The Working Group may chose, at its discretion, to invite you or your team to an occurence of the regular meeting to represent your changes. 
 If you want to be a part of that review, please indicate your preference in your issue.
