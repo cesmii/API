@@ -64,15 +64,23 @@ The reader will observe that the API requires the underlying platform to support
 
 ### 3.1.1 Required Object Metadata
 
+<<<<<<< HEAD
 - parentId: the ElementId of the parent object
 - isComposition: a boolean value indicating if the element's value is composed of one or more child objects via HasComponent relationships. When true, clients SHOULD expect the implementation will recurse through HasComponent relationships to retrieve the complete value structure.
 - namespaceUri: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
+=======
+- DisplayName: a human-friendly name for the purpose of browsing or displaying objects within an address space
+- ParentId: the ElementId of the parent object
+- HasChildren: if the element value is complex, a boolean value indicating if the element is composed of one or more child objects
+- NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
+>>>>>>> f61f12db3e2a9aa6c46754299669e1d83449a8b5
 
 ### 3.1.2 Optional Object Metadata
 
 - Interpolation: if the element value is interpolated, rather than stored, indicate the interpolation method
 - EngUnit: a string indicating the engineering unit for measuring the element value. Where present, the definitions found in [UNECE Recommendation Number 20](https://unece.org/trade/documents/2021/06/uncefact-rec20-0) MUST be used.
-- Attribute Metadata: Additional information about how an object attribute is stored or treated by the underlying platform.
+- Quality: a data quality indicator following the standard established by the [OPC UA standard status codes](https://reference.opcfoundation.org/Core/Part8/v104/docs/A.3.2.3#_Ref377938607). If data quality is not available, a CMIP may omit this metadata field.
+- Property or Attribute Metadata: Additional metadata related to the object as required by an implementation. Granting that existing contextual information platforms may already have defined metadata, or have an option for users to create ad-hoc metadata, this additional "property bag" MAY optionally be implemented to contain this metadata. This kind of metadata SHOULD be minimal, as Relationships are more easily mappable to a Knowledge Graph, and thus provide for richer contextual information.
 
 ### 3.2 Object Relationships
 
@@ -91,6 +99,20 @@ Underlying platforms MAY support composition relationships (HasComponent/Compone
 #### 3.2.4 Non-Hierarchical Relationships
 
 Modern manufacturing information involves relationships in data that are not strictly hierarchical. Examples include "equipment train" relationships in ISA-95, supply chain relationships that track material flow, and human resource relationships where qualified operators can be associated with equipment they have been certified on. Modern information platforms SHOULD include support for non-hierarchical relationships.
+
+### 3.3 ObjectTypes
+
+An ObjectType defines the schema for a class of objects within the contextualized manufacturing information model. It describes the structure, attributes, and relationships that instances of that type may exhibit, for example, defining what constitutes a `Machine`, `Sensor`, or `ProductionOrder`.
+
+ObjectTypes serve as the basis for instantiation and discovery through the I3X interfaces, such as retrieving the definition of a single ObjectType, enumerating all available ObjectTypes within a namespace, and listing object instances derived from a given ObjectType.
+
+### 3.4 Namespaces
+
+A Namespace provides a logical scope within the address space that groups related types, instances, and relationships. Namespaces allow clients to explore and manage subsets of the overall model, such as those tied to a particular site, discipline, or version, without conflict or ambiguity.
+
+### 3.5 ElementIds
+
+Within the scope of the platform providing the I3X interface, an ElementId is a unique string value that is assigned to every fundamental element in the address space. It enables unambiguous reference, linking, and retrieval of items within the CMIP address space.  Elements that contain an ElementId include:  ObjectTypes, Object Instances, Relationship Types, and Namespaces.
 
 ## 4. I3X Address Space Methods
 
@@ -111,7 +133,7 @@ The Query MAY accept an array of JSON structures defining Types for the requeste
 
 This Query MUST return an array of Type definitions registered in the contextualized manufacturing information platform. All Types MUST have an ElementId to support follow-up queries.
 
-The the response payload MAY by filtered by NamespaceURI if indicated by an optional query parameter.
+The the response payload MAY be filtered by NamespaceURI if indicated by an optional query parameter.
 
 #### 4.1.4 Relationship Types
 
@@ -146,7 +168,7 @@ If the Query specifies an optional query parameter, an implementation MAY suppor
 If the ElementId exists as an instance object, this query MUST return the instance object, conforming to the Type definition from which the instance object is derived. The returned payload MUST include the most recent values of metadata indicated in [section 3.1.1](#311-required-object-metadata) and, if indicated by an optional query parameter, MAY include the most recent values of metadata indicated in [section 3.1.2](#312-optional-object-metadata).
 
 ### 4.2 Value Methods
-Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document independent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value, or create a new value in the CMIP.
+Value methods MAY be used to both Read and Write values in a CMIP, depending on the server implementation. In order to keep this document independent of any specific implementation technology choices, a Read operation shall be referred to as a Query; a Write operation shall be referred to as an Update. An Update may change an existing value in the CMIP.
 
 #### 4.2.1 Queries
 
@@ -320,4 +342,13 @@ Implementations of this API MUST be able to return Historical Value responses wi
 
 ## 6. Acknowledgements
 
+<<<<<<< HEAD
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+=======
+Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
+
+
+
+
+
+>>>>>>> f61f12db3e2a9aa6c46754299669e1d83449a8b5
