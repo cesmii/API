@@ -1,0 +1,9 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$id": "https://thinkiq.com/equipment/v1.0",
+    "types": {
+        "sensor-type": {
+            "type": "number"
+        }
+    }
+}

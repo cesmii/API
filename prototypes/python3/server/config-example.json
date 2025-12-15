@@ -1,0 +1,40 @@
+{
+    "port": 8080,
+    "host": "0.0.0.0",
+    "debug": true,
+    "app": {
+        "title": "I3X API Prototype",
+        "description": "Industrial Information Interface eXchange API - RFC 001 Compliant",
+        "version": "0.0.1"
+    },
+    "data_sources": {
+        "exploratory": {
+            "type": "mock",
+            "config": {}
+        },
+        "values": {
+            "type": "mock", 
+            "config": {}
+        },
+        "updates": {
+            "type": "mock",
+            "config": {}
+        },
+        "subscriptions": {
+            "type": "mock",
+            "config": {}
+        }
+    },
+    "data_source_routing": {
+        "primary": "exploratory",
+        "get_namespaces": "exploratory",
+        "get_object_types": "exploratory",
+        "get_object_type_by_id": "exploratory",
+        "get_instances": "exploratory",
+        "get_instance_by_id": "values",
+        "get_relationship_types": "exploratory",
+        "get_related_instances": "exploratory",
+        "update_instance_value": "updates",
+        "get_all_instances": "subscriptions"
+    }
+}
