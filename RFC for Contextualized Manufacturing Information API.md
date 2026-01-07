@@ -64,16 +64,10 @@ The reader will observe that the API requires the underlying platform to support
 
 ### 3.1.1 Required Object Metadata
 
-<<<<<<< HEAD
-- parentId: the ElementId of the parent object
-- isComposition: a boolean value indicating if the element's value is composed of one or more child objects via HasComponent relationships. When true, clients SHOULD expect the implementation will recurse through HasComponent relationships to retrieve the complete value structure.
-- namespaceUri: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
-=======
 - DisplayName: a human-friendly name for the purpose of browsing or displaying objects within an address space
 - ParentId: the ElementId of the parent object
 - HasChildren: if the element value is complex, a boolean value indicating if the element is composed of one or more child objects
 - NamespaceURI: if the element value is an object, a URI indicating the Namespace of the object MUST be returned. If the value is an attribute, a URI indicating the Namespace SHOULD be returned.
->>>>>>> f61f12db3e2a9aa6c46754299669e1d83449a8b5
 
 ### 3.1.2 Optional Object Metadata
 
@@ -342,9 +336,6 @@ Implementations of this API MUST be able to return Historical Value responses wi
 
 ## 6. Acknowledgements
 
-<<<<<<< HEAD
-Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
-=======
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
 
 
@@ -352,3 +343,4 @@ Unless requested otherwise, contributor names and organizations from private pre
 
 
 >>>>>>> f61f12db3e2a9aa6c46754299669e1d83449a8b5
+
