@@ -337,10 +337,3 @@ Implementations of this API MUST be able to return Historical Value responses wi
 ## 6. Acknowledgements
 
 Unless requested otherwise, contributor names and organizations from private previews of this document will be acknowledged in the public release.
-
-
-
-
-
->>>>>>> f61f12db3e2a9aa6c46754299669e1d83449a8b5
-
