@@ -38,10 +38,49 @@ def get_data_source(request: Request) -> I3XDataSource:
     return request.app.state.data_source
 
 
+# GET /subscriptions - List all subscriptions
+@subs.get("/subscriptions", response_model=GetSubscriptionsResponse)
+def get_subscriptions(request: Request):
+    """List all subscriptions including their ID and settings (does not include registered objects)"""
+    subscriptions = []
+    for sub in request.app.state.I3X_DATA_SUBSCRIPTIONS:
+        subscriptions.append(
+            SubscriptionSummary(
+                subscriptionId=sub.subscriptionId,
+                qos=sub.qos,
+                created=sub.created
+            )
+        )
+    return GetSubscriptionsResponse(subscriptionIds=subscriptions)
+
+
+# GET /subscriptions/{id} - Get a single subscription with full details
+@subs.get("/subscriptions/{subscriptionId}")
+def get_subscription(request: Request, subscriptionId: str):
+    """Get a single subscription including settings and registered object IDs"""
+    sub = next(
+        (
+            s
+            for s in request.app.state.I3X_DATA_SUBSCRIPTIONS
+            if str(s.subscriptionId) == str(subscriptionId)
+        ),
+        None,
+    )
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    return {
+        "subscriptionId": sub.subscriptionId,
+        "qos": sub.qos,
+        "created": sub.created,
+        "objects": sub.monitoredItems
+    }
+
+
 # RFC 4.2.3.1 - Create Subscription
 @subs.post("/subscriptions", response_model=CreateSubscriptionResponse)
 def create_subscription(request: Request, subscription: CreateSubscriptionRequest):
-    """Register a client for a new subscription with specified QoS"""
+    """Create a new subscription with specified QoS and settings"""
 
     # Validate QoS
     if subscription.qos not in ["QoS0", "QoS2"]:
@@ -65,10 +104,11 @@ def create_subscription(request: Request, subscription: CreateSubscriptionReques
 
 
 # RFC 4.2.3.2 - Register Monitored Items
-@subs.post("/subscriptions/{subscriptionId}/objects")
-async def register_monitored_items(
+@subs.post("/subscriptions/{subscriptionId}/register")
+def register_objects(
     request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
 ):
+    """Add a list of object IDs to the subscription"""
     sub = next(
         (
             s
@@ -98,58 +138,113 @@ async def register_monitored_items(
         )
         all_element_ids.update([i["elementId"] for i in tree])
 
-    # Update the subscription
-    # Store maxDepth preference from the request
-    sub.maxDepth = req.maxDepth
-    # TODO right now this is additive, currently need to call delete and re-create the subscription entirely to remove items.
+    # Update the subscription (additive - adds to existing monitored items)
+    added_count = 0
     for eid in all_element_ids:
         if eid not in sub.monitoredItems:
             sub.monitoredItems.append(eid)
+            added_count += 1
 
-    # QoS0 setup
-    if sub.qos == "QoS0":
-        # If handler and streaming_response already exist, reuse them
-        if sub.handler is not None and sub.streaming_response is not None:
-            # Just update monitoredItems and return existing streaming response
-            return sub.streaming_response
+    return {
+        "message": f"Registered {added_count} objects to subscription.",
+        "totalObjects": len(sub.monitoredItems)
+    }
 
-        # Otherwise create queue, loop, handler, and streaming response once
-        queue = asyncio.Queue()
-        loop = asyncio.get_event_loop()
 
-        async def event_stream():
-            while True:
-                update = await queue.get()
-                # Remove None values to match QoS2 behavior
-                filtered_update = {k: v for k, v in update.items() if v is not None}
-                yield json.dumps([filtered_update]) + "\n"
+# GET /subscriptions/{id}/stream - Open SSE stream for QoS0 subscriptions
+@subs.get("/subscriptions/{subscriptionId}/stream")
+async def stream_subscription(request: Request, subscriptionId: str):
+    """Open a Server-Sent Events (SSE) stream for a QoS0 subscription"""
+    sub = next(
+        (
+            s
+            for s in request.app.state.I3X_DATA_SUBSCRIPTIONS
+            if str(s.subscriptionId) == str(subscriptionId)
+        ),
+        None,
+    )
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subscription not found")
 
-        def push_update_to_client(update):
-            asyncio.run_coroutine_threadsafe(queue.put(update), loop)
-
-        sub.handler = push_update_to_client
-        sub.event_loop = loop
-        sub.streaming_response = StreamingResponse(
-            event_stream(), media_type="application/json"
+    if sub.qos != "QoS0":
+        raise HTTPException(
+            status_code=400, detail="Stream is only supported for QoS0 subscriptions. Use /sync for QoS2."
         )
 
+    # If handler and streaming_response already exist, reuse them
+    if sub.handler is not None and sub.streaming_response is not None:
         return sub.streaming_response
 
-    # QoS2 setup: initialize empty pending queue
-    if sub.qos == "QoS2":
-        return {
-            "message": "Monitored items registered (QoS2). Use /sync to poll for changes."
-        }
+    # Otherwise create queue, loop, handler, and streaming response once
+    queue = asyncio.Queue()
+    loop = asyncio.get_event_loop()
+
+    async def event_stream():
+        while True:
+            update = await queue.get()
+            yield json.dumps([update]) + "\n"
+
+    def push_update_to_client(update):
+        asyncio.run_coroutine_threadsafe(queue.put(update), loop)
+
+    sub.handler = push_update_to_client
+    sub.event_loop = loop
+    sub.streaming_response = StreamingResponse(
+        event_stream(), media_type="application/json"
+    )
+
+    return sub.streaming_response
+
+
+# RFC 4.2.3.2 - Unregister Monitored Items
+@subs.post("/subscriptions/{subscriptionId}/unregister")
+def unregister_objects(
+    request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
+):
+    """Remove a list of object IDs from the subscription"""
+    sub = next(
+        (
+            s
+            for s in request.app.state.I3X_DATA_SUBSCRIPTIONS
+            if str(s.subscriptionId) == str(subscriptionId)
+        ),
+        None,
+    )
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    # Get data source
+    data_source = request.app.state.data_source
+
+    # Collect all elementIds including descendants (same logic as register)
+    all_element_ids = set()
+    for eid in req.elementIds:
+        # Only process IDs that exist
+        if data_source.get_instance_by_id(eid):
+            tree = collect_instance_tree(
+                eid, req.maxDepth, 0, data_source.get_all_instances()
+            )
+            all_element_ids.update([i["elementId"] for i in tree])
+
+    # Remove from subscription (silently ignore IDs that aren't registered)
+    removed_count = 0
+    for eid in all_element_ids:
+        if eid in sub.monitoredItems:
+            sub.monitoredItems.remove(eid)
+            removed_count += 1
+
+    return {
+        "message": f"Unregistered {removed_count} objects from subscription."
+    }
 
 
 # RFC 4.2.3.3 Sync
 @subs.post(
     "/subscriptions/{subscriptionId}/sync",
-    response_model=List[SyncResponseItem],
-    response_model_exclude_none=True
+    response_model=List[SyncResponseItem]
 )
 def sync_qos2(request: Request, subscriptionId: str):
-    """Sync changes for a QoS 2 subscription"""
+    """Return queued data for a QoS2 subscription"""
 
     # Locate the subscription
     sub = next(
@@ -217,7 +312,6 @@ def handle_data_source_update(instance, value, I3X_DATA_SUBSCRIPTIONS, data_sour
 
                 # Get the payload using the subscription's maxDepth preference
                 updateValue = getSubscriptionValue(instance, value, maxDepth=sub.maxDepth, data_source=data_source)
-
 
                 if sub.qos == "QoS0":
                     # Immediate delivery via handler
