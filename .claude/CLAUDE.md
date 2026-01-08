@@ -12,24 +12,24 @@ This repository contains the RFC 001 specification and prototype implementation 
 - `README.md` - High-level project overview and problem statement
 
 **Repository Structure:**
-- `prototypes/python3/server/` - FastAPI-based I3X API server implementation
-- `prototypes/python3/client/` - Test client for validating server functionality (currently basic SSE client)
+- `demo/server/` - FastAPI-based I3X API server implementation (primary active codebase)
+- `demo/client/` - Test client for validating server functionality (currently basic SSE client)
 - `images/` - Documentation diagrams
 
-## Working with the Server (prototypes/python3/server/)
+## Working with the Server (demo/server/)
 
-All server development happens in `prototypes/python3/server/`. This is the primary active codebase.
+All server development happens in `demo/server/`. This is the primary active codebase.
 
 ### Development Commands
 
 **Environment Setup:**
-- Python version: Requires Python 3.7+ but <3.13 (FastAPI/Pydantic compatibility)
-- Quick setup: `cd prototypes/python3/server && ./setup.sh` (Linux/Mac) or `.\setup.ps1` (Windows)
-- Manual setup: `python3 -m venv venv && ./venv/bin/activate && pip install -r requirements.txt`
+- Python version: Requires Python 3.7+
+- Quick setup: `cd demo/server && ./setup.sh` (Linux/Mac) or `.\setup.ps1` (Windows)
+- Manual setup: `python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt`
 
 **Running the Server:**
 ```bash
-cd prototypes/python3/server
+cd demo/server
 python app.py
 # or
 uvicorn app:app --host 0.0.0.0 --port 8080 --reload
@@ -37,13 +37,13 @@ uvicorn app:app --host 0.0.0.0 --port 8080 --reload
 
 **Testing:**
 ```bash
-cd prototypes/python3/server
-python -m unittest test_app.py
+cd demo/server
+python -m pytest test_app.py -v
 ```
 
 **Docker:**
 ```bash
-cd prototypes/python3/server
+cd demo/server
 docker build -t cesmii/api:dev .
 docker run --rm -it -p 8080:8080 cesmii/api:dev
 ```
@@ -54,6 +54,7 @@ Copy `config-example.json` to `config.json` and modify as needed. Supports singl
 **API Documentation:**
 - Swagger UI: http://localhost:8080/docs
 - ReDoc: http://localhost:8080/redoc
+- Public demo: https://i3x.cesmii.net
 
 ### Server Architecture
 
@@ -94,7 +95,7 @@ All routers use dependency injection to access data sources - they never import 
   - Explore router: Browse instances, query by type (RFC 4.1.6-4.1.8)
   - Query router: Get current/historical values (RFC 4.2.1.x)
   - Update router: Write values (RFC 4.2.2.x)
-- `subscriptions.py` - Real-time data streaming with QoS0 (SSE) and QoS2 (WebSocket) (RFC 4.2.3.x)
+- `subscriptions.py` - Real-time data streaming with QoS0 (SSE) and QoS2 (polling) (RFC 4.2.3.x)
 - `utils.py` - Response formatting helpers (`getObject`, `getValue`, `getValueMetadata`, `getSubscriptionValue`)
 
 **Key RFC Concepts:**
@@ -103,6 +104,29 @@ All routers use dependency injection to access data sources - they never import 
 - **Object Instances** - Actual equipment/sensors/processes with current attribute values
 - **Relationships** - Hierarchical (parent-child) and non-hierarchical (equipment trains, material flow)
 - **ElementId** - Platform-specific unique string identifier for any element
+
+### Key Architectural Patterns
+
+**Composition vs Organization Relationships:**
+- **HasComponent/ComponentOf**: Child data IS part of parent's value; parent has `isComposition: True`
+- **HasChildren/HasParent**: Organizational hierarchy; children are separate entities
+
+**maxDepth Parameter:**
+Controls recursion through HasComponent relationships:
+- `maxDepth=0` - Infinite recursion (include all nested composed elements)
+- `maxDepth=1` - No recursion (just this element's value) - default
+- `maxDepth=N` - Recurse up to N levels deep
+
+Returns nested structure with `_value` for own data and child keys for composed data.
+
+**VQT (Value-Quality-Timestamp) Format:**
+```json
+{
+  "value": "<any>",
+  "quality": "GOOD",
+  "timestamp": "2025-01-08T..."
+}
+```
 
 ### Data Source Configuration
 
@@ -173,13 +197,23 @@ To add a new data source type (e.g., database, time-series store):
 
 No router changes needed - dependency injection handles everything transparently.
 
-## Working with the Client (prototypes/python3/client/)
+### Mock Data Source Details
+
+**Schema Files** (`data_sources/mock/Namespaces/`):
+- `abelara.json` - Equipment/manufacturing types
+- `isa95.json` - ISA-95 types
+- `thinkiq.json` - Sensor types
+
+**MockDataUpdater Critical Detail:**
+The updater must access raw instance data (`self.data_source.data["instances"]`) not `get_all_instances()` which filters out records needed for updates.
+
+## Working with the Client (demo/client/)
 
 Currently a basic test client with SSE (Server-Sent Events) support. Future work will expand this into a full I3X client library.
 
 **Running the test client:**
 ```bash
-cd prototypes/python3/client
+cd demo/client
 ./setup.sh  # or setup.ps1 on Windows
 python test_client.py
 ```
@@ -191,20 +225,14 @@ The server implements RFC 001 I3X API specification:
 **Implemented:**
 - RFC 4.1.x - All exploratory methods (namespaces, types, instances, relationships)
 - RFC 4.2.1.x - Value query methods (current and historical values)
-- RFC 4.2.2.1 - Current value updates (PUT `/objects/{elementId}/current`)
-- RFC 4.2.3.x - Subscriptions with QoS0 (SSE) and QoS2 (WebSocket)
+- RFC 4.2.2.1 - Current value updates (PUT `/objects/{elementId}/value`)
+- RFC 4.2.3.x - Subscriptions with QoS0 (SSE) and QoS2 (polling)
 
 **Known Limitations:**
 - RFC 4.2.2.2 - Historical updates (PUT `/objects/{elementId}/history`) returns 501 Not Implemented
 - GET `/subscriptions` endpoint not implemented (model exists but no endpoint)
 - MQTT data source is read-only (no `update_instance_value` support)
 - MQTT exploratory operations limited to namespaces; types generated dynamically from topics
-
-## Git Workflow
-
-- Main branch: `main`
-- Current active branch: `prototypes`
-- Recent commits focus on mock data cleanup, displayName standardization, and JSON pointer migrations
 
 ## Common Patterns
 
@@ -223,3 +251,10 @@ The server implements RFC 001 I3X API specification:
 - Keep strict alignment with RFC 001 specification
 - Use Pydantic v2 syntax
 - Include proper JSON serialization configuration
+
+**Subscription Debugging:**
+If QoS0 subscriptions don't receive updates:
+1. Verify `MockDataUpdater` is running (check app startup logs)
+2. Ensure instance has `records` in mock_data.py
+3. Check instance is not marked `"static": true`
+4. Verify subscription's `monitoredItems` includes the elementId

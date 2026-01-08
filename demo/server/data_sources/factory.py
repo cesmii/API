@@ -38,6 +38,9 @@ class DataSourceFactory:
             return MockDataSource()
         elif data_source_type == "mqtt":
             return MQTTDataSource(data_source_config)
+        elif data_source_type == "cnc-mock" or data_source_type == "cnc_mock":
+            from .cnc_mock.cnc_data_source import CNCDataSource
+            return CNCDataSource()
         else:
             raise ValueError(f"Unsupported data source type: {data_source_type}")
     
@@ -59,4 +62,4 @@ class DataSourceFactory:
     @staticmethod
     def get_supported_types() -> list:
         """Get list of supported data source types"""
-        return ["mock", "mqtt"]
+        return ["mock", "mqtt", "cnc-mock"]
