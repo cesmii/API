@@ -39,7 +39,7 @@ def get_data_source(request: Request) -> I3XDataSource:
 
 
 # GET /subscriptions - List all subscriptions
-@subs.get("/subscriptions", response_model=GetSubscriptionsResponse)
+@subs.get("/subscriptions", summary="List Subscriptions", response_model=GetSubscriptionsResponse)
 def get_subscriptions(request: Request):
     """List all subscriptions including their ID and settings (does not include registered objects)"""
     subscriptions = []
@@ -55,9 +55,9 @@ def get_subscriptions(request: Request):
 
 
 # GET /subscriptions/{id} - Get a single subscription with full details
-@subs.get("/subscriptions/{subscriptionId}")
+@subs.get("/subscriptions/{subscriptionId}", summary="Get Subscription")
 def get_subscription(request: Request, subscriptionId: str):
-    """Get a single subscription including settings and registered object IDs"""
+    """Get a single subscription including settings and registered objects"""
     sub = next(
         (
             s
@@ -78,7 +78,7 @@ def get_subscription(request: Request, subscriptionId: str):
 
 
 # RFC 4.2.3.1 - Create Subscription
-@subs.post("/subscriptions", response_model=CreateSubscriptionResponse)
+@subs.post("/subscriptions", summary="Create Subscription", response_model=CreateSubscriptionResponse)
 def create_subscription(request: Request, subscription: CreateSubscriptionRequest):
     """Create a new subscription with specified QoS and settings"""
 
@@ -104,11 +104,11 @@ def create_subscription(request: Request, subscription: CreateSubscriptionReques
 
 
 # RFC 4.2.3.2 - Register Monitored Items
-@subs.post("/subscriptions/{subscriptionId}/register")
+@subs.post("/subscriptions/{subscriptionId}/register", summary="Register Objects",)
 def register_objects(
     request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
 ):
-    """Add a list of object IDs to the subscription"""
+    """Add a list of object to the subscription"""
     sub = next(
         (
             s
@@ -150,10 +150,50 @@ def register_objects(
         "totalObjects": len(sub.monitoredItems)
     }
 
+# RFC 4.2.3.2 - Unregister Monitored Items
+@subs.post("/subscriptions/{subscriptionId}/unregister", summary="Unregister Objects",)
+def unregister_objects(
+    request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
+):
+    """Remove a list of objects from the subscription"""
+    sub = next(
+        (
+            s
+            for s in request.app.state.I3X_DATA_SUBSCRIPTIONS
+            if str(s.subscriptionId) == str(subscriptionId)
+        ),
+        None,
+    )
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subscription not found")
+
+    # Get data source
+    data_source = request.app.state.data_source
+
+    # Collect all elementIds including descendants (same logic as register)
+    all_element_ids = set()
+    for eid in req.elementIds:
+        # Only process IDs that exist
+        if data_source.get_instance_by_id(eid):
+            tree = collect_instance_tree(
+                eid, req.maxDepth, 0, data_source.get_all_instances()
+            )
+            all_element_ids.update([i["elementId"] for i in tree])
+
+    # Remove from subscription (silently ignore IDs that aren't registered)
+    removed_count = 0
+    for eid in all_element_ids:
+        if eid in sub.monitoredItems:
+            sub.monitoredItems.remove(eid)
+            removed_count += 1
+
+    return {
+        "message": f"Unregistered {removed_count} objects from subscription."
+    }
 
 # GET /subscriptions/{id}/stream - Open SSE stream for QoS0 subscriptions
-@subs.get("/subscriptions/{subscriptionId}/stream")
-async def stream_subscription(request: Request, subscriptionId: str):
+@subs.get("/subscriptions/{subscriptionId}/stream", summary="Stream Values (QoS0)",)
+async def stream_qos0(request: Request, subscriptionId: str):
     """Open a Server-Sent Events (SSE) stream for a QoS0 subscription"""
     sub = next(
         (
@@ -195,54 +235,8 @@ async def stream_subscription(request: Request, subscriptionId: str):
 
     return sub.streaming_response
 
-
-# RFC 4.2.3.2 - Unregister Monitored Items
-@subs.post("/subscriptions/{subscriptionId}/unregister")
-def unregister_objects(
-    request: Request, subscriptionId: str, req: RegisterMonitoredItemsRequest
-):
-    """Remove a list of object IDs from the subscription"""
-    sub = next(
-        (
-            s
-            for s in request.app.state.I3X_DATA_SUBSCRIPTIONS
-            if str(s.subscriptionId) == str(subscriptionId)
-        ),
-        None,
-    )
-    if not sub:
-        raise HTTPException(status_code=404, detail="Subscription not found")
-
-    # Get data source
-    data_source = request.app.state.data_source
-
-    # Collect all elementIds including descendants (same logic as register)
-    all_element_ids = set()
-    for eid in req.elementIds:
-        # Only process IDs that exist
-        if data_source.get_instance_by_id(eid):
-            tree = collect_instance_tree(
-                eid, req.maxDepth, 0, data_source.get_all_instances()
-            )
-            all_element_ids.update([i["elementId"] for i in tree])
-
-    # Remove from subscription (silently ignore IDs that aren't registered)
-    removed_count = 0
-    for eid in all_element_ids:
-        if eid in sub.monitoredItems:
-            sub.monitoredItems.remove(eid)
-            removed_count += 1
-
-    return {
-        "message": f"Unregistered {removed_count} objects from subscription."
-    }
-
-
 # RFC 4.2.3.3 Sync
-@subs.post(
-    "/subscriptions/{subscriptionId}/sync",
-    response_model=List[SyncResponseItem]
-)
+@subs.post("/subscriptions/{subscriptionId}/sync", summary="Sync Values (QoS2)", response_model=List[SyncResponseItem])
 def sync_qos2(request: Request, subscriptionId: str):
     """Return queued data for a QoS2 subscription"""
 
@@ -269,7 +263,7 @@ def sync_qos2(request: Request, subscriptionId: str):
 
 
 # 4.2.3.4 Unsubscribe by SubscriptionId
-@subs.delete("/subscriptions/{subscriptionId}")
+@subs.delete("/subscriptions/{subscriptionId}", summary="Delete Subscription",)
 def delete_subscription(request: Request, subscriptionId: str):
     removed = []
     not_found = []
