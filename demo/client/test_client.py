@@ -513,14 +513,14 @@ async def unsubscribe(base_url: str = None, subscription_id: str = None):
 async def main():
     try:
         print("Welcome to the CESMII I3X API Test Client.")
-        default_url = "http://localhost:8080"
+        default_url = "http://localhost:8885/i3x"
         base_url = input(
             f"Enter the base url (or press enter to leave as default '{default_url}'): "
         ).strip()
         if not base_url:
             base_url = default_url
 
-        selections = "\n1: Exploratory Methods\n2: Value Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
+        selections = "\n1: Exploratory Methods\n2: Query Methods\n3: Update Methods\n4: Subscription Methods \nX: Quit\n"
 
         ##### MAIN INPUT LOOP #####
         while True:  # broken by user input
@@ -658,11 +658,11 @@ async def main():
                                 raise e
                     print("\n")
 
-            ##### VALUE METHODS #####
+            ##### QUERY METHODS #####
             elif user_selection == "2":
                 while True:
                     print(
-                        f"Value Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n"
+                        f"Query Methods\n0: Back\n1: Get Last Known Value\n2: Get Historical Values\nX: Quit\n"
                     )
                     user_selection = get_user_selection(["0", "1", "2", "X"])
                     if user_selection.upper() == "X":
