@@ -1,8 +1,10 @@
 import asyncio
 import httpx
+import threading
 import json
 import jsonschema
 from typing import Any
+from urllib.parse import quote
 
 
 #######################################
@@ -134,7 +136,7 @@ async def get_object_type(base_url: str = None, element_id: str = None):
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise TypeError("element_id cannot be None")
-    url = f"{base_url}/objecttypes/{element_id}"
+    url = f"{base_url}/objecttypes/{quote(element_id, safe='')}"
     return await get(url)
 
 
@@ -174,9 +176,9 @@ async def get_relationship_type(base_url: str = None, element_id: str = None):
     """
     if base_url is None:
         raise TypeError("base_url cannot be None")
-    if element_id is None:
+    if element_id is None or element_id == "":
         raise TypeError("element_id cannot be None")
-    url = f"{base_url}/relationshiptypes/{element_id}"
+    url = f"{base_url}/relationshiptypes/{quote(element_id, safe='')}"
     return await get(url)
 
 
@@ -220,12 +222,11 @@ async def get_relationships(
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
     if relationship_type is None:
-        url += f"/{element_id}/related"
-        json_response = await get(url)
-    else:
-        params = {"relationshiptype": relationship_type}
-        json_response = await get(url, params=params)
+        raise ValueError("relationship_type is required to run get_relationships")
+    url += f"/{quote(element_id, safe='')}/related"
+    params = {"relationshiptype": relationship_type}
 
+    json_response = await get(url, params=params)
     return json_response
 
 
@@ -240,9 +241,9 @@ async def get_object(
     if base_url is None:
         raise TypeError("base_url cannot be None")
     url = f"{base_url}/objects"
-    if element_id is None:
+    if element_id is None or element_id == "":
         raise ValueError("element_id is required to run get_object")
-    url += f"/{element_id}"
+    url += f"/{quote(element_id, safe='')}"
     params = {"includeMetadata": "false"}
     if include_metadata:
         params["includeMetadata"] = "true"
@@ -250,7 +251,7 @@ async def get_object(
 
 
 #######################################
-########### Query Methods #############
+########### Value Methods #############
 #######################################
 async def get_value(
     base_url: str = None, element_id: str = None, include_metadata: bool = False
@@ -264,7 +265,7 @@ async def get_value(
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_relationships")
-    url = f"{base_url}/objects/{element_id}/value"
+    url = f"{base_url}/objects/{quote(element_id, safe='')}/value"
     params = {"includeMetadata": "false"}
     if include_metadata:
         params["includeMetadata"] = "true"
@@ -289,7 +290,7 @@ async def get_history(
         raise TypeError("base_url cannot be None")
     if element_id is None:
         raise ValueError("element_id is required to run get_history")
-    url = f"{base_url}/objects/{element_id}/history"
+    url = f"{base_url}/objects/{quote(element_id, safe='')}/history"
     params = {"includeMetadata": "false"}
     if include_metadata:
         params["includeMetadata"] = "true"
@@ -318,7 +319,7 @@ async def update_objects_current_value(
     if value is None:
         raise ValueError("value is required to run update")
 
-    url += f"/{element_id}/value"
+    url += f"/{quote(element_id, safe='')}/value"
     payload = value
     return await put(url, payload)
 
@@ -348,7 +349,7 @@ async def update_object_history(
     if timestamps is None or len(timestamps) != len(values):
         raise ValueError("timestamps must have same length as values")
 
-   
+
     updates = []
     for element_id, value, timestamp in zip(element_ids, values, timestamps):
         updates.append(
@@ -356,7 +357,7 @@ async def update_object_history(
         )
     url += "/history"
     payload = updates
-   
+
     return await put(url, payload)
 
 
@@ -405,26 +406,34 @@ async def register(
         "includeMetadata": include_metadata,
     }
 
-    url = f"{base_url}/subscriptions/{subscription_id}/objects"
+    url = f"{base_url}/subscriptions/{subscription_id}/register"
+    return await post(url, payload)
 
-    async with httpx.AsyncClient(timeout=None) as client:
-        async with client.stream("POST", url, json=payload) as response:
-            response.raise_for_status()
+async def unregister(
+    base_url: str = None,
+    subscription_id: str = None,
+    element_ids: list[str] = None
+):
+    """
+    unregister calls Unregister Monitored Items (RFC 4.2.3.5)
+    :param base_url: base URL of API method being called
+    :param subscription_id: subscription id to register elements for
+    :param element_ids: element ids to register
+    :return: JSON response from register
+    """
+    if base_url is None:
+        raise TypeError("base_url cannot be None")
+    if subscription_id is None:
+        raise ValueError("subscription_id is required to run register")
+    if element_ids is None:
+        raise ValueError("element_ids is required to run register")
 
-            async for line in response.aiter_lines():
-                if line:
-                    try:
-                        data = json.loads(line)
-                        for update_received in data:
-                            if update_received == "message" and len(data) == 1:
-                                return data  # this is QoS2, return message to user
-                            pretty_print_json(update_received)
-                            # TODO: current state will run until program is killed externally. Add some threaded keyboard interrupt?
-                    except Exception as e:
-                        print(f"Failed to decode JSON line: {line}, error: {e}")
+    payload = {
+        "elementIds": element_ids,
+    }
 
-        return ""  # if this is QoS0, handle prints here and have caller print nothing
-
+    url = f"{base_url}/subscriptions/{subscription_id}/unregister"
+    return await post(url, payload)
 
 async def sync(base_url: str = None, subscription_id: str = None):
     """
@@ -440,6 +449,48 @@ async def sync(base_url: str = None, subscription_id: str = None):
     url = f"{base_url}/subscriptions/{subscription_id}/sync"
     return await post(url)
 
+def get_user_selection_any_key():
+    input("Press Enter to exit SSE...\n")
+
+async def read_sse(url: str):
+    try:
+        async with httpx.AsyncClient(timeout=None) as client:
+            async with client.stream("GET", url, headers={"Accept": "text/event-stream"}) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if line:
+                        print(line)
+    except asyncio.CancelledError:
+        pass
+    except httpx.StreamClosed:
+        pass
+    except Exception as e:
+        print(f"SSE stream error: {e}")
+
+def stream(base_url: str, subscription_id: str):
+    url = f"{base_url}/subscriptions/{subscription_id}/stream"
+
+    # Create a new asyncio loop in a background thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # Task for SSE reader
+    sse_task = loop.create_task(read_sse(url))
+
+    # Run the event loop in a background thread
+    def start_loop():
+        loop.run_until_complete(sse_task)
+
+    t = threading.Thread(target=start_loop, daemon=True)
+    t.start()
+
+    # Blocking input in main thread
+    get_user_selection_any_key()
+
+    # Cancel SSE task and wait for thread to finish
+    loop.call_soon_threadsafe(sse_task.cancel)
+    t.join()
+    loop.close()
 
 async def unsubscribe(base_url: str = None, subscription_id: str = None):
     """
@@ -461,10 +512,8 @@ async def unsubscribe(base_url: str = None, subscription_id: str = None):
 #######################################
 async def main():
     try:
-        print()
-        print()
         print("Welcome to the CESMII I3X API Test Client.")
-        default_url = "http://localhost:8080"
+        default_url = "http://localhost:8885/i3x"
         base_url = input(
             f"Enter the base url (or press enter to leave as default '{default_url}'): "
         ).strip()
@@ -531,7 +580,7 @@ async def main():
                                 raise e
                     elif user_selection == "4":
                         type_id = input(
-                            "Enter Object Type ElementID (leave blank to return all instance objects): "
+                            "Enter Type ElementID (leave blank to return all instance objects): "
                         ).strip()
                         try:
                             pretty_print_json(
@@ -547,7 +596,7 @@ async def main():
                             else:
                                 raise e
                     elif user_selection == "5":
-                        element_id = input("Enter Object ElementID (required): ").strip()
+                        element_id = input("Enter ElementID (required): ").strip()
                         try:
                             pretty_print_json(
                                 await get_object(
@@ -570,7 +619,7 @@ async def main():
                         pretty_print_json(await get_relationship_types(base_url, namespace_uri))
                     elif user_selection == "7":
                         type_id = input(
-                            "Enter RelationshipType ElementID (leave blank to return all objects): "
+                            "Enter RelationshipType ElementID (required): "
                         ).strip()
                         try:
                             pretty_print_json(
@@ -588,10 +637,8 @@ async def main():
                     elif user_selection == "8":
                         element_id = input("Enter ElementID (required): ").strip()
                         relationship_type = input(
-                            "Enter Relationship Type (leave blank to return all related objects): "
+                            "Enter Relationship Type (required, see 'Get Relationship Types'): "
                         ).strip()
-                        if not relationship_type:
-                            relationship_type = None
                         try:
                             pretty_print_json(
                                 await get_relationships(
@@ -611,7 +658,7 @@ async def main():
                                 raise e
                     print("\n")
 
-            ##### VALUE METHODS #####
+            ##### QUERY METHODS #####
             elif user_selection == "2":
                 while True:
                     print(
@@ -686,7 +733,7 @@ async def main():
                         value = input(
                             f"Enter the value: "
                         ).strip()
-                          
+
                         if element_id and value:
                             pretty_print_json(
                                 await update_objects_current_value(base_url, element_id, json.loads(value), None)
@@ -701,24 +748,43 @@ async def main():
                     menu_text = (
                         "Subscription Methods\n"
                         "0: Back\n"
-                        "1: Create Subscription\n"
-                        "2: Register Objects\n"
-                        "3: Sync (QoS2 Subscription)\n"
-                        "4: Unsubscribe\n"
+                        "1: List Subscriptions\n"
+                        "2: Get Subscription\n"
+                        "3: Create Subscription\n"
+                        "4: Register Objects\n"
+                        "5: Unregister Objects\n"
+                        "6: Sync (QoS2 Subscription)\n"
+                        "7: Stream (QoS0 Subscription)\n"
+                        "8: Delete Subscription\n"
                         "X: Quit\n"
                     )
                     print(menu_text)
-                    user_selection = get_user_selection(["0", "1", "2", "3", "4", "X"])
+                    user_selection = get_user_selection(["0", "1", "2", "3", "4", "5","6","7", "8","X"])
                     if user_selection.upper() == "X":
                         exit()
                     elif user_selection == "0":
                         break
                     elif user_selection == "1":
+                        pretty_print_json(await get(base_url + "/subscriptions"))
+                    elif user_selection == "2":
+                        subscription_id = input("Enter Subscription ID: ").strip()
+                        try:
+                            pretty_print_json(
+                                await get(
+                                    f"{base_url}/subscriptions/{subscription_id}"
+                                )
+                            )
+                        except Exception as e:
+                            if str(e).startswith(
+                                "Client error '404 Not Found' for url"
+                            ):
+                                print(f"Subscription ID '{subscription_id}' not found")
+                    elif user_selection == "3":
                         print("Choose Subscription Type:\n0: QoS0\n2: QoS2")
                         user_selection = get_user_selection(["0", "2"])
                         qos = "QoS" + user_selection
                         pretty_print_json(await subscribe(base_url, qos))
-                    elif user_selection == "2":
+                    elif user_selection == "4":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         element_ids = []
                         while True:
@@ -746,7 +812,33 @@ async def main():
                                 print(
                                     f"Subscription ID '{subscription_id}' or element in '{element_ids}' not found"
                                 )
-                    elif user_selection == "3":
+                    elif user_selection == "5":
+                        subscription_id = input("Enter Subscription ID: ").strip()
+                        element_ids = []
+                        while True:
+                            element_id = input("Enter Element ID to unregister: ").strip()
+                            element_ids.append(element_id)
+                            another = input(
+                                "Unregister another Element ID? (1: yes, else no): "
+                            ).strip()
+                            if another != "1":
+                                break
+                        try:
+                            pretty_print_json(
+                                await unregister(
+                                    base_url,
+                                    subscription_id,
+                                    element_ids
+                                )
+                            )
+                        except Exception as e:
+                            if str(e).startswith(
+                                "Client error '404 Not Found' for url"
+                            ):
+                                print(
+                                    f"Subscription ID '{subscription_id}' or element in '{element_ids}' not found"
+                                )
+                    elif user_selection == "6":
                         subscription_id = input("Enter Subscription ID: ").strip()
                         try:
                             pretty_print_json(await sync(base_url, subscription_id))
@@ -755,10 +847,20 @@ async def main():
                                 "Client error '404 Not Found' for url"
                             ):
                                 print(f"Subscription ID '{subscription_id}' not found")
-                    elif user_selection == "4":
+                    elif user_selection == "7":
+                        subscription_id = input("Enter Subscription ID: ").strip()
+                        try:
+                            pretty_print_json(await stream(base_url, subscription_id))
+                        except Exception as e:
+                            if str(e).startswith(
+                                "Client error '404 Not Found' for url"
+                            ):
+                                print(f"Subscription ID '{subscription_id}' not found")
+
+                    elif user_selection == "8":
                         subscription_ids = []
                         subscription_id = input(
-                            "Enter Subscription ID to unsubscribe from: "
+                            "Enter Subscription ID to delete: "
                         ).strip()
                         pretty_print_json(await unsubscribe(base_url, subscription_id))
 
